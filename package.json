@@ -1,5 +1,5 @@
 {
-  "name": "10x-astro-starter",
+  "name": "10x-cards",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
@@ -54,9 +54,7 @@
     "typescript-eslint": "^8.59.2",
     "wrangler": "^4.90.0"
   },
-  "overrides": {
-    "vite": "^7.3.2"
-  },
+  "overrides": {},
   "lint-staged": {
     "*.{ts,tsx,astro}": [
       "eslint --fix"
