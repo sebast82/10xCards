@@ -12,7 +12,7 @@ Każda faza z checkboxami — stanowa i trackowalna.
 - **Supabase**: najpierw smoke-deploy bez sekretów; aplikacja degraduje się gracefully (banner „auth wyłączone”). Sekrety dodajemy później.
 - **Deploy**: ręczny teraz + auto-deploy na push do `master` przez Workers Builds (bez GitHub Actions).
 - **Cloudflare**: dołączamy kroki setupu konta i `wrangler login`.
-- **SessionKV**: wyłączamy Astro Sessions (`session: false`) — aplikacja używa cookies Supabase, nie Sessions API.
+- **SessionKV**: adapter `@astrojs/cloudflare` 14.x **nie ma** opcji `session: false` (istnieje tylko `sessionKVBindingName`). Aplikacja używa cookies Supabase i nigdy nie woła `Astro.session`, więc pozwalamy na auto-provisioning KV `SESSION` przy deployu — jest nieinteraktywny i nieszkodliwy. Namespace powstaje automatycznie, ale nie jest używany.
 
 ## Rozbieżności infrastructure.md vs realny kod (WAŻNE)
 
@@ -83,7 +83,7 @@ Wystarczający do lokalnego `npm run dev`, ale **nie** do wdrożonego Workera.
 
 ## Pliki
 
-- `astro.config.mjs` — dodać `session: false` do `cloudflare()`; (opcjonalnie) `vite.build.minify: false` dla czytelnych błędów w preview.
+- `astro.config.mjs` — bez zmian dot. sesji (adapter 14.x nie wspiera `session: false`; KV `SESSION` jest auto-provisionowany i niewykorzystywany). (Opcjonalnie) `vite.build.minify: false` dla czytelnych błędów w preview.
 - `package.json` — (opcjonalnie) skrypt `"deploy": "astro build && wrangler deploy"`.
 - `wrangler.jsonc` — bez zmian (`nodejs_compat`, `ASSETS`, `observability` już OK). Nazwa Workera: `10x-cards`.
 - `src/lib/supabase.ts`, `src/lib/config-status.ts`, `src/middleware.ts` — bez zmian; obsługują brak sekretów (`null` → auth off).
@@ -100,11 +100,11 @@ Wystarczający do lokalnego `npm run dev`, ale **nie** do wdrożonego Workera.
 
 ### Faza 1 — Pre-flight lokalny
 
-- [ ] `astro.config.mjs`: dodać `session: false` w `cloudflare()`
-- [ ] `npx wrangler types` (typy bindingów)
-- [ ] `npm run build` — sukces bez sekretów (są `optional`)
-- [ ] `npm run preview` (workerd) — strona wstaje, banner „Supabase nieskonfigurowany”, `/dashboard` redirect → `/auth/signin`
-- [ ] lint / błędy czyste
+- [x] `astro.config.mjs`: bez `session: false` (opcja nie istnieje w adapterze 14.x; KV `SESSION` auto-provisionowany, niewykorzystywany — app używa cookies Supabase)
+- [x] `npx wrangler types` (typy bindingsów)
+- [x] `npm run build` — sukces bez sekretów (są `optional`)
+- [x] `npm run preview` (workerd) — strona wstaje (200, banner „Supabase nieskonfigurowany”), `/dashboard` → 302 `location: /auth/signin`
+- [x] lint / błędy czyste (0 błędów; `endOfLine: "auto"` w `.prettierrc.json` neutralizuje szum CRLF na Windows; 2 nieblokujące warningi w generowanym `worker-configuration.d.ts`)
 
 ### Faza 2 — Pierwsze ręczne wdrożenie
 
@@ -137,7 +137,7 @@ Wystarczający do lokalnego `npm run dev`, ale **nie** do wdrożonego Workera.
 2. **Nazwa sekretu** MUSI = schema `astro:env` (`SUPABASE_URL` / `SUPABASE_KEY`), inaczej `undefined` w runtime.
 3. **Lokalny Supabase URL** nie działa z prod Workera → cloud project do auth.
 4. **Cloudflare Auto Minify** łamie hydration React → wyłączyć w dashboard.
-5. **KV `SESSION` auto-provision** → neutralizowane przez `session: false`.
+5. **KV `SESSION` auto-provision** → adapter 14.x nie ma `session: false`; namespace powstaje automatycznie przy deployu, ale app nie używa `Astro.session` (tylko cookies Supabase), więc jest nieszkodliwy.
 6. **`astro dev` ≠ prod** → walidacja przez `astro preview` / `wrangler dev` przed deployem.
 7. **`.dev.vars`** untracked (jest w `.gitignore`); sekrety prod tylko przez `wrangler secret put`.
 8. **Przyszłe AI (OpenRouter)**: 10 ms CPU free-tier, 50 subrequestów, 6 równoległych połączeń — poza zakresem tego deployu.
