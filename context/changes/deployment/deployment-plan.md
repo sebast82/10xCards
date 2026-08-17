@@ -108,12 +108,12 @@ Wystarczający do lokalnego `npm run dev`, ale **nie** do wdrożonego Workera.
 
 ### Faza 2 — Pierwsze ręczne wdrożenie
 
-- [ ] `npx wrangler deploy` (lub `astro build && wrangler deploy`)
-- [ ] Zapisać URL `https://10x-cards.<subdomena>.workers.dev`
-- [ ] Smoke prod: strona główna + banner + redirect `/dashboard`
-- [ ] `npx wrangler tail` — brak błędów runtime (1101/1102), brak błędów `node:*`
-- [ ] Znać rollback: `npx wrangler rollback`
-- [ ] (opcjonalnie) skrypt `deploy` w `package.json`
+- [x] `npx wrangler deploy` — sukces; KV `SESSION` (`10x-cards-session`, `86d4c83ea6ff48adaf83495110c2fa20`) auto-provisionowany. Version ID: `9a45c139-afea-4eb5-90f6-9e1a6eccbc2c`. Potwierdzone `wrangler deployments list` (100%).
+- [x] Zapisać URL `https://10x-cards.sebger82.workers.dev`
+- [x] Smoke prod: strona główna 200 + banner Supabase; `/dashboard` → 302 `location: /auth/signin` (po ~kilku min propagacji certyfikatu SSL świeżej subdomeny)
+- [x] `npx wrangler tail` — żądania `/dashboard` i `/auth/signin` ze statusem `Ok`; brak błędów runtime (1101/1102), brak `node:*`
+- [x] Znać rollback: `npx wrangler rollback`
+- [x] (opcjonalnie) skrypt `deploy` w `package.json`
 
 ### Faza 3 — Auto-deploy przez Workers Builds (natywne, bez GitHub Actions)
 
