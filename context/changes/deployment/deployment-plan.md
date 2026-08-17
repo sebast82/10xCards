@@ -117,11 +117,11 @@ Wystarczający do lokalnego `npm run dev`, ale **nie** do wdrożonego Workera.
 
 ### Faza 3 — Auto-deploy przez Workers Builds (natywne, bez GitHub Actions)
 
-- [ ] Dashboard → Workers & Pages → `10x-cards` → Settings → Builds → Connect repo (GitHub)
-- [ ] Production branch: `master`
-- [ ] Build command: `npm run build`; Deploy command: `npx wrangler deploy`
-- [ ] Non-prod branche → preview deployments
-- [ ] Test: push do `master` → auto-build → auto-deploy; sprawdzić w dashboard / `wrangler deployments list`
+- [x] Dashboard → Workers & Pages → `10x-cards` → Settings → Builds → Connect repo (GitHub `sebast82/10xCards`)
+- [x] Production branch: `master`
+- [x] Build command: `npm run build`; Deploy command: `npx wrangler deploy`
+- [x] Non-prod branche → preview deployments (domyślnie `npx wrangler versions upload`)
+- [x] Test: push `a745852` do `master` → auto-build → auto-deploy. Nowy deployment `6d65e59d-7d89-4ad0-b718-d9dae81b2cbe` (100%), Created `2026-08-17T22:16:26Z` (= 00:16 CEST 18.08). Smoke prod OK (200 + banner, `/dashboard` → 302).
 
 ### Faza 4 — (Później) Podpięcie Supabase w prod
 
