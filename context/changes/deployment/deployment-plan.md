@@ -56,10 +56,10 @@ Każda faza z checkboxami — stanowa i trackowalna.
 Wdrożony Worker działa na edge, więc **musi** wskazywać na hostowany Supabase (nie lokalny `127.0.0.1`).
 
 - [x] Utwórz projekt na <https://supabase.com/dashboard> (region blisko użytkowników)
-- [ ] Skopiuj z **Settings → API**:
+- [x] Skopiuj z **Settings → API**:
   - `SUPABASE_URL` = Project URL (`https://<project-ref>.supabase.co`)
   - `SUPABASE_KEY` = klucz **anon public** (NIE `service_role`)
-- [ ] **Authentication → Email**: skonfiguruj potwierdzanie emaila zgodnie z potrzebą (domyślnie wymagane przed pierwszym logowaniem)
+- [x] **Authentication → Email**: potwierdzanie emaila włączone; Site URL / Redirect URLs wskazują na prod (link z maila wraca na `https://10x-cards.sebger82.workers.dev`).
 - [ ] Te wartości trafiają do prod przez `wrangler secret put` (Faza 4), lokalnie do `.dev.vars`
 
 ### Supabase — opcja B: stack lokalny (tylko dev, wymaga Dockera)
@@ -123,13 +123,13 @@ Wystarczający do lokalnego `npm run dev`, ale **nie** do wdrożonego Workera.
 - [x] Non-prod branche → preview deployments (domyślnie `npx wrangler versions upload`)
 - [x] Test: push `a745852` do `master` → auto-build → auto-deploy. Nowy deployment `6d65e59d-7d89-4ad0-b718-d9dae81b2cbe` (100%), Created `2026-08-17T22:16:26Z` (= 00:16 CEST 18.08). Smoke prod OK (200 + banner, `/dashboard` → 302).
 
-### Faza 4 — (Później) Podpięcie Supabase w prod
+### Faza 4 — Podpięcie Supabase w prod
 
-- [ ] Cloud Supabase project (URL + anon key)
-- [ ] `npx wrangler secret put SUPABASE_URL`
-- [ ] `npx wrangler secret put SUPABASE_KEY`
-- [ ] (Workers Builds) te same sekrety w Build settings, jeśli build ich wymaga (są `optional` → zwykle nie)
-- [ ] Redeploy + weryfikacja auth (signup / signin / protected)
+- [x] Cloud Supabase project (URL + anon key)
+- [x] `npx wrangler secret put SUPABASE_URL`
+- [x] `npx wrangler secret put SUPABASE_KEY`
+- [x] (Workers Builds) sekrety nie są potrzebne w Build settings (są `optional`; żyją na Workerze i przetrwają auto-deploye)
+- [x] Weryfikacja: `wrangler secret list` → oba `secret_text`; banner „nie jest skonfigurowany” zniknął; `/dashboard` → 302 `/auth/signin`; `/auth/signin` → 200 z formularzem. **Pełny test signup przeszedł**: rejestracja → mail potwierdzający → kliknięcie linku → powrót na prod URL.
 
 ## Support / edge cases integracji zewnętrznych
 
