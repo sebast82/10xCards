@@ -27,17 +27,18 @@ Każda faza z checkboxami — stanowa i trackowalna.
 
 ### Narzędzia bazowe
 
-- [ ] **Node.js 22.14.0** (zgodnie z `.nvmrc`) — `node -v`. Sugerowane `nvm use`.
-- [ ] `npm ci` — zależności zainstalowane (w tym `wrangler` i `supabase` są devDependencies, więc `npx` wystarczy — globalna instalacja niepotrzebna).
-- [ ] Git skonfigurowany i repo połączone z GitHub (potrzebne później dla Workers Builds).
+- [x] **Node.js 24.19.0** (zgodnie z `.nvmrc`) — `node -v` → `v24.19.0`. Projekt celuje w Node 24 (zaktualizowane `.nvmrc` i CI `node-version: 24`).
+- [x] `npm ci` — zależności zainstalowane (700 paczek; `npm audit`: 8 podatności — poza zakresem tego deployu).
+- [x] Git skonfigurowany i repo połączone z GitHub (potrzebne później dla Workers Builds).
+- [x] **GitHub CLI (`gh`)** zainstalowane — przyda się do połączenia repo z Workers Builds (Faza 3).
 
 ### CLI: Cloudflare Wrangler
 
 `wrangler` jest już w devDependencies (`^4.90.0`) — używaj przez `npx wrangler`, bez globalnej instalacji.
 
-- [ ] `npx wrangler --version` — potwierdza dostępność
-- [ ] `npx wrangler login` — otwiera OAuth w przeglądarce; autoryzuje CLI dla Twojego konta
-- [ ] `npx wrangler whoami` — potwierdza zalogowane konto i email
+- [x] `npx wrangler --version` — potwierdza dostępność
+- [x] `npx wrangler login` — otwiera OAuth w przeglądarce; autoryzuje CLI dla Twojego konta
+- [x] `npx wrangler whoami` — potwierdza zalogowane konto i email
 - [ ] (dla CI/automatyzacji, opcjonalnie) zamiast `login` użyj tokenu:
   - Dashboard → My Profile → API Tokens → Create Token → szablon **Edit Cloudflare Workers**, zawężony do 1 konta/projektu (bez DNS, bez billing)
   - Ustaw w env: `CLOUDFLARE_API_TOKEN` (+ ewentualnie `CLOUDFLARE_ACCOUNT_ID`)
@@ -54,7 +55,7 @@ Każda faza z checkboxami — stanowa i trackowalna.
 
 Wdrożony Worker działa na edge, więc **musi** wskazywać na hostowany Supabase (nie lokalny `127.0.0.1`).
 
-- [ ] Utwórz projekt na <https://supabase.com/dashboard> (region blisko użytkowników)
+- [x] Utwórz projekt na <https://supabase.com/dashboard> (region blisko użytkowników)
 - [ ] Skopiuj z **Settings → API**:
   - `SUPABASE_URL` = Project URL (`https://<project-ref>.supabase.co`)
   - `SUPABASE_KEY` = klucz **anon public** (NIE `service_role`)
@@ -76,9 +77,9 @@ Wystarczający do lokalnego `npm run dev`, ale **nie** do wdrożonego Workera.
 
 ### Sekrety lokalne (`.dev.vars`)
 
-- [ ] `.dev.vars` istnieje w rootcie (jest w `.gitignore` — nie commitować). Baza: `cp .env.example .dev.vars`
-- [ ] Zawiera `SUPABASE_URL` i `SUPABASE_KEY` (z opcji A lub B) — nazwy MUSZĄ zgadzać się ze schematem `astro:env`
-- [ ] Uwaga: na etapie smoke-deployu (Faza 1–3) sekrety mogą być puste — aplikacja degraduje się gracefully (auth off)
+- [x] `.dev.vars` istnieje w rootcie (jest w `.gitignore` — nie commitować). Utworzony na bazie `.env.example`.
+- [ ] Zawiera `SUPABASE_URL` i `SUPABASE_KEY` (z opcji A lub B) — nazwy MUSZĄ zgadzać się ze schematem `astro:env`. Aktualnie **puste** — uzupełnić z Supabase Settings → API przed testem auth.
+- [x] Uwaga: na etapie smoke-deployu (Faza 1–3) sekrety mogą być puste — aplikacja degraduje się gracefully (auth off)
 
 ## Pliki
 
@@ -92,9 +93,9 @@ Wystarczający do lokalnego `npm run dev`, ale **nie** do wdrożonego Workera.
 
 ### Faza 0 — Setup Cloudflare (ręczne, manual gate)
 
-- [ ] Konto Cloudflare (utworzone / zalogowane)
-- [ ] `npx wrangler login` (OAuth w przeglądarce) — lokalna autoryzacja
-- [ ] `npx wrangler whoami` potwierdza konto
+- [x] Konto Cloudflare (utworzone / zalogowane)
+- [x] `npx wrangler login` (OAuth w przeglądarce) — lokalna autoryzacja
+- [x] `npx wrangler whoami` potwierdza konto
 - [ ] (jeśli automatyzacja) API token scoped tylko do Workers dla 1 projektu, bez DNS/billing, w env var (nie w repo)
 
 ### Faza 1 — Pre-flight lokalny
