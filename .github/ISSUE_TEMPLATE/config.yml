@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Roadmapa projektu
+    url: https://github.com/sebast82/10xCards/blob/master/context/foundation/roadmap.md
+    about: Sekwencja, zależności i uzasadnienia. Nowe elementy dodawaj najpierw tutaj, dopiero potem jako issue.
+  - name: PRD
+    url: https://github.com/sebast82/10xCards/blob/master/context/foundation/prd.md
+    about: Wymagania i kryteria sukcesu. Każdy element roadmapy musi się do czegoś tutaj odwoływać.

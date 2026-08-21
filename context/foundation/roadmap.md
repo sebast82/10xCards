@@ -14,6 +14,8 @@ top_blocker: time
 > Wyprowadzone z `context/foundation/prd.md` (v1) + automatycznie zbadanego stanu bazy kodu.
 > Edytuj w miejscu; archiwizuj, gdy dokument zostanie zastąpiony.
 > Elementy poniżej są ułożone w kolejności zależności. Tabela „W skrócie" jest indeksem.
+> Ten dokument jest źródłem prawdy dla **sekwencji i uzasadnień**; stan wykonania żyje w GitHub Issues
+> (`sebast82/10xCards`), dopasowywany po `Change ID`. Zmiana zakresu — najpierw tutaj, potem w issue.
 
 ## Vision recap
 
@@ -34,7 +36,7 @@ Deklaracja właściciela produktu brzmiała: gwiazdą jest **cała pętla** (rej
 | ID   | Change ID                        | Outcome (użytkownik może …)                                                       | Prerequisites | PRD refs                    | Status   |
 | ---- | -------------------------------- | --------------------------------------------------------------------------------- | ------------- | --------------------------- | -------- |
 | F-01 | `srs-algorithm-contract`         | (fundament) wybrany jest gotowy algorytm powtórek i kontrakt stanu, który niesie fiszka | —         | FR-009, Non-Goals, Success Criteria §Guardrails | ready |
-| F-02 | `flashcards-schema-isolation`    | (fundament) fiszki mają trwały schemat, a każdy użytkownik widzi wyłącznie swoje    | F-01          | Access Control, FR-008      | proposed |
+| F-02 | `flashcards-schema-isolation`    | (fundament) fiszki mają trwały schemat, a każdy użytkownik widzi wyłącznie swoje    | F-01          | Access Control, FR-008      | blocked |
 | S-01 | `deployed-auth-baseline`         | zarejestrować się, zalogować i wylogować na wdrożonej instancji                     | —             | FR-001, FR-002, Access Control | ready    |
 | S-02 | `first-gated-generation`         | wkleić tekst, przejrzeć propozycje AI i zapisać zaakceptowane do swojej kolekcji    | F-02, S-01    | US-01, FR-003, FR-004, FR-008 | proposed |
 | S-03 | `manual-card-edit-delete`        | poprawić treść zapisanej fiszki i usunąć zbędną                                     | S-02          | FR-006, FR-007              | proposed |
@@ -90,9 +92,10 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 - **Prerequisites:** F-01
 - **Parallel with:** S-01
 - **Blockers:** —
-- **Unknowns:** —
-- **Risk:** Sonda raportuje warstwę danych jako nieistniejącą, a wszystkie dziewięć wymagań koniecznych na niej stoi — zły kształt tabeli odkryty w połowie pętli to jedyna przeróbka, której termin 2026-08-31 nie wchłonie. Stąd zależność od F-01: pola harmonogramu wchodzą do schematu od razu, zanim użytkownik cokolwiek zapisze. Zakres celowo wąski: tabela fiszek, polityka izolacji, typy — bez budowania „całej warstwy danych" z góry. Każdy kolejny element pętli i tak przechodzi przez tę warstwę pionowo.
-- **Status:** proposed
+- **Unknowns:**
+  - Czy w danych odróżniamy fiszkę wygenerowaną przez AI od ręcznej? — Owner: user. Block: yes (patrz Open Roadmap Question 2; decyzja podjęta po wdrożeniu schematu oznacza migrację na zapisanych fiszkach).
+- **Risk:** Sonda raportuje warstwę danych jako nieistniejącą, a wszystkie dziewięć wymagań koniecznych na niej stoi — zły kształt tabeli odkryty w połowie pętli to jedyna przeróbka, której termin 2026-08-31 nie wchłonie. Stąd zależność od F-01: pola harmonogramu wchodzą do schematu od razu, zanim użytkownik cokolwiek zapisze. Z tego samego powodu blokuje to Open Roadmap Question 2 — znacznik pochodzenia fiszki musi wejść razem ze schematem albo nie wejdzie wcale. Zakres celowo wąski: tabela fiszek, polityka izolacji, typy — bez budowania „całej warstwy danych" z góry. Każdy kolejny element pętli i tak przechodzi przez tę warstwę pionowo.
+- **Status:** blocked
 
 ## Slices
 
@@ -144,7 +147,7 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 - **Parallel with:** S-03, S-05, S-06
 - **Blockers:** —
 - **Unknowns:**
-  - Czy odróżniamy w danych fiszkę z AI od ręcznej? — Owner: user. Block: no (bez tego rozróżnienia drugie kryterium sukcesu — „75% kolekcji pochodzi z AI" — nie jest mierzalne).
+  - Czy odróżniamy w danych fiszkę z AI od ręcznej? — Owner: user. Block: no dla tego elementu; rozstrzygane w F-02 (Open Roadmap Question 2), bo tam decyzja wchodzi do schematu.
 - **Risk:** Najmniejszy element pętli, świadomie po S-02: ręczne dodawanie korzysta z tego samego zapisu i tej samej listy, więc zbudowane po generowaniu nie tworzy drugiej ścieżki zapisu. Odwrotna kolejność oznaczałaby przerabianie formularza pod przepływ AI.
 - **Status:** proposed
 
@@ -175,21 +178,23 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 
 ## Backlog Handoff
 
-| Roadmap ID | Change ID                       | Suggested issue title                                                | Ready for `/10x-plan` | Notes                                              |
-| ---------- | ------------------------------- | -------------------------------------------------------------------- | --------------------- | -------------------------------------------------- |
-| F-01       | `srs-algorithm-contract`        | Kontrakt algorytmu powtórek i stanu harmonogramu                      | yes                   | `/10x-plan srs-algorithm-contract`                  |
-| F-02       | `flashcards-schema-isolation`   | Schemat fiszek i izolacja danych per użytkownik                       | no                    | Czeka na F-01 (pola harmonogramu)                   |
-| S-01       | `deployed-auth-baseline`        | Rejestracja i logowanie na wdrożonej instancji                        | yes                   | Kontynuuje `context/changes/deployment/`            |
-| S-02       | `first-gated-generation`        | Generowanie fiszek z tekstu: przegląd, akceptacja, zapis              | no                    | Czeka na F-02 i S-01; gwiazda przewodnia            |
-| S-03       | `manual-card-edit-delete`       | Poprawianie i usuwanie zapisanych fiszek                              | no                    | Czeka na S-02                                       |
-| S-04       | `manual-card-create`            | Ręczne tworzenie fiszki                                               | no                    | Czeka na S-02                                       |
-| S-05       | `srs-review-session`            | Sesja powtórkowa z algorytmem spaced repetition                       | no                    | Czeka na F-02 i S-02; domyka pętlę                  |
-| S-06       | `streaming-generation-progress` | Przyrostowe generowanie i widoczny postęp                             | no                    | Czeka na S-02; pierwszy kandydat do odłożenia       |
+| Roadmap ID | Change ID                       | Issue | Suggested issue title                                    | Ready for `/10x-plan` | Notes                                              |
+| ---------- | ------------------------------- | ----- | -------------------------------------------------------- | --------------------- | -------------------------------------------------- |
+| F-01       | `srs-algorithm-contract`        | #1    | Kontrakt algorytmu powtórek i stanu harmonogramu          | yes                   | `/10x-plan srs-algorithm-contract`                  |
+| F-02       | `flashcards-schema-isolation`   | #2    | Schemat fiszek i izolacja danych per użytkownik           | no                    | Czeka na F-01 (pola harmonogramu) i na #10          |
+| S-01       | `deployed-auth-baseline`        | #3    | Rejestracja i logowanie na wdrożonej instancji            | yes                   | Kontynuuje `context/changes/deployment/`            |
+| S-02       | `first-gated-generation`        | #4    | Generowanie fiszek z tekstu: przegląd, akceptacja, zapis  | no                    | Czeka na F-02 i S-01; gwiazda przewodnia            |
+| S-03       | `manual-card-edit-delete`       | #5    | Poprawianie i usuwanie zapisanych fiszek                  | no                    | Czeka na S-02                                       |
+| S-04       | `manual-card-create`            | #6    | Ręczne tworzenie fiszki                                   | no                    | Czeka na S-02                                       |
+| S-05       | `srs-review-session`            | #7    | Sesja powtórkowa z algorytmem spaced repetition           | no                    | Czeka na F-02 i S-02; domyka pętlę                  |
+| S-06       | `streaming-generation-progress` | #8    | Przyrostowe generowanie i widoczny postęp                 | no                    | Czeka na S-02; pierwszy kandydat do odłożenia       |
+
+Kamienie milowe: F-01–S-05 w `MVP — pętla` (termin 2026-08-31), S-06 w `Bufor — do przycięcia`.
 
 ## Open Roadmap Questions
 
-1. **Które metody logowania wdrożyć w MVP — email+hasło, OAuth, passwordless, czy podzbiór?** — Owner: user. Block: nie blokuje; S-01 rusza na email+hasło, które jest już w kodzie. Rozstrzygnięcie na „tylko email+hasło" trwale zamyka temat i oszczędza wieczory.
-2. **Czy w danych odróżniamy fiszkę wygenerowaną przez AI od ręcznej?** — Owner: user. Block: gates pomiar drugiego kryterium sukcesu („75% kolekcji pochodzi z AI"); technicznie nie blokuje żadnego elementu, ale bez tego kryterium jest niemierzalne po fakcie. Decyzja należy do F-02 — podjęta później oznacza migrację.
+1. **Które metody logowania wdrożyć w MVP — email+hasło, OAuth, passwordless, czy podzbiór?** — Owner: user. Block: nie blokuje; S-01 rusza na email+hasło, które jest już w kodzie. Rozstrzygnięcie na „tylko email+hasło" trwale zamyka temat i oszczędza wieczory. → #9
+2. **Czy w danych odróżniamy fiszkę wygenerowaną przez AI od ręcznej?** — Owner: user. Block: **F-02**. Bez znacznika pochodzenia drugie kryterium sukcesu („75% kolekcji pochodzi z AI") jest niemierzalne, a odtworzenie go wstecz niemożliwe — decyzja podjęta po wdrożeniu schematu oznacza migrację na zapisanych fiszkach. → #10
 
 ## Parked
 

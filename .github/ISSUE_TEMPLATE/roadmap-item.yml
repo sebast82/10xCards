@@ -1,0 +1,76 @@
+name: Element roadmapy
+description: Fundament (F-NN) lub plaster (S-NN) przeniesiony z context/foundation/roadmap.md
+title: "F-NN · "
+labels: ["status:proposed"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Roadmapa jest źródłem prawdy dla sekwencji i uzasadnień; to issue jest źródłem prawdy dla stanu wykonania.
+        Nowe elementy dodawaj najpierw do `context/foundation/roadmap.md`, dopiero potem tutaj.
+  - type: input
+    id: roadmap-id
+    attributes:
+      label: ID roadmapy
+      description: Identyfikator porządkowy z roadmapy, np. F-01 albo S-03.
+      placeholder: S-03
+    validations:
+      required: true
+  - type: input
+    id: change-id
+    attributes:
+      label: Change ID
+      description: Kebab-case. Po tym identyfikatorze /10x-plan, /10x-implement i /10x-archive dopasowują element roadmapy. Nigdy nie używaj tu F-01 ani S-01.
+      placeholder: manual-card-edit-delete
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Rezultat
+      description: Plaster — zdanie „użytkownik może …". Fundament — stan świata, który zaczyna obowiązywać.
+    validations:
+      required: true
+  - type: input
+    id: prd-refs
+    attributes:
+      label: Odniesienia do PRD
+      description: Dosłowne identyfikatory z PRD. Element bez odniesienia nie ma prawa istnieć.
+      placeholder: US-01, FR-003, FR-004
+    validations:
+      required: true
+  - type: textarea
+    id: unlocks
+    attributes:
+      label: Odblokowuje
+      description: Tylko dla fundamentów. Nazwij elementy S-NN, blokujące niewiadome albo ścieżki weryfikacji, które ten fundament otwiera. Fundament bez tego pola to praca pozioma bez uzasadnienia.
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Zależności
+      value: |
+        - Blokowane przez: 
+        - Równolegle z: 
+    validations:
+      required: true
+  - type: textarea
+    id: unknowns
+    attributes:
+      label: Niewiadome
+      description: Każda z właścicielem i informacją, czy blokuje. Co najmniej jedna blokująca oznacza etykietę status:blocked.
+      placeholder: "- [ ] <pytanie> — Właściciel: user · Blokuje: nie"
+  - type: textarea
+    id: risk
+    attributes:
+      label: Ryzyko i uzasadnienie kolejności
+      description: Dlaczego akurat w tym miejscu sekwencji i co może pójść nie tak.
+    validations:
+      required: true
+  - type: textarea
+    id: dod
+    attributes:
+      label: Definicja ukończenia
+      description: Weryfikowalne stwierdzenia wyprowadzone z Rezultatu. Bez szacunków i jednostek czasu.
+      placeholder: "- [ ] …"
+    validations:
+      required: true

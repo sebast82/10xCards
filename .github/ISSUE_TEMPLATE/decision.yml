@@ -1,0 +1,46 @@
+name: Decyzja
+description: Otwarte pytanie roadmapy, które trzeba rozstrzygnąć zanim zablokuje pracę
+title: "DEC-N · "
+labels: ["type:decision", "status:ready"]
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Pytanie
+      description: Jedno zdanie, w języku produktu, nie implementacji.
+    validations:
+      required: true
+  - type: input
+    id: owner
+    attributes:
+      label: Właściciel
+      description: Kto odpowiada. Decyzja bez właściciela nie zostaje podjęta.
+      placeholder: user
+    validations:
+      required: true
+  - type: textarea
+    id: affects
+    attributes:
+      label: Czego dotyczy
+      description: Elementy roadmapy, na które wpływa. Napisz wprost, czy blokuje, czy nie.
+    validations:
+      required: true
+  - type: textarea
+    id: cost-of-delay
+    attributes:
+      label: Konsekwencja odkładania
+      description: Co się psuje, jeśli decyzja zapadnie później — migracja danych, niemierzalne kryterium, rozrost zakresu.
+    validations:
+      required: true
+  - type: textarea
+    id: options
+    attributes:
+      label: Opcje
+      placeholder: "- [ ] <opcja> — <konsekwencja>"
+    validations:
+      required: true
+  - type: textarea
+    id: decision
+    attributes:
+      label: Rozstrzygnięcie
+      description: Uzupełnij przy zamykaniu i przenieś do context/foundation/roadmap.md.
