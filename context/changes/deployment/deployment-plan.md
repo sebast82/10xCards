@@ -11,6 +11,7 @@ Każda faza z checkboxami — stanowa i trackowalna.
 
 - **Supabase**: najpierw smoke-deploy bez sekretów; aplikacja degraduje się gracefully (banner „auth wyłączone”). Sekrety dodajemy później.
 - **Deploy**: ręczny teraz + auto-deploy na push do `master` przez Workers Builds (bez GitHub Actions).
+- **Metody logowania**: MVP wdraża **wyłącznie email + hasło** (decyzja 2026-08-21, issue #9). OAuth i logowanie bez hasła poza zakresem — patrz `context/foundation/prd.md` §Non-Goals.
 - **Cloudflare**: dołączamy kroki setupu konta i `wrangler login`.
 - **SessionKV**: adapter `@astrojs/cloudflare` 14.x **nie ma** opcji `session: false` (istnieje tylko `sessionKVBindingName`). Aplikacja używa cookies Supabase i nigdy nie woła `Astro.session`, więc pozwalamy na auto-provisioning KV `SESSION` przy deployu — jest nieinteraktywny i nieszkodliwy. Namespace powstaje automatycznie, ale nie jest używany.
 
@@ -129,8 +130,7 @@ Wystarczający do lokalnego `npm run dev`, ale **nie** do wdrożonego Workera.
 - [x] `npx wrangler secret put SUPABASE_URL`
 - [x] `npx wrangler secret put SUPABASE_KEY`
 - [x] (Workers Builds) sekrety nie są potrzebne w Build settings (są `optional`; żyją na Workerze i przetrwają auto-deploye)
-- [x] Weryfikacja: `wrangler secret list` → oba `secret_text`; banner „nie jest skonfigurowany” zniknął; `/dashboard` → 302 `/auth/signin`; `/auth/signin` → 200 z formularzem. **Pełny test signup przeszedł**: rejestracja → mail potwierdzający → kliknięcie linku → powrót na prod URL.
-
+- [x] Weryfikacja: `wrangler secret list` → oba `secret_text`; banner „nie jest skonfigurowany” zniknął; `/dashboard` → 302 `/auth/signin`; `/auth/signin` → 200 z formularzem. **Pełny test signup przeszedł**: rejestracja → mail potwierdzający → kliknięcie linku → powrót na prod URL.- [x] **Pełny cykl auth potwierdzony na produkcji (2026-08-21)**: rejestracja, logowanie i wylogowanie działają na `https://10x-cards.sebger82.workers.dev`. Domyka element S-01 roadmapy (`deployed-auth-baseline`, issue #3).
 ## Support / edge cases integracji zewnętrznych
 
 1. **Supabase build na `workerd`**: `nodejs_compat` już ON; potwierdzić w `astro preview`, że klient buduje się bez `Could not resolve "node:..."`. Fallback: `prerenderEnvironment: 'node'` lub `optimizeDeps.include`.
@@ -149,6 +149,7 @@ Wystarczający do lokalnego `npm run dev`, ale **nie** do wdrożonego Workera.
 - `wrangler tail` bez błędów
 - push do `master` → auto-deploy działa
 - rollback znany
+- rejestracja, logowanie i wylogowanie potwierdzone na wdrożonej instancji (2026-08-21)
 
 ## Poza zakresem
 

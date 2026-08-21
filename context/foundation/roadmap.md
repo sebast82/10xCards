@@ -4,14 +4,14 @@ version: 1
 status: draft
 created: 2026-08-21
 updated: 2026-08-21
-prd_version: 1
+prd_version: 2
 main_goal: speed
 top_blocker: time
 ---
 
 # Roadmap: 10xCards
 
-> Wyprowadzone z `context/foundation/prd.md` (v1) + automatycznie zbadanego stanu bazy kodu.
+> Wyprowadzone z `context/foundation/prd.md` (v2) + automatycznie zbadanego stanu bazy kodu.
 > Edytuj w miejscu; archiwizuj, gdy dokument zostanie zastąpiony.
 > Elementy poniżej są ułożone w kolejności zależności. Tabela „W skrócie" jest indeksem.
 > Ten dokument jest źródłem prawdy dla **sekwencji i uzasadnień**; stan wykonania żyje w GitHub Issues
@@ -36,8 +36,8 @@ Deklaracja właściciela produktu brzmiała: gwiazdą jest **cała pętla** (rej
 | ID   | Change ID                        | Outcome (użytkownik może …)                                                       | Prerequisites | PRD refs                    | Status   |
 | ---- | -------------------------------- | --------------------------------------------------------------------------------- | ------------- | --------------------------- | -------- |
 | F-01 | `srs-algorithm-contract`         | (fundament) wybrany jest gotowy algorytm powtórek i kontrakt stanu, który niesie fiszka | —         | FR-009, Non-Goals, Success Criteria §Guardrails | ready |
-| F-02 | `flashcards-schema-isolation`    | (fundament) fiszki mają trwały schemat, a każdy użytkownik widzi wyłącznie swoje    | F-01          | Access Control, FR-008      | blocked |
-| S-01 | `deployed-auth-baseline`         | zarejestrować się, zalogować i wylogować na wdrożonej instancji                     | —             | FR-001, FR-002, Access Control | ready    |
+| F-02 | `flashcards-schema-isolation`    | (fundament) fiszki mają trwały schemat ze znacznikiem pochodzenia, a każdy użytkownik widzi wyłącznie swoje | F-01          | Access Control, FR-008      | proposed |
+| S-01 | `deployed-auth-baseline`         | zarejestrować się, zalogować i wylogować na wdrożonej instancji                     | —             | FR-001, FR-002, Access Control | done     |
 | S-02 | `first-gated-generation`         | wkleić tekst, przejrzeć propozycje AI i zapisać zaakceptowane do swojej kolekcji    | F-02, S-01    | US-01, FR-003, FR-004, FR-008 | proposed |
 | S-03 | `manual-card-edit-delete`        | poprawić treść zapisanej fiszki i usunąć zbędną                                     | S-02          | FR-006, FR-007              | proposed |
 | S-04 | `manual-card-create`             | dodać własną fiszkę ręcznie, bez udziału AI                                         | S-02          | FR-005                      | proposed |
@@ -50,7 +50,7 @@ Pomoc nawigacyjna — grupuje elementy dzielące ten sam łańcuch zależności.
 
 | Stream | Theme                     | Chain                                  | Note                                                                                            |
 | ------ | ------------------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| A      | Dostęp i wdrożenie        | `S-01`                                 | Samodzielny; nie dzieli żadnej zależności ze Stream B, więc może iść równolegle. Odblokowuje weryfikację na prawdziwej instancji. |
+| A      | Dostęp i wdrożenie        | `S-01`                                 | Domknięty — dostarcza reszcie roadmapy działającą instancję z sesją użytkownika. |
 | B      | Pętla generowania         | `F-01` → `F-02` → `S-02` → `S-06`      | Ścieżka gwiazdy przewodniej; przy celu `speed` ma pierwszeństwo w każdym remisie.                 |
 | C      | Zarządzanie kolekcją      | `S-03` / `S-04` (równolegle)            | Dołącza do Stream B w `S-02`; oba elementy niezależne od siebie.                                  |
 | D      | Pętla nauki               | `S-05`                                 | Dołącza do Stream B w `S-02`, a kontrakt bierze z `F-01`; domyka pętlę zadeklarowaną przez właściciela produktu. |
@@ -63,8 +63,8 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 - **Frontend:** present — Astro 7 + React 19 (wyspy), Tailwind 4, komponenty w `src/components/ui/`; strony `index`, `dashboard`, `auth/signin`, `auth/signup`, `auth/confirm-email`.
 - **Backend / API:** partial — endpointy SSR istnieją tylko dla auth (`src/pages/api/auth/signin.ts`, `signup.ts`, `signout.ts`); brak endpointów domenowych (fiszki, generowanie).
 - **Data:** absent — `supabase/config.toml` obecny, ale brak katalogu migracji, schematu i typów bazy.
-- **Auth:** present — klient Supabase SSR (`src/lib/supabase.ts`), middleware chroniące `/dashboard` (`src/middleware.ts`), pełny cykl rejestracja/logowanie/wylogowanie w kodzie. Brakuje projektu Supabase w chmurze i sekretów w produkcji.
-- **Deploy / infra:** partial — `wrangler.jsonc` (`nodejs_compat`, assets, observability), CI GitHub Actions robi lint + build bez kroku deploy; plan wdrożenia w toku w `context/changes/deployment/deployment-plan.md`.
+- **Auth:** present — klient Supabase SSR (`src/lib/supabase.ts`), middleware chroniące `/dashboard` (`src/middleware.ts`), pełny cykl rejestracja/logowanie/wylogowanie w kodzie. Projekt Supabase w chmurze utworzony, sekrety `SUPABASE_URL` i `SUPABASE_KEY` ustawione na produkcji, rejestracja z potwierdzeniem email przetestowana na wdrożonej instancji (`context/changes/deployment/deployment-plan.md`, Faza 4).
+- **Deploy / infra:** present — `wrangler.jsonc` (`nodejs_compat`, assets, observability); aplikacja wdrożona pod `https://10x-cards.sebger82.workers.dev`, auto-deploy na push do `master` przez Cloudflare Workers Builds. CI GitHub Actions robi lint + build (deploy celowo poza nim).
 - **Observability:** partial — `observability.enabled` w konfiguracji Workers; brak biblioteki logowania i śledzenia błędów.
 
 ## Foundations
@@ -85,32 +85,30 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 
 ### F-02: Schemat fiszek i izolacja danych per użytkownik
 
-- **Outcome:** (fundament) fiszki mają trwały schemat w bazie — z polami stanu wynikającymi z kontraktu F-01 — a polityka dostępu gwarantuje, że każdy użytkownik odczytuje i modyfikuje wyłącznie własne rekordy; typy bazy są dostępne w kodzie.
+- **Outcome:** (fundament) fiszki mają trwały schemat w bazie — z polami stanu wynikającymi z kontraktu F-01 i ze znacznikiem pochodzenia (AI albo ręczne) — a polityka dostępu gwarantuje, że każdy użytkownik odczytuje i modyfikuje wyłącznie własne rekordy; typy bazy są dostępne w kodzie.
 - **Change ID:** `flashcards-schema-isolation`
 - **PRD refs:** Access Control, FR-008
 - **Unlocks:** S-02 (zapis zaakceptowanych propozycji), S-03, S-04 (zarządzanie kolekcją), S-05 (odczyt i zapis stanu harmonogramu); domyka niewiadomą „gdzie żyją fiszki i kto je widzi" dla całej pętli
 - **Prerequisites:** F-01
 - **Parallel with:** S-01
 - **Blockers:** —
-- **Unknowns:**
-  - Czy w danych odróżniamy fiszkę wygenerowaną przez AI od ręcznej? — Owner: user. Block: yes (patrz Open Roadmap Question 2; decyzja podjęta po wdrożeniu schematu oznacza migrację na zapisanych fiszkach).
-- **Risk:** Sonda raportuje warstwę danych jako nieistniejącą, a wszystkie dziewięć wymagań koniecznych na niej stoi — zły kształt tabeli odkryty w połowie pętli to jedyna przeróbka, której termin 2026-08-31 nie wchłonie. Stąd zależność od F-01: pola harmonogramu wchodzą do schematu od razu, zanim użytkownik cokolwiek zapisze. Z tego samego powodu blokuje to Open Roadmap Question 2 — znacznik pochodzenia fiszki musi wejść razem ze schematem albo nie wejdzie wcale. Zakres celowo wąski: tabela fiszek, polityka izolacji, typy — bez budowania „całej warstwy danych" z góry. Każdy kolejny element pętli i tak przechodzi przez tę warstwę pionowo.
-- **Status:** blocked
+- **Unknowns:** —
+- **Risk:** Sonda raportuje warstwę danych jako nieistniejącą, a wszystkie dziewięć wymagań koniecznych na niej stoi — zły kształt tabeli odkryty w połowie pętli to jedyna przeróbka, której termin 2026-08-31 nie wchłonie. Stąd zależność od F-01: pola harmonogramu wchodzą do schematu od razu, zanim użytkownik cokolwiek zapisze. Z tego samego powodu znacznik pochodzenia fiszki (decyzja z 2026-08-21) wchodzi tą samą migracją — dopisany później wymagałby przerobienia już zapisanych rekordów, a wstecz i tak nie da się odtworzyć pochodzenia. Zakres celowo wąski: tabela fiszek, polityka izolacji, typy — bez budowania „całej warstwy danych" z góry. Każdy kolejny element pętli i tak przechodzi przez tę warstwę pionowo.
+- **Status:** proposed
 
 ## Slices
 
 ### S-01: Rejestracja i logowanie na wdrożonej instancji
 
-- **Outcome:** użytkownik może założyć konto, zalogować się i wylogować na publicznie dostępnej instancji aplikacji, a niezalogowany trafia na ekran logowania.
+- **Outcome:** użytkownik może założyć konto na email i hasło, zalogować się i wylogować na publicznie dostępnej instancji aplikacji, a niezalogowany trafia na ekran logowania.
 - **Change ID:** `deployed-auth-baseline`
 - **PRD refs:** FR-001, FR-002, Access Control
 - **Prerequisites:** —
 - **Parallel with:** F-01, F-02
 - **Blockers:** —
-- **Unknowns:**
-  - Które metody logowania wchodzą do MVP (email+hasło / OAuth / passwordless)? — Owner: user. Block: no (email+hasło wystarcza na start i jest już w kodzie).
-- **Risk:** Kod auth istnieje, ale nic tego nie potwierdziło na środowisku docelowym — brakuje projektu Supabase w chmurze i sekretów. Ryzyko nie leży w napisaniu funkcji, tylko w niespodziankach środowiska uruchomieniowego opisanych w `infrastructure.md` (klient Supabase na workerd, sekrety ustawiane inaczej niż zmienne procesu). Wyprowadzenie tego na pierwszy ogień zamienia całą resztę roadmapy w pracę weryfikowalną na żywo; odłożenie oznacza, że ostatni tydzień przed terminem jest jednocześnie pierwszym wdrożeniem. Kontynuuje pracę zaczętą w `context/changes/deployment/deployment-plan.md`.
-- **Status:** ready
+- **Unknowns:** —
+- **Risk:** Wdrożenie, sekrety produkcyjne i rejestracja z potwierdzeniem email zostały dowiezione w `context/changes/deployment/deployment-plan.md` (Fazy 1–4), a logowanie i wylogowanie potwierdzono na wdrożonej instancji 2026-08-21. Ryzyko, które ten element miał zdjąć — niespodzianki środowiska uruchomieniowego opisane w `infrastructure.md` (klient Supabase na workerd, cookies sesji za edge) — zostało zdjęte empirycznie, nie założeniowo. Każdy kolejny element pętli buduje już na sprawdzonym założeniu, że sesja użytkownika utrzymuje się na produkcji.
+- **Status:** done
 
 ### S-02: Generowanie fiszek z wklejonego tekstu, przegląd i zapis do kolekcji
 
@@ -146,8 +144,7 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 - **Prerequisites:** S-02
 - **Parallel with:** S-03, S-05, S-06
 - **Blockers:** —
-- **Unknowns:**
-  - Czy odróżniamy w danych fiszkę z AI od ręcznej? — Owner: user. Block: no dla tego elementu; rozstrzygane w F-02 (Open Roadmap Question 2), bo tam decyzja wchodzi do schematu.
+- **Unknowns:** —
 - **Risk:** Najmniejszy element pętli, świadomie po S-02: ręczne dodawanie korzysta z tego samego zapisu i tej samej listy, więc zbudowane po generowaniu nie tworzy drugiej ścieżki zapisu. Odwrotna kolejność oznaczałaby przerabianie formularza pod przepływ AI.
 - **Status:** proposed
 
@@ -181,8 +178,8 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 | Roadmap ID | Change ID                       | Issue | Suggested issue title                                    | Ready for `/10x-plan` | Notes                                              |
 | ---------- | ------------------------------- | ----- | -------------------------------------------------------- | --------------------- | -------------------------------------------------- |
 | F-01       | `srs-algorithm-contract`        | #1    | Kontrakt algorytmu powtórek i stanu harmonogramu          | yes                   | `/10x-plan srs-algorithm-contract`                  |
-| F-02       | `flashcards-schema-isolation`   | #2    | Schemat fiszek i izolacja danych per użytkownik           | no                    | Czeka na F-01 (pola harmonogramu) i na #10          |
-| S-01       | `deployed-auth-baseline`        | #3    | Rejestracja i logowanie na wdrożonej instancji            | yes                   | Kontynuuje `context/changes/deployment/`            |
+| F-02       | `flashcards-schema-isolation`   | #2    | Schemat fiszek i izolacja danych per użytkownik           | no                    | Czeka na F-01 (pola harmonogramu)                   |
+| S-01       | `deployed-auth-baseline`        | #3    | Rejestracja i logowanie na wdrożonej instancji            | done                  | Zweryfikowane na produkcji 2026-08-21; issue zamknięte |
 | S-02       | `first-gated-generation`        | #4    | Generowanie fiszek z tekstu: przegląd, akceptacja, zapis  | no                    | Czeka na F-02 i S-01; gwiazda przewodnia            |
 | S-03       | `manual-card-edit-delete`       | #5    | Poprawianie i usuwanie zapisanych fiszek                  | no                    | Czeka na S-02                                       |
 | S-04       | `manual-card-create`            | #6    | Ręczne tworzenie fiszki                                   | no                    | Czeka na S-02                                       |
@@ -193,8 +190,12 @@ Kamienie milowe: F-01–S-05 w `MVP — pętla` (termin 2026-08-31), S-06 w `Buf
 
 ## Open Roadmap Questions
 
-1. **Które metody logowania wdrożyć w MVP — email+hasło, OAuth, passwordless, czy podzbiór?** — Owner: user. Block: nie blokuje; S-01 rusza na email+hasło, które jest już w kodzie. Rozstrzygnięcie na „tylko email+hasło" trwale zamyka temat i oszczędza wieczory. → #9
-2. **Czy w danych odróżniamy fiszkę wygenerowaną przez AI od ręcznej?** — Owner: user. Block: **F-02**. Bez znacznika pochodzenia drugie kryterium sukcesu („75% kolekcji pochodzi z AI") jest niemierzalne, a odtworzenie go wstecz niemożliwe — decyzja podjęta po wdrożeniu schematu oznacza migrację na zapisanych fiszkach. → #10
+Brak otwartych pytań — oba rozstrzygnięto 2026-08-21.
+
+**Rozstrzygnięte**
+
+1. **Które metody logowania wdrożyć w MVP?** → **tylko email+hasło**. Pełny cykl jest już w kodzie, więc koszt zerowy; przy celu `speed` każda dodatkowa metoda to konfiguracja, która nie przybliża żadnego kryterium sukcesu. OAuth i logowanie bez hasła zostają w `## Parked`. Wpływ: S-01 potwierdza istniejącą ścieżkę, nie dodaje nowej. Issue #9 (zamknięte).
+2. **Czy dane odróżniają fiszkę z AI od ręcznej?** → **tak, znacznik pochodzenia w tabeli fiszek**. Bez niego drugie kryterium sukcesu („75% kolekcji pochodzi z AI") jest niemierzalne, a pochodzenia nie da się odtworzyć wstecz. Wpływ: znacznik wchodzi tą samą migracją co reszta schematu w F-02, które wraca ze stanu `blocked` do `proposed`. Issue #10 (zamknięte).
 
 ## Parked
 
@@ -203,9 +204,11 @@ Kamienie milowe: F-01–S-05 w `MVP — pętla` (termin 2026-08-31), S-06 w `Buf
 - **Współdzielenie zestawów fiszek między użytkownikami** — Why parked: PRD §Non-Goals; MVP jest narzędziem osobistym.
 - **Integracje z platformami edukacyjnymi** — Why parked: PRD §Non-Goals; MVP jest samodzielną aplikacją.
 - **Aplikacja mobilna** — Why parked: PRD §Non-Goals; na start tylko aplikacja webowa.
-- **OAuth i logowanie bez hasła** — Why parked: cel `speed` + główne ryzyko `time`; PRD dopuszcza dowolną z trzech metod, a email+hasło jest już zaimplementowane. Do odblokowania po odpowiedzi na Open Roadmap Question 1.
+- **OAuth i logowanie bez hasła** — Why parked: decyzja z 2026-08-21 — MVP wdraża wyłącznie email+hasło, które jest już zaimplementowane. PRD dopuszcza dowolną z trzech metod, więc to zawężenie zakresu, nie odstępstwo od wymagań.
 - **Śledzenie błędów i logowanie ponad to, co daje platforma** — Why parked: cel `speed`; wbudowana obserwowalność Workers jest już włączona i wystarcza przy skali `users: small`.
 
 ## Done
 
-(Pusta przy pierwszym wygenerowaniu. `/10x-archive` dopisuje tu wpis — i przestawia status elementu na `done` — gdy archiwizowana zmiana ma pasujący Change ID.)
+- **S-01: użytkownik może założyć konto na email i hasło, zalogować się i wylogować na wdrożonej instancji** — zweryfikowane 2026-08-21 na `https://10x-cards.sebger82.workers.dev` (rejestracja z potwierdzeniem email, logowanie, wylogowanie). Praca prowadzona w `context/changes/deployment/`; folder nie jest jeszcze zarchiwizowany — uruchom `/10x-archive`, gdy uznasz go za zamknięty. Issue #3. Lesson: —
+
+(Kolejne wpisy dopisuje `/10x-archive` — i przestawia status elementu na `done` — gdy archiwizowana zmiana ma pasujący Change ID.)

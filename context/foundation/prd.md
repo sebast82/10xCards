@@ -1,6 +1,6 @@
 ---
 project: "10xCards"
-version: 1
+version: 2
 status: draft
 created: 2026-07-10
 context_type: greenfield
@@ -96,7 +96,9 @@ Wejściem jest tekst wklejony przez użytkownika (kopiuj-wklej). Wynikiem jest z
 
 ## Access Control
 
-Logowanie (email + hasło / OAuth / passwordless). Płaski model użytkowników — wszyscy użytkownicy mają te same uprawnienia, bez ról. Każdy użytkownik widzi i zarządza wyłącznie swoimi fiszkami. Niezalogowany użytkownik jest przekierowywany na stronę logowania.
+Logowanie email + hasło. Płaski model użytkowników — wszyscy użytkownicy mają te same uprawnienia, bez ról. Każdy użytkownik widzi i zarządza wyłącznie swoimi fiszkami. Niezalogowany użytkownik jest przekierowywany na stronę logowania.
+
+OAuth i logowanie bez hasła były rozważane i świadomie odrzucone dla MVP (decyzja 2026-08-21) — patrz Non-Goals.
 
 ## Non-Goals
 
@@ -105,7 +107,13 @@ Logowanie (email + hasło / OAuth / passwordless). Płaski model użytkowników 
 - Współdzielenie zestawów fiszek między użytkownikami — MVP jest narzędziem osobistym, bez funkcji społecznościowych.
 - Integracje z innymi platformami edukacyjnymi — MVP jest samodzielną aplikacją, bez łączenia z zewnętrznymi systemami.
 - Aplikacja mobilna — na początek tylko aplikacja webowa. Natywna apka mobilna jest poza zakresem MVP.
+- Logowanie przez OAuth i logowanie bez hasła — MVP wdraża wyłącznie email + hasło, które jest już zaimplementowane. Każda dodatkowa metoda to konfiguracja zewnętrznego dostawcy, która nie przybliża żadnego kryterium sukcesu przed terminem.
 
 ## Open Questions
 
-1. **Które metody logowania wdrożyć w MVP?** — Shape-notes wymieniają email+hasło, OAuth i passwordless. Czy MVP wspiera wszystkie trzy, czy podzbiór? Owner: user. Block: no (dowolna z trzech wystarczy na start).
+Brak otwartych pytań.
+
+**Rozstrzygnięte**
+
+1. **Które metody logowania wdrożyć w MVP?** — rozstrzygnięte 2026-08-21: **wyłącznie email + hasło**. Odzwierciedlone w Access Control i Non-Goals.
+2. **Czy dane odróżniają fiszkę wygenerowaną przez AI od utworzonej ręcznie?** — rozstrzygnięte 2026-08-21: **tak, znacznik pochodzenia przy każdej fiszce**. Bez niego drugie kryterium sukcesu („75% fiszek w kolekcji jest tworzonych z wykorzystaniem generowania AI") byłoby niemierzalne, a pochodzenia nie da się odtworzyć wstecz.
