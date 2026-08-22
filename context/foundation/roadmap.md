@@ -16,6 +16,8 @@ top_blocker: time
 > Elementy poniżej są ułożone w kolejności zależności. Tabela „W skrócie" jest indeksem.
 > Ten dokument jest źródłem prawdy dla **sekwencji i uzasadnień**; stan wykonania żyje w GitHub Issues
 > (`sebast82/10xCards`), dopasowywany po `Change ID`. Zmiana zakresu — najpierw tutaj, potem w issue.
+> Ścieżki, endpointy i inne nazwy nośne celowo nie występują poniżej — mieszkają w
+> `docs/reference/contract-surfaces.md`, żeby sekwencja przetrwała zmianę decyzji technicznych.
 
 ## Vision recap
 
