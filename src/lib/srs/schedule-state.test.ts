@@ -47,4 +47,10 @@ describe("schedule state", () => {
       expectTypeOf(result.data).not.toBeAny();
     }
   });
+
+  it("rejects invalid domain values", () => {
+    expect(scheduleStateRowSchema.safeParse({ ...row, stability: -1 }).success).toBe(false);
+    expect(scheduleStateRowSchema.safeParse({ ...row, difficulty: 11 }).success).toBe(false);
+    expect(scheduleStateRowSchema.safeParse({ ...row, reps: -1 }).success).toBe(false);
+  });
 });

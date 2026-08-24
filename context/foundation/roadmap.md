@@ -35,27 +35,27 @@ Deklaracja właściciela produktu brzmiała: gwiazdą jest **cała pętla** (rej
 
 ## At a glance
 
-| ID   | Change ID                        | Outcome (użytkownik może …)                                                       | Prerequisites | PRD refs                    | Status   |
-| ---- | -------------------------------- | --------------------------------------------------------------------------------- | ------------- | --------------------------- | -------- |
-| F-01 | `srs-algorithm-contract`         | (fundament) wybrany jest gotowy algorytm powtórek i kontrakt stanu, który niesie fiszka | —         | FR-009, Non-Goals, Success Criteria §Guardrails | in-progress |
-| F-02 | `flashcards-schema-isolation`    | (fundament) fiszki mają trwały schemat ze znacznikiem pochodzenia, a każdy użytkownik widzi wyłącznie swoje | F-01          | Access Control, FR-008      | proposed |
-| S-01 | `deployed-auth-baseline`         | zarejestrować się, zalogować i wylogować na wdrożonej instancji                     | —             | FR-001, FR-002, Access Control | done     |
-| S-02 | `first-gated-generation`         | wkleić tekst, przejrzeć propozycje AI i zapisać zaakceptowane do swojej kolekcji    | F-02, S-01    | US-01, FR-003, FR-004, FR-008 | proposed |
-| S-03 | `manual-card-edit-delete`        | poprawić treść zapisanej fiszki i usunąć zbędną                                     | S-02          | FR-006, FR-007              | proposed |
-| S-04 | `manual-card-create`             | dodać własną fiszkę ręcznie, bez udziału AI                                         | S-02          | FR-005                      | proposed |
-| S-05 | `srs-review-session`             | uruchomić sesję powtórkową i ocenić fiszki według algorytmu spaced repetition       | F-02, S-02    | FR-009, Success Criteria §Guardrails | proposed |
-| S-06 | `streaming-generation-progress`  | widzieć pierwsze fiszki i postęp już w trakcie generowania, bez czekania na całość  | S-02          | US-01, FR-003, Non-Functional Requirements | proposed |
+| ID   | Change ID                       | Outcome (użytkownik może …)                                                                                 | Prerequisites | PRD refs                                        | Status   |
+| ---- | ------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------- | ----------------------------------------------- | -------- |
+| F-01 | `srs-algorithm-contract`        | (fundament) wybrany jest gotowy algorytm powtórek i kontrakt stanu, który niesie fiszka                     | —             | FR-009, Non-Goals, Success Criteria §Guardrails | done     |
+| F-02 | `flashcards-schema-isolation`   | (fundament) fiszki mają trwały schemat ze znacznikiem pochodzenia, a każdy użytkownik widzi wyłącznie swoje | F-01          | Access Control, FR-008                          | proposed |
+| S-01 | `deployed-auth-baseline`        | zarejestrować się, zalogować i wylogować na wdrożonej instancji                                             | —             | FR-001, FR-002, Access Control                  | done     |
+| S-02 | `first-gated-generation`        | wkleić tekst, przejrzeć propozycje AI i zapisać zaakceptowane do swojej kolekcji                            | F-02, S-01    | US-01, FR-003, FR-004, FR-008                   | proposed |
+| S-03 | `manual-card-edit-delete`       | poprawić treść zapisanej fiszki i usunąć zbędną                                                             | S-02          | FR-006, FR-007                                  | proposed |
+| S-04 | `manual-card-create`            | dodać własną fiszkę ręcznie, bez udziału AI                                                                 | S-02          | FR-005                                          | proposed |
+| S-05 | `srs-review-session`            | uruchomić sesję powtórkową i ocenić fiszki według algorytmu spaced repetition                               | F-02, S-02    | FR-009, Success Criteria §Guardrails            | proposed |
+| S-06 | `streaming-generation-progress` | widzieć pierwsze fiszki i postęp już w trakcie generowania, bez czekania na całość                          | S-02          | US-01, FR-003, Non-Functional Requirements      | proposed |
 
 ## Streams
 
 Pomoc nawigacyjna — grupuje elementy dzielące ten sam łańcuch zależności. Kolejność wiążąca nadal wynika z grafu zależności poniżej; ta tabela to proponowana kolejność czytania w poprzek równoległych torów.
 
-| Stream | Theme                     | Chain                                  | Note                                                                                            |
-| ------ | ------------------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| A      | Dostęp i wdrożenie        | `S-01`                                 | Domknięty — dostarcza reszcie roadmapy działającą instancję z sesją użytkownika. |
-| B      | Pętla generowania         | `F-01` → `F-02` → `S-02` → `S-06`      | Ścieżka gwiazdy przewodniej; przy celu `speed` ma pierwszeństwo w każdym remisie.                 |
-| C      | Zarządzanie kolekcją      | `S-03` / `S-04` (równolegle)            | Dołącza do Stream B w `S-02`; oba elementy niezależne od siebie.                                  |
-| D      | Pętla nauki               | `S-05`                                 | Dołącza do Stream B w `S-02`, a kontrakt bierze z `F-01`; domyka pętlę zadeklarowaną przez właściciela produktu. |
+| Stream | Theme                | Chain                             | Note                                                                                                             |
+| ------ | -------------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| A      | Dostęp i wdrożenie   | `S-01`                            | Domknięty — dostarcza reszcie roadmapy działającą instancję z sesją użytkownika.                                 |
+| B      | Pętla generowania    | `F-01` → `F-02` → `S-02` → `S-06` | Ścieżka gwiazdy przewodniej; przy celu `speed` ma pierwszeństwo w każdym remisie.                                |
+| C      | Zarządzanie kolekcją | `S-03` / `S-04` (równolegle)      | Dołącza do Stream B w `S-02`; oba elementy niezależne od siebie.                                                 |
+| D      | Pętla nauki          | `S-05`                            | Dołącza do Stream B w `S-02`, a kontrakt bierze z `F-01`; domyka pętlę zadeklarowaną przez właściciela produktu. |
 
 ## Baseline
 
@@ -83,7 +83,7 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 - **Unknowns:**
   - Czy wybrany algorytm trzyma stan wyłącznie per fiszka, czy potrzebuje też stanu per sesja lub per kolekcja? — Owner: user. Block: no (odpowiedź jest częścią dostarczanego kontraktu, nie warunkiem jego rozpoczęcia).
 - **Risk:** Konsekwencje tej decyzji sięgają znacznie dalej niż sama sesja nauki, dlatego stoi przed schematem, a nie w nim. **(1)** Wyznacza pola harmonogramu w F-02 — podjęta dopiero przy S-05 oznacza migrację na fiszkach, które użytkownik już zapisał. **(2)** Wyznacza, co sesja zapisuje przy każdej ocenie, więc przesądza kształt interakcji w S-05, a nie tylko jej wnętrze. **(3)** PRD w Non-Goals zakazuje pisania własnego algorytmu, więc to wybór z gotowych rozwiązań i akceptacja ich modelu stanu — nie projektowanie od zera. **(4)** Warunek brzegowy PRD („mechanizm powtórek nie może zawieść, niezależnie od źródła fiszek") wyklucza kontrakt zakładający, że fiszka pochodzi z AI — po S-04 w kolekcji są oba rodzaje. Dodatkowe ograniczenie doboru: algorytm musi dać się uruchomić w docelowym środowisku serwerowym projektu, opisanym w `infrastructure.md`. Zakres celowo decyzyjny, nie implementacyjny — sam algorytm zostaje wdrożony w S-05; tutaj powstaje tylko ustalenie i kontrakt, żeby nie opóźniać gwiazdy przewodniej.
-- **Status:** in-progress
+- **Status:** done
 
 ### F-02: Schemat fiszek i izolacja danych per użytkownik
 
@@ -177,16 +177,16 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 
 ## Backlog Handoff
 
-| Roadmap ID | Change ID                       | Issue | Suggested issue title                                    | Ready for `/10x-plan` | Notes                                              |
-| ---------- | ------------------------------- | ----- | -------------------------------------------------------- | --------------------- | -------------------------------------------------- |
-| F-01       | `srs-algorithm-contract`        | #1    | Kontrakt algorytmu powtórek i stanu harmonogramu          | yes                   | `/10x-plan srs-algorithm-contract`                  |
-| F-02       | `flashcards-schema-isolation`   | #2    | Schemat fiszek i izolacja danych per użytkownik           | no                    | Czeka na F-01 (pola harmonogramu)                   |
-| S-01       | `deployed-auth-baseline`        | #3    | Rejestracja i logowanie na wdrożonej instancji            | done                  | Zweryfikowane na produkcji 2026-08-21; issue zamknięte |
-| S-02       | `first-gated-generation`        | #4    | Generowanie fiszek z tekstu: przegląd, akceptacja, zapis  | no                    | Czeka na F-02 i S-01; gwiazda przewodnia            |
-| S-03       | `manual-card-edit-delete`       | #5    | Poprawianie i usuwanie zapisanych fiszek                  | no                    | Czeka na S-02                                       |
-| S-04       | `manual-card-create`            | #6    | Ręczne tworzenie fiszki                                   | no                    | Czeka na S-02                                       |
-| S-05       | `srs-review-session`            | #7    | Sesja powtórkowa z algorytmem spaced repetition           | no                    | Czeka na F-02 i S-02; domyka pętlę                  |
-| S-06       | `streaming-generation-progress` | #8    | Przyrostowe generowanie i widoczny postęp                 | no                    | Czeka na S-02; pierwszy kandydat do odłożenia       |
+| Roadmap ID | Change ID                       | Issue | Suggested issue title                                    | Ready for `/10x-plan` | Notes                                                  |
+| ---------- | ------------------------------- | ----- | -------------------------------------------------------- | --------------------- | ------------------------------------------------------ |
+| F-01       | `srs-algorithm-contract`        | #1    | Kontrakt algorytmu powtórek i stanu harmonogramu         | yes                   | `/10x-plan srs-algorithm-contract`                     |
+| F-02       | `flashcards-schema-isolation`   | #2    | Schemat fiszek i izolacja danych per użytkownik          | no                    | Czeka na F-01 (pola harmonogramu)                      |
+| S-01       | `deployed-auth-baseline`        | #3    | Rejestracja i logowanie na wdrożonej instancji           | done                  | Zweryfikowane na produkcji 2026-08-21; issue zamknięte |
+| S-02       | `first-gated-generation`        | #4    | Generowanie fiszek z tekstu: przegląd, akceptacja, zapis | no                    | Czeka na F-02 i S-01; gwiazda przewodnia               |
+| S-03       | `manual-card-edit-delete`       | #5    | Poprawianie i usuwanie zapisanych fiszek                 | no                    | Czeka na S-02                                          |
+| S-04       | `manual-card-create`            | #6    | Ręczne tworzenie fiszki                                  | no                    | Czeka na S-02                                          |
+| S-05       | `srs-review-session`            | #7    | Sesja powtórkowa z algorytmem spaced repetition          | no                    | Czeka na F-02 i S-02; domyka pętlę                     |
+| S-06       | `streaming-generation-progress` | #8    | Przyrostowe generowanie i widoczny postęp                | no                    | Czeka na S-02; pierwszy kandydat do odłożenia          |
 
 Kamienie milowe: F-01–S-05 w `MVP — pętla` (termin 2026-08-31), S-06 w `Bufor — do przycięcia`.
 

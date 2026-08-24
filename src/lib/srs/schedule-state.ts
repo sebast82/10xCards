@@ -6,12 +6,12 @@ const stateSchema = z.union([z.literal(0), z.literal(1), z.literal(2), z.literal
 
 export const scheduleStateRowSchema = z.object({
   due: z.iso.datetime({ offset: true }),
-  stability: z.number(),
-  difficulty: z.number(),
-  scheduled_days: z.number().int(),
-  learning_steps: z.number().int(),
-  reps: z.number().int(),
-  lapses: z.number().int(),
+  stability: z.number().nonnegative(),
+  difficulty: z.number().min(0).max(10),
+  scheduled_days: z.number().int().nonnegative(),
+  learning_steps: z.number().int().nonnegative(),
+  reps: z.number().int().nonnegative(),
+  lapses: z.number().int().nonnegative(),
   state: stateSchema,
   last_review: z.iso.datetime({ offset: true }).nullable(),
 });

@@ -150,6 +150,8 @@ Route protection is handled in `src/middleware.ts`. Add paths to the `PROTECTED_
 
 ## Deployment
 
+GitHub Actions validates each push with `npm ci`, `astro sync`, `astro check`, lint, tests, and build.
+
 This project deploys to [Cloudflare Workers](https://workers.cloudflare.com/).
 
 1. Build the project:

@@ -64,16 +64,16 @@ Równolegle [contract-surfaces.md](docs/reference/contract-surfaces.md) zawiera 
 
 Decyzje podjęte w tym przebiegu planowania, w kolejności wpływu na schemat F-02:
 
-| # | Decyzja | Rozstrzygnięcie |
-| --- | --- | --- |
-| 1 | Utrwalanie `ReviewLog` | **Nie w MVP.** Najmniejsza migracja i najkrótsza droga do S-05 przy terminie 2026-08-31. Log to tabela doklejana, nie kolumna — dodanie później nie wymaga przeróbki istniejących rekordów. |
-| 2 | `due`, `last_review` | **`timestamptz`.** Kolejkowanie `WHERE due <= now() ORDER BY due` jest natywnie indeksowalne bez konwersji. |
-| 3 | `state` | **`smallint`** + CHECK 0–3. `State` mapuje 1:1; PG enum wymagałby mapowania string ↔ liczba przy każdym odczycie. |
-| 4 | `stability`, `difficulty` | **`double precision`.** Wartości runtime FSRS to zwykłe floaty — `decimal.js` jest wyłącznie dev-dependency `ts-fsrs`. |
-| 5 | Znacznik pochodzenia | **Enum `ai` / `ai_edited` / `manual`.** Jedyny wariant mierzący **oba** kryteria sukcesu PRD — `boolean` nie odróżni propozycji AI przyjętej bez zmian od poprawionej przed zapisem. |
-| 6 | Parametry FSRS | **Stałe w kodzie**, wartości domyślne biblioteki (potwierdzone empirycznie). |
-| 7 | Artefakt F-01 | **Dokument + wykonywalny kontrakt w kodzie.** Sama proza nie obroni dziewięciu pól liczbowych przed pomyłką `stability` ↔ `difficulty`. |
-| 8 | Runner testów | **Vitest teraz, wąski zakres.** Między F-01 a S-05 leżą cztery zmiany — pod presją terminu runner odłożony nie powstałby wcale. |
+| #   | Decyzja                   | Rozstrzygnięcie                                                                                                                                                                             |
+| --- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Utrwalanie `ReviewLog`    | **Nie w MVP.** Najmniejsza migracja i najkrótsza droga do S-05 przy terminie 2026-08-31. Log to tabela doklejana, nie kolumna — dodanie później nie wymaga przeróbki istniejących rekordów. |
+| 2   | `due`, `last_review`      | **`timestamptz`.** Kolejkowanie `WHERE due <= now() ORDER BY due` jest natywnie indeksowalne bez konwersji.                                                                                 |
+| 3   | `state`                   | **`smallint`** + CHECK 0–3. `State` mapuje 1:1; PG enum wymagałby mapowania string ↔ liczba przy każdym odczycie.                                                                           |
+| 4   | `stability`, `difficulty` | **`double precision`.** Wartości runtime FSRS to zwykłe floaty — `decimal.js` jest wyłącznie dev-dependency `ts-fsrs`.                                                                      |
+| 5   | Znacznik pochodzenia      | **Enum `ai` / `ai_edited` / `manual`.** Jedyny wariant mierzący **oba** kryteria sukcesu PRD — `boolean` nie odróżni propozycji AI przyjętej bez zmian od poprawionej przed zapisem.        |
+| 6   | Parametry FSRS            | **Stałe w kodzie**, wartości domyślne biblioteki (potwierdzone empirycznie).                                                                                                                |
+| 7   | Artefakt F-01             | **Dokument + wykonywalny kontrakt w kodzie.** Sama proza nie obroni dziewięciu pól liczbowych przed pomyłką `stability` ↔ `difficulty`.                                                     |
+| 8   | Runner testów             | **Vitest teraz, wąski zakres.** Między F-01 a S-05 leżą cztery zmiany — pod presją terminu runner odłożony nie powstałby wcale.                                                             |
 
 ## Critical Implementation Details
 
@@ -111,17 +111,17 @@ Powstaje moduł `src/lib/srs/` — jedyne miejsce w kodzie, które wie, jak wygl
 
 Kształt wiersza — nazwy pól są **wiążące** dla F-02:
 
-| Pole | Typ TS | Typ PG (dla F-02) | Uwagi |
-| --- | --- | --- | --- |
-| `due` | `string` (ISO) | `timestamptz not null` | po tym polu filtruje sesja |
-| `stability` | `number` | `double precision not null` | |
-| `difficulty` | `number` | `double precision not null` | skala 1–10 |
-| `scheduled_days` | `number` | `integer not null` | |
-| `learning_steps` | `number` | `smallint not null` | indeks kroku, **nie** tablica kroków |
-| `reps` | `number` | `integer not null` | |
-| `lapses` | `number` | `integer not null` | |
-| `state` | `0 \| 1 \| 2 \| 3` | `smallint not null check (state between 0 and 3)` | `New`/`Learning`/`Review`/`Relearning` |
-| `last_review` | `string \| null` (ISO) | `timestamptz` | jedyne pole dopuszczające `null` |
+| Pole             | Typ TS                 | Typ PG (dla F-02)                                 | Uwagi                                  |
+| ---------------- | ---------------------- | ------------------------------------------------- | -------------------------------------- |
+| `due`            | `string` (ISO)         | `timestamptz not null`                            | po tym polu filtruje sesja             |
+| `stability`      | `number`               | `double precision not null`                       |                                        |
+| `difficulty`     | `number`               | `double precision not null`                       | skala 1–10                             |
+| `scheduled_days` | `number`               | `integer not null`                                |                                        |
+| `learning_steps` | `number`               | `smallint not null`                               | indeks kroku, **nie** tablica kroków   |
+| `reps`           | `number`               | `integer not null`                                |                                        |
+| `lapses`         | `number`               | `integer not null`                                |                                        |
+| `state`          | `0 \| 1 \| 2 \| 3`     | `smallint not null check (state between 0 and 3)` | `New`/`Learning`/`Review`/`Relearning` |
+| `last_review`    | `string \| null` (ISO) | `timestamptz`                                     | jedyne pole dopuszczające `null`       |
 
 **Nie wchodzą do kontraktu:** `elapsed_days`, `last_elapsed_days` — oba `@deprecated`, usuwane w `ts-fsrs` 6.0.0.
 
@@ -377,4 +377,4 @@ Dwie rzeczy zabezpieczone na przyszłość:
 
 - [x] 3.4 Z samego `contract-surfaces.md` da się napisać `CREATE TABLE` dla F-02 — c49fa41
 - [x] 3.5 Zmiana nie wprowadziła żadnej nowej trasy ani endpointu — c49fa41
-- [x] 3.6 `roadmap.md` pokazuje F-01 jako `planning`, F-02 jako odblokowane — c49fa41
+- [x] 3.6 `roadmap.md` pokazuje F-01 jako `done`, F-02 jako odblokowane — c49fa41
