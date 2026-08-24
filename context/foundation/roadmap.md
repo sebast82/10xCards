@@ -65,7 +65,7 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 - **Frontend:** present — Astro 7 + React 19 (wyspy), Tailwind 4, komponenty w `src/components/ui/`; strony `index`, `dashboard`, `auth/signin`, `auth/signup`, `auth/confirm-email`.
 - **Backend / API:** partial — endpointy SSR istnieją tylko dla auth (`src/pages/api/auth/signin.ts`, `signup.ts`, `signout.ts`); brak endpointów domenowych (fiszki, generowanie).
 - **Data:** absent — `supabase/config.toml` obecny, ale brak katalogu migracji, schematu i typów bazy.
-- **Auth:** present — klient Supabase SSR (`src/lib/supabase.ts`), middleware chroniące `/dashboard` (`src/middleware.ts`), pełny cykl rejestracja/logowanie/wylogowanie w kodzie. Projekt Supabase w chmurze utworzony, sekrety `SUPABASE_URL` i `SUPABASE_KEY` ustawione na produkcji, rejestracja z potwierdzeniem email przetestowana na wdrożonej instancji (`context/changes/deployment/deployment-plan.md`, Faza 4).
+- **Auth:** present — klient Supabase SSR (`src/lib/supabase.ts`), middleware chroniące `/dashboard` (`src/middleware.ts`), pełny cykl rejestracja/logowanie/wylogowanie w kodzie. Projekt Supabase w chmurze utworzony, sekrety `SUPABASE_URL` i `SUPABASE_KEY` ustawione na produkcji, rejestracja z potwierdzeniem email przetestowana na wdrożonej instancji (`context/archive/2026-08-17-deployment/deployment-plan.md`, Faza 4).
 - **Deploy / infra:** present — `wrangler.jsonc` (`nodejs_compat`, assets, observability); aplikacja wdrożona pod `https://10x-cards.sebger82.workers.dev`, auto-deploy na push do `master` przez Cloudflare Workers Builds. CI GitHub Actions robi lint + build (deploy celowo poza nim).
 - **Observability:** partial — `observability.enabled` w konfiguracji Workers; brak biblioteki logowania i śledzenia błędów.
 
@@ -109,7 +109,7 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 - **Parallel with:** F-01, F-02
 - **Blockers:** —
 - **Unknowns:** —
-- **Risk:** Wdrożenie, sekrety produkcyjne i rejestracja z potwierdzeniem email zostały dowiezione w `context/changes/deployment/deployment-plan.md` (Fazy 1–4), a logowanie i wylogowanie potwierdzono na wdrożonej instancji 2026-08-21. Ryzyko, które ten element miał zdjąć — niespodzianki środowiska uruchomieniowego opisane w `infrastructure.md` (klient Supabase na workerd, cookies sesji za edge) — zostało zdjęte empirycznie, nie założeniowo. Każdy kolejny element pętli buduje już na sprawdzonym założeniu, że sesja użytkownika utrzymuje się na produkcji.
+- **Risk:** Wdrożenie, sekrety produkcyjne i rejestracja z potwierdzeniem email zostały dowiezione w `context/archive/2026-08-17-deployment/deployment-plan.md` (Fazy 1–4), a logowanie i wylogowanie potwierdzono na wdrożonej instancji 2026-08-21. Ryzyko, które ten element miał zdjąć — niespodzianki środowiska uruchomieniowego opisane w `infrastructure.md` (klient Supabase na workerd, cookies sesji za edge) — zostało zdjęte empirycznie, nie założeniowo. Każdy kolejny element pętli buduje już na sprawdzonym założeniu, że sesja użytkownika utrzymuje się na produkcji.
 - **Status:** done
 
 ### S-02: Generowanie fiszek z wklejonego tekstu, przegląd i zapis do kolekcji
@@ -211,7 +211,7 @@ Brak otwartych pytań — oba rozstrzygnięto 2026-08-21.
 
 ## Done
 
-- **S-01: użytkownik może założyć konto na email i hasło, zalogować się i wylogować na wdrożonej instancji** — zweryfikowane 2026-08-21 na `https://10x-cards.sebger82.workers.dev` (rejestracja z potwierdzeniem email, logowanie, wylogowanie). Praca prowadzona w `context/changes/deployment/`; folder nie jest jeszcze zarchiwizowany — uruchom `/10x-archive`, gdy uznasz go za zamknięty. Issue #3. Lesson: —
+- **S-01: użytkownik może założyć konto na email i hasło, zalogować się i wylogować na wdrożonej instancji** — zweryfikowane 2026-08-21 na `https://10x-cards.sebger82.workers.dev` (rejestracja z potwierdzeniem email, logowanie, wylogowanie). Archived 2026-08-24 → `context/archive/2026-08-17-deployment/`. Issue #3. Lesson: —
 - **F-01: (fundament) wybrany jest gotowy algorytm powtórek i spisany kontrakt stanu — jakie dane musi nieść każda fiszka, żeby sesja nauki umiała wyznaczyć termin jej kolejnego pokazania i zaktualizować go po ocenie.** — Archived 2026-08-24 → `context/archive/2026-08-23-srs-algorithm-contract/`. Lesson: —.
 
 (Kolejne wpisy dopisuje `/10x-archive` — i przestawia status elementu na `done` — gdy archiwizowana zmiana ma pasujący Change ID.)
