@@ -95,11 +95,11 @@ Powstaje moduł `src/lib/srs/` — jedyne miejsce w kodzie, które wie, jak wygl
 
 #### 1. Zależności
 
-**File**: `package.json`
+**Files**: `package.json`, `package-lock.json`
 
 **Intent**: Dołożyć `zod` jako granicę walidacji odczytu (zastępuje nieeksportowany `FSRSValidationError`) i zawęzić `ts-fsrs` do dokładnej wersji, żeby minor bump nie ruszył domyślnych wag algorytmu.
 
-**Contract**: `dependencies` zyskuje `zod`; wpis `"ts-fsrs": "^5.4.1"` zmienia się na `"ts-fsrs": "5.4.1"`. Bez zmian w `devDependencies`.
+**Contract**: `dependencies` zyskuje `zod`; wpis `"ts-fsrs": "^5.4.1"` zmienia się na `"ts-fsrs": "5.4.1"`; `package-lock.json` jest zaktualizowany przez `npm install`. Bez zmian w `devDependencies`.
 
 #### 2. Kształt wiersza i granica walidacji
 
@@ -141,6 +141,8 @@ Walidacja idzie **przed** `TypeConvert.card`, nie po — uzasadnienie w „Criti
 
 Ocena przyjmowana jako `Grade` z `ts-fsrs` (1–4), nie jako `number` — inaczej `Rating.Manual` (0) przecieka do API modułu.
 
+Każda z trzech operacji przyjmuje jawne `now: Date`: utworzenie przekazuje je do `createEmptyCard`, a podgląd i zastosowanie oceny do `repeat`/`next`. Moduł nie odczytuje zegara systemowego; S-05 przekazuje czas żądania, a testy używają stałej daty.
+
 #### 4. Powierzchnia publiczna modułu
 
 **File**: `src/lib/srs/index.ts`
@@ -156,7 +158,7 @@ Ocena przyjmowana jako `Grade` z `ts-fsrs` (1–4), nie jako `number` — inacze
 - Kontrola typów przechodzi: `npx astro check` (0 errors, 0 warnings)
 - Lint przechodzi bez wyłączania reguł: `npm run lint`
 - Build przechodzi: `npm run build`
-- `package.json` zawiera `zod` oraz `"ts-fsrs": "5.4.1"` bez `^`
+- `package.json` zawiera `zod` oraz `"ts-fsrs": "5.4.1"` bez `^`, a `package-lock.json` jest z nim zgodny
 
 #### Manual Verification:
 
@@ -177,11 +179,11 @@ PRD stawia jeden twardy warunek brzegowy — „mechanizm powtórek nie może za
 
 #### 1. Runner testów
 
-**File**: `vitest.config.ts`, `package.json`
+**Files**: `vitest.config.ts`, `package.json`, `package-lock.json`
 
 **Intent**: Uruchomić Vitest w projekcie Astro bez zmian w konfiguracji lintera.
 
-**Contract**: `vitest.config.ts` z aliasem `@` → `./src` (spójnym z `tsconfig.json`) i środowiskiem `node`. Skrypt `"test": "vitest run"` w `package.json`; `vitest` jako `devDependency`. Testy importują `describe`/`it`/`expect` jawnie z `vitest` — **bez globals**, żeby [eslint.config.js](eslint.config.js) w trybie `strictTypeChecked` nie wymagał nowej sekcji dla plików testowych.
+**Contract**: `vitest.config.ts` z aliasem `@` → `./src` (spójnym z `tsconfig.json`) i środowiskiem `node`. Skrypt `"test": "vitest run"` w `package.json`; `vitest` jako `devDependency`; `package-lock.json` zawiera jego rozwiązaną wersję. Testy importują `describe`/`it`/`expect` jawnie z `vitest` — **bez globals**, żeby [eslint.config.js](eslint.config.js) w trybie `strictTypeChecked` nie wymagał nowej sekcji dla plików testowych.
 
 #### 2. Testy kontraktu stanu
 
@@ -197,7 +199,7 @@ PRD stawia jeden twardy warunek brzegowy — „mechanizm powtórek nie może za
 
 **Intent**: Potwierdzić, że sesja nauki wyznacza termin i aktualizuje go po ocenie — czyli dokładnie to, co roadmapa przypisuje S-05, zanim S-05 powstanie.
 
-**Contract**: Przypadki — nowa fiszka startuje w `State.New` z zerowymi licznikami; ocena `Good` przesuwa stan do `Learning` i ustawia `last_review`; ocena `Again` po fazie `Review` zwiększa `lapses`; podgląd zwraca cztery warianty i **nie** modyfikuje wejścia; ten sam wiersz oceniony w ten sam sposób daje ten sam wynik niezależnie od tego, czy fiszka pochodzi z AI czy jest ręczna (znacznik pochodzenia nie jest częścią stanu — to sprawdzenie warunku brzegowego PRD).
+**Contract**: Przypadki — nowa fiszka startuje w `State.New` z zerowymi licznikami; ocena `Good` przesuwa stan do `Learning` i ustawia `last_review`; ocena `Again` po fazie `Review` zwiększa `lapses`; podgląd zwraca cztery warianty i **nie** modyfikuje wejścia. Wszystkie przypadki przekazują stałe `now`, a ponowne zastosowanie tej samej oceny do tego samego wiersza z tym samym `now` daje ten sam wynik. Test obu źródeł fiszki należy do integracji F-02/S-05: `source` nie jest częścią `ScheduleStateRow` ani API modułu SRS.
 
 #### 4. Testy w CI
 
@@ -253,15 +255,15 @@ Moduł z Fazy 1 jest kontraktem dla kodu; ta faza czyni go kontraktem dla **road
 
 **Intent**: Zamknąć lukę, przez którą `/api/generations` stałoby się nieuwierzytelnionym, płatnym endpointem AI.
 
-**Contract**: W sekcji „Endpointy API" jedno zdanie: `PROTECTED_ROUTES` w [middleware.ts](src/middleware.ts) obejmuje wyłącznie trasy stron, więc każdy endpoint `/api/**` poza `/api/auth/*` **musi sam** weryfikować `locals.user` i zwracać 401. Zgodne z regułą 4 rejestru, która wymaga zgodności kolumny „Ochrona" z kodem.
+**Contract**: Tabela „Endpointy API" zyskuje kolumnę „Ochrona": endpointy `/api/auth/*` są opisane jako obsługujące przepływ auth, a każdy endpoint domenowy jako wymagający samodzielnej weryfikacji `locals.user` i odpowiedzi 401 bez sesji. Jednoznaczne zdanie pod tabelą wyjaśnia, że `PROTECTED_ROUTES` w [middleware.ts](src/middleware.ts) obejmuje wyłącznie trasy stron, więc nie ochroni `/api/**`; zgodność ochrony endpointów jest widoczna w tej tabeli.
 
-#### 3. Rozjazd wersji Node
+#### 3. Polityka wersji Node
 
 **File**: `README.md`
 
-**Intent**: Usunąć zdanie wewnętrznie sprzeczne — powołuje się na `.nvmrc`, podając inną liczbę niż `.nvmrc`.
+**Intent**: Usunąć zdanie wewnętrznie sprzeczne i opisać wspólną politykę środowisk: lokalne minimum `24.19.0`, bieżące minor update w gałęzi 24.x, bez przejścia na Node 25.
 
-**Contract**: `Node.js v22.14.0` → `Node.js v24.19.0`, zgodnie z [.nvmrc](.nvmrc) i [ci.yml](.github/workflows/ci.yml). Bez pola `engines` w `package.json` — Cloudflare Workers Builds i tak czyta `.nvmrc`.
+**Contract**: `Node.js v22.14.0` → `Node.js v24.19.0+ (24.x only)`. `.nvmrc` pozostaje minimalnym lokalnym punktem bazowym `24.19.0`; [ci.yml](.github/workflows/ci.yml) pozostaje na `node-version: 24`, żeby pobierać bieżący minor tej samej gałęzi. Bez pola `engines` w `package.json` — Cloudflare Workers Builds i tak czyta `.nvmrc`.
 
 #### 4. Domknięcie zmiany
 
@@ -342,7 +344,7 @@ Dwie rzeczy zabezpieczone na przyszłość:
 - [ ] 1.1 Kontrola typów przechodzi: `npx astro check` (0 errors, 0 warnings)
 - [ ] 1.2 Lint przechodzi bez wyłączania reguł: `npm run lint`
 - [ ] 1.3 Build przechodzi: `npm run build`
-- [ ] 1.4 `package.json` zawiera `zod` oraz `"ts-fsrs": "5.4.1"` bez `^`
+- [ ] 1.4 `package.json` zawiera `zod` oraz `"ts-fsrs": "5.4.1"` bez `^`, a `package-lock.json` jest z nim zgodny
 
 #### Manual
 
