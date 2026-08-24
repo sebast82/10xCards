@@ -12,6 +12,7 @@ status: reference
 
 > Materiał referencyjny do `context/foundation/roadmap.md` → **F-01: Kontrakt algorytmu powtórek i stanu harmonogramu**.
 > To jest zewnętrzna dokumentacja biblioteki, nie decyzja projektowa. Rozstrzygnięcia i kontrakt żyją w `change.md` / `plan.md`.
+> **Trzy nieścisłości tego dokumentu wobec zainstalowanej wersji 5.4.1 są opisane w `research.md` §3** — przeczytaj je przed użyciem tego wyciągu.
 > Metadane rozstrzygnięcia biblioteki: Source Reputation `High`, Benchmark Score `89`, 447 snippetów.
 
 ## 1. Model danych — `Card`

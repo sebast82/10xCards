@@ -1,9 +1,9 @@
 ---
 change_id: srs-algorithm-contract
 title: Kontrakt algorytmu powtórek i stanu harmonogramu
-status: preparing
+status: planned
 created: 2026-08-23
-updated: 2026-08-23
+updated: 2026-08-24
 archived_at: null
 ---
 
@@ -13,4 +13,10 @@ Roadmap F-01. Wybór gotowej biblioteki spaced repetition i spisanie kontraktu s
 
 Zakres decyzyjny, nie implementacyjny — sam algorytm wdraża S-05 `srs-review-session`.
 
-Research zewnętrzny (Exa MCP) w `research.md`: rekomendacja `ts-fsrs`, kontrakt stanu per fiszka, konsekwencje dla schematu w F-02.
+Research zewnętrzny (Exa MCP) w `srs-library-research.md`: porównanie kandydatów, rekomendacja `ts-fsrs`, kontrakt stanu per fiszka, konsekwencje dla schematu w F-02.
+
+Research wewnętrzny (`/10x-research`) w `research.md` (2026-08-23): `ts-fsrs@5.4.1` (FSRS-6.0) potwierdzony empirycznie na `workerd` przez `wrangler dev`, ~1,25 µs na przeliczenie karty. Zależność dodana do `package.json`. Osiem decyzji do rozstrzygnięcia przed migracją F-02.
+
+Wyciąg z API biblioteki: `ts-fsrs-api-doc.md`.
+
+Plan (2026-08-24) w `plan.md`, streszczenie w `plan-brief.md`. Wszystkie osiem decyzji z `research.md` §6 rozstrzygniętych — tabela w `plan.md` §Implementation Approach. Zakres: moduł `src/lib/srs/` jako wykonywalny kontrakt, Vitest pod guardrail PRD, nazwy kolumn i typy w `docs/reference/contract-surfaces.md`.
