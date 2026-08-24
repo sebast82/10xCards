@@ -37,7 +37,7 @@ Deklaracja właściciela produktu brzmiała: gwiazdą jest **cała pętla** (rej
 
 | ID   | Change ID                        | Outcome (użytkownik może …)                                                       | Prerequisites | PRD refs                    | Status   |
 | ---- | -------------------------------- | --------------------------------------------------------------------------------- | ------------- | --------------------------- | -------- |
-| F-01 | `srs-algorithm-contract`         | (fundament) wybrany jest gotowy algorytm powtórek i kontrakt stanu, który niesie fiszka | —         | FR-009, Non-Goals, Success Criteria §Guardrails | planning |
+| F-01 | `srs-algorithm-contract`         | (fundament) wybrany jest gotowy algorytm powtórek i kontrakt stanu, który niesie fiszka | —         | FR-009, Non-Goals, Success Criteria §Guardrails | in-progress |
 | F-02 | `flashcards-schema-isolation`    | (fundament) fiszki mają trwały schemat ze znacznikiem pochodzenia, a każdy użytkownik widzi wyłącznie swoje | F-01          | Access Control, FR-008      | proposed |
 | S-01 | `deployed-auth-baseline`         | zarejestrować się, zalogować i wylogować na wdrożonej instancji                     | —             | FR-001, FR-002, Access Control | done     |
 | S-02 | `first-gated-generation`         | wkleić tekst, przejrzeć propozycje AI i zapisać zaakceptowane do swojej kolekcji    | F-02, S-01    | US-01, FR-003, FR-004, FR-008 | proposed |
@@ -83,7 +83,7 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 - **Unknowns:**
   - Czy wybrany algorytm trzyma stan wyłącznie per fiszka, czy potrzebuje też stanu per sesja lub per kolekcja? — Owner: user. Block: no (odpowiedź jest częścią dostarczanego kontraktu, nie warunkiem jego rozpoczęcia).
 - **Risk:** Konsekwencje tej decyzji sięgają znacznie dalej niż sama sesja nauki, dlatego stoi przed schematem, a nie w nim. **(1)** Wyznacza pola harmonogramu w F-02 — podjęta dopiero przy S-05 oznacza migrację na fiszkach, które użytkownik już zapisał. **(2)** Wyznacza, co sesja zapisuje przy każdej ocenie, więc przesądza kształt interakcji w S-05, a nie tylko jej wnętrze. **(3)** PRD w Non-Goals zakazuje pisania własnego algorytmu, więc to wybór z gotowych rozwiązań i akceptacja ich modelu stanu — nie projektowanie od zera. **(4)** Warunek brzegowy PRD („mechanizm powtórek nie może zawieść, niezależnie od źródła fiszek") wyklucza kontrakt zakładający, że fiszka pochodzi z AI — po S-04 w kolekcji są oba rodzaje. Dodatkowe ograniczenie doboru: algorytm musi dać się uruchomić w docelowym środowisku serwerowym projektu, opisanym w `infrastructure.md`. Zakres celowo decyzyjny, nie implementacyjny — sam algorytm zostaje wdrożony w S-05; tutaj powstaje tylko ustalenie i kontrakt, żeby nie opóźniać gwiazdy przewodniej.
-- **Status:** planning
+- **Status:** in-progress
 
 ### F-02: Schemat fiszek i izolacja danych per użytkownik
 

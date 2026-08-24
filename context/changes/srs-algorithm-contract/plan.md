@@ -341,15 +341,15 @@ Dwie rzeczy zabezpieczone na przyszłość:
 
 #### Automated
 
-- [ ] 1.1 Kontrola typów przechodzi: `npx astro check` (0 errors, 0 warnings)
-- [ ] 1.2 Lint przechodzi bez wyłączania reguł: `npm run lint`
-- [ ] 1.3 Build przechodzi: `npm run build`
-- [ ] 1.4 `package.json` zawiera `zod` oraz `"ts-fsrs": "5.4.1"` bez `^`, a `package-lock.json` jest z nim zgodny
+- [x] 1.1 Kontrola typów przechodzi: `npx astro check` (0 errors, 0 warnings)
+- [x] 1.2 Lint przechodzi bez wyłączania reguł: `npm run lint`
+- [x] 1.3 Build przechodzi: `npm run build`
+- [x] 1.4 `package.json` zawiera `zod` oraz `"ts-fsrs": "5.4.1"` bez `^`, a `package-lock.json` jest z nim zgodny
 
 #### Manual
 
-- [ ] 1.5 Nazwy dziewięciu pól są snake_case i nadają się na kolumny bez tłumaczenia
-- [ ] 1.6 Moduł nie importuje niczego z `@supabase/*` ani `astro:*`
+- [x] 1.5 Nazwy dziewięciu pól są snake_case i nadają się na kolumny bez tłumaczenia
+- [x] 1.6 Moduł nie importuje niczego z `@supabase/*` ani `astro:*`
 
 ### Phase 2: Pokrycie guardrail-a PRD
 
