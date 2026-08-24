@@ -38,7 +38,7 @@ Deklaracja właściciela produktu brzmiała: gwiazdą jest **cała pętla** (rej
 | ID   | Change ID                       | Outcome (użytkownik może …)                                                                                 | Prerequisites | PRD refs                                        | Status   |
 | ---- | ------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------- | ----------------------------------------------- | -------- |
 | F-01 | `srs-algorithm-contract`        | (fundament) wybrany jest gotowy algorytm powtórek i kontrakt stanu, który niesie fiszka                     | —             | FR-009, Non-Goals, Success Criteria §Guardrails | done     |
-| F-02 | `flashcards-schema-isolation`   | (fundament) fiszki mają trwały schemat ze znacznikiem pochodzenia, a każdy użytkownik widzi wyłącznie swoje | F-01          | Access Control, FR-008                          | proposed |
+| F-02 | `flashcards-schema-isolation`   | (fundament) fiszki mają trwały schemat ze znacznikiem pochodzenia, a każdy użytkownik widzi wyłącznie swoje | F-01          | Access Control, FR-008                          | planning |
 | S-01 | `deployed-auth-baseline`        | zarejestrować się, zalogować i wylogować na wdrożonej instancji                                             | —             | FR-001, FR-002, Access Control                  | done     |
 | S-02 | `first-gated-generation`        | wkleić tekst, przejrzeć propozycje AI i zapisać zaakceptowane do swojej kolekcji                            | F-02, S-01    | US-01, FR-003, FR-004, FR-008                   | proposed |
 | S-03 | `manual-card-edit-delete`       | poprawić treść zapisanej fiszki i usunąć zbędną                                                             | S-02          | FR-006, FR-007                                  | proposed |
@@ -96,7 +96,7 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Sonda raportuje warstwę danych jako nieistniejącą, a wszystkie dziewięć wymagań koniecznych na niej stoi — zły kształt tabeli odkryty w połowie pętli to jedyna przeróbka, której termin 2026-08-31 nie wchłonie. Stąd zależność od F-01: pola harmonogramu wchodzą do schematu od razu, zanim użytkownik cokolwiek zapisze. Z tego samego powodu znacznik pochodzenia fiszki (decyzja z 2026-08-21) wchodzi tą samą migracją — dopisany później wymagałby przerobienia już zapisanych rekordów, a wstecz i tak nie da się odtworzyć pochodzenia. Zakres celowo wąski: tabela fiszek, polityka izolacji, typy — bez budowania „całej warstwy danych" z góry. Każdy kolejny element pętli i tak przechodzi przez tę warstwę pionowo.
-- **Status:** proposed
+- **Status:** planning
 
 ## Slices
 
