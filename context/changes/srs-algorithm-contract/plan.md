@@ -355,26 +355,26 @@ Dwie rzeczy zabezpieczone na przyszłość:
 
 #### Automated
 
-- [x] 2.1 Testy przechodzą: `npm test`
-- [x] 2.2 Lint nadal przechodzi, bez nowej sekcji dla plików testowych
-- [x] 2.3 Kontrola typów obejmuje pliki testowe: `npx astro check`
-- [x] 2.4 Build nie zaciąga testów do bundla
+- [x] 2.1 Testy przechodzą: `npm test` — acbbfb4
+- [x] 2.2 Lint nadal przechodzi, bez nowej sekcji dla plików testowych — acbbfb4
+- [x] 2.3 Kontrola typów obejmuje pliki testowe: `npx astro check` — acbbfb4
+- [x] 2.4 Build nie zaciąga testów do bundla — acbbfb4
 
 #### Manual
 
-- [x] 2.5 CI pokazuje krok `npm test` jako osobny, zielony
-- [x] 2.6 Zamiana `stability` ↔ `difficulty` wywala test
+- [x] 2.5 CI pokazuje krok `npm test` jako osobny, zielony — acbbfb4
+- [x] 2.6 Zamiana `stability` ↔ `difficulty` wywala test — acbbfb4
 
 ### Phase 3: Zapis kontraktu w rejestrze nazw nośnych
 
 #### Automated
 
-- [ ] 3.1 Dziewięć nazw kolumn występuje w `docs/reference/contract-surfaces.md`
-- [ ] 3.2 `README.md` nie zawiera już `22.14.0`
-- [ ] 3.3 Format markdown przechodzi: `npx prettier --check "**/*.md"`
+- [x] 3.1 Dziewięć nazw kolumn występuje w `docs/reference/contract-surfaces.md`
+- [x] 3.2 `README.md` nie zawiera już `22.14.0`
+- [x] 3.3 Format markdown przechodzi: `npx prettier --check "**/*.md"`
 
 #### Manual
 
-- [ ] 3.4 Z samego `contract-surfaces.md` da się napisać `CREATE TABLE` dla F-02
-- [ ] 3.5 Zmiana nie wprowadziła żadnej nowej trasy ani endpointu
-- [ ] 3.6 `roadmap.md` pokazuje F-01 jako `planning`, F-02 jako odblokowane
+- [x] 3.4 Z samego `contract-surfaces.md` da się napisać `CREATE TABLE` dla F-02
+- [x] 3.5 Zmiana nie wprowadziła żadnej nowej trasy ani endpointu
+- [x] 3.6 `roadmap.md` pokazuje F-01 jako `planning`, F-02 jako odblokowane

@@ -13,16 +13,16 @@ Rejestr **nazw nośnych** — tych, które muszą pozostać spójne między zmia
 
 ## Trasy
 
-| Ścieżka | Ochrona | Rola | Stan | Wprowadza |
-| --- | --- | --- | --- | --- |
-| `/` | publiczna | Strona wejściowa | istnieje | — |
-| `/auth/signin` | publiczna | Logowanie email + hasło | istnieje | — |
-| `/auth/signup` | publiczna | Rejestracja | istnieje | — |
-| `/auth/confirm-email` | publiczna | Powrót z linku potwierdzającego | istnieje | — |
-| `/dashboard` | chroniona | Ekran po zalogowaniu | istnieje | — |
-| `/generate` | chroniona | Wklejenie tekstu, przegląd propozycji, akceptacja | proponowane | S-02 |
-| `/deck` | chroniona | Kolekcja fiszek użytkownika | proponowane | S-02, rozszerzana w S-03 i S-04 |
-| `/review` | chroniona | Sesja powtórkowa | proponowane | S-05 |
+| Ścieżka               | Ochrona   | Rola                                              | Stan        | Wprowadza                       |
+| --------------------- | --------- | ------------------------------------------------- | ----------- | ------------------------------- |
+| `/`                   | publiczna | Strona wejściowa                                  | istnieje    | —                               |
+| `/auth/signin`        | publiczna | Logowanie email + hasło                           | istnieje    | —                               |
+| `/auth/signup`        | publiczna | Rejestracja                                       | istnieje    | —                               |
+| `/auth/confirm-email` | publiczna | Powrót z linku potwierdzającego                   | istnieje    | —                               |
+| `/dashboard`          | chroniona | Ekran po zalogowaniu                              | istnieje    | —                               |
+| `/generate`           | chroniona | Wklejenie tekstu, przegląd propozycji, akceptacja | proponowane | S-02                            |
+| `/deck`               | chroniona | Kolekcja fiszek użytkownika                       | proponowane | S-02, rozszerzana w S-03 i S-04 |
+| `/review`             | chroniona | Sesja powtórkowa                                  | proponowane | S-05                            |
 
 **Decyzja (2026-08-22):** ekran po zalogowaniu zostaje pod `/dashboard`. Rozważano `/home` — odrzucone, bo `/dashboard` działa, jest chroniony przez middleware i zweryfikowany na produkcji, a zmiana nazwy niosłaby ryzyko regresji w przepływie auth bez zysku dla użytkownika.
 
@@ -32,25 +32,39 @@ S-06 nie wprowadza nowych tras — zmienia zachowanie `/generate`.
 
 ## Endpointy API
 
-| Endpoint | Metoda | Rola | Stan | Wprowadza |
-| --- | --- | --- | --- | --- |
-| `/api/auth/signup` | POST | Rejestracja | istnieje | — |
-| `/api/auth/signin` | POST | Logowanie | istnieje | — |
-| `/api/auth/signout` | POST | Wylogowanie | istnieje | — |
-| `/api/generations` | POST | Zlecenie generowania propozycji z wklejonego tekstu | proponowane | S-02 |
-| `/api/flashcards` | GET, POST | Odczyt kolekcji, zapis zaakceptowanej lub ręcznej fiszki | proponowane | S-02, S-04 |
-| `/api/flashcards/:id` | PATCH, DELETE | Edycja i usunięcie zapisanej fiszki | proponowane | S-03 |
-| `/api/reviews` | GET, POST | Pobranie fiszek na sesję, zapis oceny | proponowane | S-05 |
+| Endpoint              | Metoda        | Rola                                                     | Ochrona                      | Stan        | Wprowadza  |
+| --------------------- | ------------- | -------------------------------------------------------- | ---------------------------- | ----------- | ---------- |
+| `/api/auth/signup`    | POST          | Rejestracja                                              | przepływ auth                | istnieje    | —          |
+| `/api/auth/signin`    | POST          | Logowanie                                                | przepływ auth                | istnieje    | —          |
+| `/api/auth/signout`   | POST          | Wylogowanie                                              | przepływ auth                | istnieje    | —          |
+| `/api/generations`    | POST          | Zlecenie generowania propozycji z wklejonego tekstu      | `locals.user`, 401 bez sesji | proponowane | S-02       |
+| `/api/flashcards`     | GET, POST     | Odczyt kolekcji, zapis zaakceptowanej lub ręcznej fiszki | `locals.user`, 401 bez sesji | proponowane | S-02, S-04 |
+| `/api/flashcards/:id` | PATCH, DELETE | Edycja i usunięcie zapisanej fiszki                      | `locals.user`, 401 bez sesji | proponowane | S-03       |
+| `/api/reviews`        | GET, POST     | Pobranie fiszek na sesję, zapis oceny                    | `locals.user`, 401 bez sesji | proponowane | S-05       |
 
 **Wzorzec odpowiedzi.** Istniejące endpointy auth zwracają przekierowanie z komunikatem błędu w parametrze zapytania (`src/pages/api/auth/`). Endpointy domenowe będą wołane z wysp React, więc zwracają JSON — to świadomy rozjazd, nie niespójność.
 
 **Twarda zasada dla `/api/generations`.** Tekst źródłowy nie może trafić do trwałego zapisu ani do logów po zakończeniu żądania — wymaganie niefunkcjonalne z `context/foundation/prd.md`. Endpoint przetwarza i odrzuca.
 
+**Ochrona endpointów domenowych.** `PROTECTED_ROUTES` w `src/middleware.ts` obejmuje wyłącznie trasy stron i nie chroni `/api/**`. Każdy endpoint domenowy musi samodzielnie zweryfikować `locals.user` i zwrócić 401 bez sesji.
+
 ## Nazwy w danych
 
-| Nazwa | Rola | Stan | Wprowadza |
-| --- | --- | --- | --- |
-| znacznik pochodzenia fiszki | Odróżnia fiszkę wygenerowaną przez AI od utworzonej ręcznie; bez niego drugie kryterium sukcesu PRD jest niemierzalne | proponowane | F-02 |
-| stan harmonogramu powtórek | Pola wymagane przez wybrany algorytm, żeby wyznaczyć termin kolejnego pokazania | proponowane | F-01 określa kontrakt, F-02 wprowadza do schematu |
+| Nazwa            | Typ PostgreSQL                                    | Rola                                                   | Stan    | Wprowadza  |
+| ---------------- | ------------------------------------------------- | ------------------------------------------------------ | ------- | ---------- |
+| `due`            | `timestamptz not null`                            | Termin kolejnego pokazania; po tym polu filtruje sesja | wiążące | F-01, F-02 |
+| `stability`      | `double precision not null`                       | Siła pamięci                                           | wiążące | F-01, F-02 |
+| `difficulty`     | `double precision not null`                       | Trudność w skali 1–10                                  | wiążące | F-01, F-02 |
+| `scheduled_days` | `integer not null`                                | Liczba dni do kolejnej powtórki                        | wiążące | F-01, F-02 |
+| `learning_steps` | `smallint not null`                               | Indeks kroku nauki, nie tablica kroków                 | wiążące | F-01, F-02 |
+| `reps`           | `integer not null`                                | Łączna liczba powtórek                                 | wiążące | F-01, F-02 |
+| `lapses`         | `integer not null`                                | Liczba zapomnień                                       | wiążące | F-01, F-02 |
+| `state`          | `smallint not null check (state between 0 and 3)` | Etap: New, Learning, Review albo Relearning            | wiążące | F-01, F-02 |
+| `last_review`    | `timestamptz`                                     | Czas ostatniej oceny; może być `null` dla nowej fiszki | wiążące | F-01, F-02 |
+| `source`         | `flashcard_source`                                | Pochodzenie: `ai`, `ai_edited` albo `manual`           | wiążące | F-02       |
 
-Konkretne nazwy kolumn i typy ustala `/10x-plan` przy F-01 i F-02 — i zapisuje je tutaj.
+`flashcard_source` jest enumem PostgreSQL z wartościami `ai`, `ai_edited`, `manual`. `source` zapisuje się raz przy tworzeniu fiszki; późniejsza edycja nie zmienia tej wartości.
+
+Sesja wybiera fiszki zapytaniem `WHERE user_id = ? AND due <= now() ORDER BY due`, dlatego tabela wymaga indeksu `(user_id, due)`.
+
+`elapsed_days` i `last_elapsed_days` są wykluczone ze schematu jako pola deprecated. W MVP używamy przypiętego pakietu `ts-fsrs` `5.4.1` (algorytm FSRS-6.0). `@open-spaced-repetition/binding` służący do trenowania wag i WASM pozostaje poza zakresem, ponieważ nie wspiera edge runtime.
