@@ -341,29 +341,29 @@ Dwie rzeczy zabezpieczone na przyszłość:
 
 #### Automated
 
-- [x] 1.1 Kontrola typów przechodzi: `npx astro check` (0 errors, 0 warnings)
-- [x] 1.2 Lint przechodzi bez wyłączania reguł: `npm run lint`
-- [x] 1.3 Build przechodzi: `npm run build`
-- [x] 1.4 `package.json` zawiera `zod` oraz `"ts-fsrs": "5.4.1"` bez `^`, a `package-lock.json` jest z nim zgodny
+- [x] 1.1 Kontrola typów przechodzi: `npx astro check` (0 errors, 0 warnings) — e874264
+- [x] 1.2 Lint przechodzi bez wyłączania reguł: `npm run lint` — e874264
+- [x] 1.3 Build przechodzi: `npm run build` — e874264
+- [x] 1.4 `package.json` zawiera `zod` oraz `"ts-fsrs": "5.4.1"` bez `^`, a `package-lock.json` jest z nim zgodny — e874264
 
 #### Manual
 
-- [x] 1.5 Nazwy dziewięciu pól są snake_case i nadają się na kolumny bez tłumaczenia
-- [x] 1.6 Moduł nie importuje niczego z `@supabase/*` ani `astro:*`
+- [x] 1.5 Nazwy dziewięciu pól są snake_case i nadają się na kolumny bez tłumaczenia — e874264
+- [x] 1.6 Moduł nie importuje niczego z `@supabase/*` ani `astro:*` — e874264
 
 ### Phase 2: Pokrycie guardrail-a PRD
 
 #### Automated
 
-- [ ] 2.1 Testy przechodzą: `npm test`
-- [ ] 2.2 Lint nadal przechodzi, bez nowej sekcji dla plików testowych
-- [ ] 2.3 Kontrola typów obejmuje pliki testowe: `npx astro check`
-- [ ] 2.4 Build nie zaciąga testów do bundla
+- [x] 2.1 Testy przechodzą: `npm test`
+- [x] 2.2 Lint nadal przechodzi, bez nowej sekcji dla plików testowych
+- [x] 2.3 Kontrola typów obejmuje pliki testowe: `npx astro check`
+- [x] 2.4 Build nie zaciąga testów do bundla
 
 #### Manual
 
-- [ ] 2.5 CI pokazuje krok `npm test` jako osobny, zielony
-- [ ] 2.6 Zamiana `stability` ↔ `difficulty` wywala test
+- [x] 2.5 CI pokazuje krok `npm test` jako osobny, zielony
+- [x] 2.6 Zamiana `stability` ↔ `difficulty` wywala test
 
 ### Phase 3: Zapis kontraktu w rejestrze nazw nośnych
 
