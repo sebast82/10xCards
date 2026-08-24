@@ -180,7 +180,7 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 | Roadmap ID | Change ID                       | Issue | Suggested issue title                                    | Ready for `/10x-plan` | Notes                                                  |
 | ---------- | ------------------------------- | ----- | -------------------------------------------------------- | --------------------- | ------------------------------------------------------ |
 | F-01       | `srs-algorithm-contract`        | #1    | Kontrakt algorytmu powtórek i stanu harmonogramu         | yes                   | `/10x-plan srs-algorithm-contract`                     |
-| F-02       | `flashcards-schema-isolation`   | #2    | Schemat fiszek i izolacja danych per użytkownik          | no                    | Czeka na F-01 (pola harmonogramu)                      |
+| F-02       | `flashcards-schema-isolation`   | #2    | Schemat fiszek i izolacja danych per użytkownik          | yes                   | F-01 ukończone; pola harmonogramu są dostępne          |
 | S-01       | `deployed-auth-baseline`        | #3    | Rejestracja i logowanie na wdrożonej instancji           | done                  | Zweryfikowane na produkcji 2026-08-21; issue zamknięte |
 | S-02       | `first-gated-generation`        | #4    | Generowanie fiszek z tekstu: przegląd, akceptacja, zapis | no                    | Czeka na F-02 i S-01; gwiazda przewodnia               |
 | S-03       | `manual-card-edit-delete`       | #5    | Poprawianie i usuwanie zapisanych fiszek                 | no                    | Czeka na S-02                                          |
