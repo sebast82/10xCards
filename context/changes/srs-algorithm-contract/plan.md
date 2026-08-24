@@ -369,12 +369,12 @@ Dwie rzeczy zabezpieczone na przyszłość:
 
 #### Automated
 
-- [x] 3.1 Dziewięć nazw kolumn występuje w `docs/reference/contract-surfaces.md`
-- [x] 3.2 `README.md` nie zawiera już `22.14.0`
-- [x] 3.3 Format markdown przechodzi: `npx prettier --check "**/*.md"`
+- [x] 3.1 Dziewięć nazw kolumn występuje w `docs/reference/contract-surfaces.md` — c49fa41
+- [x] 3.2 `README.md` nie zawiera już `22.14.0` — c49fa41
+- [x] 3.3 Format markdown przechodzi: `npx prettier --check "**/*.md"` — c49fa41
 
 #### Manual
 
-- [x] 3.4 Z samego `contract-surfaces.md` da się napisać `CREATE TABLE` dla F-02
-- [x] 3.5 Zmiana nie wprowadziła żadnej nowej trasy ani endpointu
-- [x] 3.6 `roadmap.md` pokazuje F-01 jako `planning`, F-02 jako odblokowane
+- [x] 3.4 Z samego `contract-surfaces.md` da się napisać `CREATE TABLE` dla F-02 — c49fa41
+- [x] 3.5 Zmiana nie wprowadziła żadnej nowej trasy ani endpointu — c49fa41
+- [x] 3.6 `roadmap.md` pokazuje F-01 jako `planning`, F-02 jako odblokowane — c49fa41

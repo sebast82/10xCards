@@ -1,7 +1,7 @@
 ---
 change_id: srs-algorithm-contract
 title: Kontrakt algorytmu powtórek i stanu harmonogramu
-status: implementing
+status: implemented
 created: 2026-08-23
 updated: 2026-08-24
 archived_at: null
