@@ -68,6 +68,19 @@ const astroConfig = tseslint.config({
   },
 });
 
+// Ścieżki, przez które przechodzi tekst źródłowy użytkownika — logowanie go trafiłoby do Workers Logs.
+const noConsoleOnServerPathsConfig = tseslint.config({
+  files: [
+    "src/pages/api/**/*.ts",
+    "src/lib/openrouter/**/*.ts",
+    "src/lib/generations/**/*.ts",
+    "src/lib/flashcards/**/*.ts",
+  ],
+  rules: {
+    "no-console": "error",
+  },
+});
+
 export default tseslint.config(
   {
     // Pliki generowane: `npm run db:types` i `wrangler types` nadpisują je w całości.
@@ -80,4 +93,5 @@ export default tseslint.config(
   ...eslintPluginAstro.configs["flat/jsx-a11y-recommended"],
   astroConfig,
   eslintPluginPrettier,
+  noConsoleOnServerPathsConfig,
 );

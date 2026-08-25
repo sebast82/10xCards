@@ -755,15 +755,15 @@ Cykl obowiązujący przy każdej zmianie schematu, ustalony w F-02: `npm run db:
 
 #### Automated
 
-- [ ] 1.1 Typy się zgadzają: `npx astro sync && npx astro check`
-- [ ] 1.2 Lint przechodzi: `npm run lint`
-- [ ] 1.3 Build przechodzi: `npm run build`
-- [ ] 1.4 Nowa reguła działa: `console.log` w endpointcie daje błąd, nie ostrzeżenie
+- [x] 1.1 Typy się zgadzają: `npx astro sync && npx astro check`
+- [x] 1.2 Lint przechodzi: `npm run lint`
+- [x] 1.3 Build przechodzi: `npm run build`
+- [x] 1.4 Nowa reguła działa: `console.log` w endpointcie daje błąd, nie ostrzeżenie
 
 #### Manual
 
-- [ ] 1.5 Bez `OPENROUTER_API_KEY` strona pokazuje banner i nadal działa
-- [ ] 1.6 Po dodaniu klucza banner znika
+- [x] 1.5 Bez `OPENROUTER_API_KEY` strona pokazuje banner i nadal działa
+- [x] 1.6 Po dodaniu klucza banner znika
 
 ### Phase 2: Funkcja przeliczająca liczniki akceptacji
 
