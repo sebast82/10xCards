@@ -40,7 +40,7 @@ Deklaracja właściciela produktu brzmiała: gwiazdą jest **cała pętla** (rej
 | F-01 | `srs-algorithm-contract`        | (fundament) wybrany jest gotowy algorytm powtórek i kontrakt stanu, który niesie fiszka                     | —             | FR-009, Non-Goals, Success Criteria §Guardrails | done     |
 | F-02 | `flashcards-schema-isolation`   | (fundament) fiszki mają trwały schemat ze znacznikiem pochodzenia, a każdy użytkownik widzi wyłącznie swoje | F-01          | Access Control, FR-008                          | done     |
 | S-01 | `deployed-auth-baseline`        | zarejestrować się, zalogować i wylogować na wdrożonej instancji                                             | —             | FR-001, FR-002, Access Control                  | done     |
-| S-02 | `first-gated-generation`        | wkleić tekst, przejrzeć propozycje AI i zapisać zaakceptowane do swojej kolekcji                            | F-02, S-01    | US-01, FR-003, FR-004, FR-008                   | proposed |
+| S-02 | `first-gated-generation`        | wkleić tekst, przejrzeć propozycje AI i zapisać zaakceptowane do swojej kolekcji                            | F-02, S-01    | US-01, FR-003, FR-004, FR-008                   | in progress |
 | S-03 | `manual-card-edit-delete`       | poprawić treść zapisanej fiszki i usunąć zbędną                                                             | S-02          | FR-006, FR-007                                  | proposed |
 | S-04 | `manual-card-create`            | dodać własną fiszkę ręcznie, bez udziału AI                                                                 | S-02          | FR-005                                          | proposed |
 | S-05 | `srs-review-session`            | uruchomić sesję powtórkową i ocenić fiszki według algorytmu spaced repetition                               | F-02, S-02    | FR-009, Success Criteria §Guardrails            | proposed |
@@ -124,7 +124,7 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
   - Który model przez OpenRouter i jaki kształt promptu daje 75% akceptacji bez istotnych zmian? — Owner: user. Block: no (start na dowolnym rozsądnym modelu; kryterium mierzy się na własnych tekstach po pierwszym uruchomieniu).
   - Jak zagwarantować, że wklejony tekst nie zostaje nigdzie po zakończeniu żądania (zakaz trwałego zapisu z wymagań niefunkcjonalnych) — również w logach? — Owner: user. Block: no.
 - **Risk:** To jest gwiazda przewodnia i jednocześnie największa niewiadoma produktowa — jakości propozycji nie da się przewidzieć z PRD, tylko zmierzyć na własnym materiale. Sekwencjonowane zaraz po fundamencie i logowaniu, bo im później ten pomiar, tym mniej wieczorów zostaje na poprawę promptu. Odrzucone propozycje nie mogą trafiać do bazy — inaczej kryterium „75% fiszek w kolekcji pochodzi z AI" przestaje cokolwiek mierzyć.
-- **Status:** proposed
+- **Status:** in progress (otwarte 2026-08-25 — `context/changes/first-gated-generation/`)
 
 ### S-03: Poprawianie i usuwanie zapisanych fiszek
 
@@ -182,7 +182,7 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 | F-01       | `srs-algorithm-contract`        | #1    | Kontrakt algorytmu powtórek i stanu harmonogramu         | done                  | Zarchiwizowane 2026-08-24; issue zamknięte             |
 | F-02       | `flashcards-schema-isolation`   | #2    | Schemat fiszek i izolacja danych per użytkownik          | done                  | Wdrożone lokalnie i zdalnie 2026-08-25; issue zamknięte |
 | S-01       | `deployed-auth-baseline`        | #3    | Rejestracja i logowanie na wdrożonej instancji           | done                  | Zweryfikowane na produkcji 2026-08-21; issue zamknięte |
-| S-02       | `first-gated-generation`        | #4    | Generowanie fiszek z tekstu: przegląd, akceptacja, zapis | yes                   | F-02 i S-01 ukończone; gwiazda przewodnia — następna   |
+| S-02       | `first-gated-generation`        | Generowanie fiszek z tekstu: przegląd, akceptacja, zapis | in progress           | Otwarte 2026-08-25; folder zmiany utworzony; issue #4 otwarte |
 | S-03       | `manual-card-edit-delete`       | #5    | Poprawianie i usuwanie zapisanych fiszek                 | no                    | Czeka na S-02                                          |
 | S-04       | `manual-card-create`            | #6    | Ręczne tworzenie fiszki                                  | no                    | Czeka na S-02                                          |
 | S-05       | `srs-review-session`            | #7    | Sesja powtórkowa z algorytmem spaced repetition          | no                    | Czeka na F-02 i S-02; domyka pętlę                     |
