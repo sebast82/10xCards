@@ -3,7 +3,7 @@ project: "10xCards"
 version: 1
 status: draft
 created: 2026-08-21
-updated: 2026-08-24
+updated: 2026-08-25
 prd_version: 2
 main_goal: speed
 top_blocker: time
@@ -38,7 +38,7 @@ Deklaracja właściciela produktu brzmiała: gwiazdą jest **cała pętla** (rej
 | ID   | Change ID                       | Outcome (użytkownik może …)                                                                                 | Prerequisites | PRD refs                                        | Status   |
 | ---- | ------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------- | ----------------------------------------------- | -------- |
 | F-01 | `srs-algorithm-contract`        | (fundament) wybrany jest gotowy algorytm powtórek i kontrakt stanu, który niesie fiszka                     | —             | FR-009, Non-Goals, Success Criteria §Guardrails | done     |
-| F-02 | `flashcards-schema-isolation`   | (fundament) fiszki mają trwały schemat ze znacznikiem pochodzenia, a każdy użytkownik widzi wyłącznie swoje | F-01          | Access Control, FR-008                          | planning |
+| F-02 | `flashcards-schema-isolation`   | (fundament) fiszki mają trwały schemat ze znacznikiem pochodzenia, a każdy użytkownik widzi wyłącznie swoje | F-01          | Access Control, FR-008                          | done     |
 | S-01 | `deployed-auth-baseline`        | zarejestrować się, zalogować i wylogować na wdrożonej instancji                                             | —             | FR-001, FR-002, Access Control                  | done     |
 | S-02 | `first-gated-generation`        | wkleić tekst, przejrzeć propozycje AI i zapisać zaakceptowane do swojej kolekcji                            | F-02, S-01    | US-01, FR-003, FR-004, FR-008                   | proposed |
 | S-03 | `manual-card-edit-delete`       | poprawić treść zapisanej fiszki i usunąć zbędną                                                             | S-02          | FR-006, FR-007                                  | proposed |
@@ -96,7 +96,7 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Sonda raportuje warstwę danych jako nieistniejącą, a wszystkie dziewięć wymagań koniecznych na niej stoi — zły kształt tabeli odkryty w połowie pętli to jedyna przeróbka, której termin 2026-08-31 nie wchłonie. Stąd zależność od F-01: pola harmonogramu wchodzą do schematu od razu, zanim użytkownik cokolwiek zapisze. Z tego samego powodu znacznik pochodzenia fiszki (decyzja z 2026-08-21) wchodzi tą samą migracją — dopisany później wymagałby przerobienia już zapisanych rekordów, a wstecz i tak nie da się odtworzyć pochodzenia. Zakres celowo wąski: tabela fiszek, polityka izolacji, typy — bez budowania „całej warstwy danych" z góry. Każdy kolejny element pętli i tak przechodzi przez tę warstwę pionowo.
-- **Status:** planning
+- **Status:** done
 
 ## Slices
 
@@ -180,9 +180,9 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 | Roadmap ID | Change ID                       | Issue | Suggested issue title                                    | Ready for `/10x-plan` | Notes                                                  |
 | ---------- | ------------------------------- | ----- | -------------------------------------------------------- | --------------------- | ------------------------------------------------------ |
 | F-01       | `srs-algorithm-contract`        | #1    | Kontrakt algorytmu powtórek i stanu harmonogramu         | done                  | Zarchiwizowane 2026-08-24; issue zamknięte             |
-| F-02       | `flashcards-schema-isolation`   | #2    | Schemat fiszek i izolacja danych per użytkownik          | yes                   | F-01 ukończone; pola harmonogramu są dostępne          |
+| F-02       | `flashcards-schema-isolation`   | #2    | Schemat fiszek i izolacja danych per użytkownik          | done                  | Wdrożone lokalnie i zdalnie 2026-08-25; issue zamknięte |
 | S-01       | `deployed-auth-baseline`        | #3    | Rejestracja i logowanie na wdrożonej instancji           | done                  | Zweryfikowane na produkcji 2026-08-21; issue zamknięte |
-| S-02       | `first-gated-generation`        | #4    | Generowanie fiszek z tekstu: przegląd, akceptacja, zapis | no                    | Czeka na F-02 i S-01; gwiazda przewodnia               |
+| S-02       | `first-gated-generation`        | #4    | Generowanie fiszek z tekstu: przegląd, akceptacja, zapis | yes                   | F-02 i S-01 ukończone; gwiazda przewodnia — następna   |
 | S-03       | `manual-card-edit-delete`       | #5    | Poprawianie i usuwanie zapisanych fiszek                 | no                    | Czeka na S-02                                          |
 | S-04       | `manual-card-create`            | #6    | Ręczne tworzenie fiszki                                  | no                    | Czeka na S-02                                          |
 | S-05       | `srs-review-session`            | #7    | Sesja powtórkowa z algorytmem spaced repetition          | no                    | Czeka na F-02 i S-02; domyka pętlę                     |
@@ -213,5 +213,6 @@ Brak otwartych pytań — oba rozstrzygnięto 2026-08-21.
 
 - **S-01: użytkownik może założyć konto na email i hasło, zalogować się i wylogować na wdrożonej instancji** — zweryfikowane 2026-08-21 na `https://10x-cards.sebger82.workers.dev` (rejestracja z potwierdzeniem email, logowanie, wylogowanie). Archived 2026-08-24 → `context/archive/2026-08-17-deployment/`. Issue #3. Lesson: —
 - **F-01: (fundament) wybrany jest gotowy algorytm powtórek i spisany kontrakt stanu — jakie dane musi nieść każda fiszka, żeby sesja nauki umiała wyznaczyć termin jej kolejnego pokazania i zaktualizować go po ocenie.** — Archived 2026-08-24 → `context/archive/2026-08-23-srs-algorithm-contract/`. Lesson: —.
+- **F-02: (fundament) fiszki mają trwały schemat ze znacznikiem pochodzenia, a każdy użytkownik widzi wyłącznie swoje** — wdrożone lokalnie i zdalnie 2026-08-24; RLS i komplet polityk potwierdzone w Dashboardzie Supabase. Przegląd implementacji 2026-08-25 (`context/changes/flashcards-schema-isolation/reviews/impl-review.md`): 8 ustaleń, wszystkie naprawione, migracja `20260825120802_revoke_anon_table_privileges.sql` wypchnięta na chmurę. Issue #2. Lesson: —.
 
 (Kolejne wpisy dopisuje `/10x-archive` — i przestawia status elementu na `done` — gdy archiwizowana zmiana ma pasujący Change ID.)

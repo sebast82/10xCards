@@ -96,14 +96,28 @@ npx supabase init
 npx supabase start
 ```
 
-4. Copy the credentials printed by the CLI into your `.env` and `.dev.vars`:
+4. Apply the schema and RLS policies to the local database:
+
+```bash
+npx supabase db reset
+```
+
+5. Regenerate the typed database contract used by the app:
+
+```bash
+npm run db:types
+```
+
+`src/db/database.types.ts` is generated output — never edit it by hand. Change the migration, then re-run `npx supabase db reset` and `npm run db:types`.
+
+6. Copy the credentials printed by the CLI into your `.env` and `.dev.vars`:
 
 ```
 SUPABASE_URL=http://127.0.0.1:54321
 SUPABASE_KEY=<anon key from CLI output>
 ```
 
-5. To stop the stack when done:
+7. To stop the stack when done:
 
 ```bash
 npx supabase stop
@@ -111,11 +125,19 @@ npx supabase stop
 
 The local Studio UI is available at `http://localhost:54323`.
 
-No database tables or migrations are required — this project uses Supabase Auth's built-in `auth.users` table only.
+This project now includes a committed schema migration for flashcards and generation records, plus row-level security so each user only sees their own records.
 
 ### Using a cloud Supabase project instead
 
-If you prefer to use a hosted Supabase project, add these variables to your `.env` and `.dev.vars` files:
+If you prefer to use a hosted Supabase project, link and push the migration before running the app locally against the remote database:
+
+```bash
+npx supabase link --project-ref <project-ref>
+npx supabase db push --dry-run
+npx supabase db push
+```
+
+Then add these variables to your `.env` and `.dev.vars` files:
 
 | Variable       | Description                                                |
 | -------------- | ---------------------------------------------------------- |

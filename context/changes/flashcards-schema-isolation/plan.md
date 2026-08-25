@@ -367,53 +367,53 @@ Kaskada `on delete cascade` na `user_id` sprawia, że usunięcie konta w Supabas
 
 #### Automated
 
-- [ ] 1.1 Migracja stosuje się na czystej bazie: `npx supabase db reset`
-- [ ] 1.2 Brak błędów schematu: `npx supabase db lint --level error --fail-on error`
-- [ ] 1.3 Plik migracji istnieje w `supabase/migrations/` i jest jedynym w katalogu
+- [x] 1.1 Migracja stosuje się na czystej bazie: `npx supabase db reset` — zweryfikowane lokalnie 2026-08-24
+- [x] 1.2 Brak błędów schematu: `npx supabase db lint --level error --fail-on error` — zweryfikowane lokalnie 2026-08-24
+- [x] 1.3 Plik migracji istnieje w `supabase/migrations/` i jest jedynym w katalogu
 
 #### Manual
 
-- [ ] 1.4 W Supabase Studio obie tabele mają włączone RLS i po cztery polityki
-- [ ] 1.5 Wstawienie fiszki z `state = 4` albo pustym `front` kończy się błędem ograniczenia
-- [ ] 1.6 `\d public.flashcards` pokazuje wszystkie dziewięć kolumn harmonogramu w typach z rejestru
+- [x] 1.4 W Supabase Studio obie tabele mają włączone RLS i po cztery polityki — potwierdzone ręcznie 2026-08-24
+- [x] 1.5 Wstawienie fiszki z `state = 4` albo pustym `front` kończy się błędem ograniczenia — zweryfikowane 2026-08-25 (`flashcards_state_range`, `flashcards_front_not_blank`)
+- [x] 1.6 `\d public.flashcards` pokazuje wszystkie dziewięć kolumn harmonogramu w typach z rejestru — zweryfikowane 2026-08-25 przez `information_schema.columns`
 
 ### Phase 2: Dowód izolacji (pgTAP)
 
 #### Automated
 
-- [ ] 2.1 Test izolacji przechodzi: `npm run db:test`
-- [ ] 2.2 Vitest nadal przechodzi i nie wymaga bazy: `npm test`
-- [ ] 2.3 Linting przechodzi: `npm run lint`
+- [x] 2.1 Test izolacji przechodzi: `npm run db:test` — zweryfikowane lokalnie 2026-08-24
+- [x] 2.2 Vitest nadal przechodzi i nie wymaga bazy: `npm test` — zweryfikowane lokalnie 2026-08-24
+- [x] 2.3 Linting przechodzi: `npm run lint` — zweryfikowane lokalnie 2026-08-24
 
 #### Manual
 
-- [ ] 2.4 Rozluźnienie polityki `flashcards_select_own` daje czerwony `npm run db:test`
-- [ ] 2.5 Po cofnięciu zmiany test znów przechodzi
+- [x] 2.4 Rozluźnienie polityki `flashcards_select_own` daje czerwony `npm run db:test` — zweryfikowane 2026-08-25 (`Failed tests: 4-5`)
+- [x] 2.5 Po cofnięciu zmiany test znów przechodzi — zweryfikowane 2026-08-25 po `supabase db reset` (10/10)
 
 ### Phase 3: Typy bazy w kodzie
 
 #### Automated
 
-- [ ] 3.1 Regeneracja typów jest idempotentna: `npm run db:types` nie zmienia drzewa roboczego
-- [ ] 3.2 Sprawdzenie typów przechodzi: `npx astro check`
-- [ ] 3.3 Testy przechodzą, w tym test kontraktu: `npm test`
-- [ ] 3.4 Linting i build przechodzą: `npm run lint` oraz `npm run build`
+- [x] 3.1 Regeneracja typów jest idempotentna: `npm run db:types` nie zmienia drzewa roboczego — zweryfikowane lokalnie 2026-08-24
+- [x] 3.2 Sprawdzenie typów przechodzi: `npx astro check` — zweryfikowane lokalnie 2026-08-24
+- [x] 3.3 Testy przechodzą, w tym test kontraktu: `npm test` — zweryfikowane lokalnie 2026-08-24
+- [x] 3.4 Linting i build przechodzą: `npm run lint` oraz `npm run build` — zweryfikowane lokalnie 2026-08-24
 
 #### Manual
 
-- [ ] 3.5 Edytor podpowiada kolumny w `supabase.from("flashcards")`, literówka jest podkreślana
-- [ ] 3.6 Zmiana nazwy kolumny w migracji wywala test kontraktu i wraca na zielono po cofnięciu
+- [x] 3.5 Edytor podpowiada kolumny w `supabase.from("flashcards")`, literówka jest podkreślana — potwierdzone ręcznie 2026-08-25
+- [x] 3.6 Zmiana nazwy kolumny w migracji wywala test kontraktu i wraca na zielono po cofnięciu — zweryfikowane 2026-08-25; egzekwuje to `npx astro check` (i CI), nie `npm test` — Vitest bez `--typecheck` wymazuje asercje `expectTypeOf`
 
 ### Phase 4: Wdrożenie na chmurowy projekt i domknięcie rejestru
 
 #### Automated
 
-- [ ] 4.1 Podgląd wypycha dokładnie jedną migrację: `npx supabase db push --dry-run`
-- [ ] 4.2 Historia migracji zgodna lokalnie i zdalnie: `npx supabase migration list`
-- [ ] 4.3 Build przechodzi: `npm run build`
+- [x] 4.1 Podgląd wypycha dokładnie jedną migrację: `npx supabase db push --dry-run` — przed wdrożeniem potwierdzono jedną migrację; po wdrożeniu: zdalna baza aktualna, 2026-08-24
+- [x] 4.2 Historia migracji zgodna lokalnie i zdalnie: `npx supabase migration list` — `20260824202259` po obu stronach, 2026-08-24
+- [x] 4.3 Build przechodzi: `npm run build` — zweryfikowane lokalnie 2026-08-24
 
 #### Manual
 
-- [ ] 4.4 W dashboardzie chmurowego projektu obie tabele mają RLS i komplet polityk
-- [ ] 4.5 Logowanie i wylogowanie na wdrożonej instancji bez regresji
-- [ ] 4.6 `contract-surfaces.md` i `README.md` opisują stan faktyczny
+- [x] 4.4 W dashboardzie chmurowego projektu obie tabele mają RLS i komplet polityk — potwierdzone ręcznie 2026-08-24
+- [x] 4.5 Logowanie i wylogowanie na wdrożonej instancji bez regresji — potwierdzone ręcznie 2026-08-24
+- [x] 4.6 `contract-surfaces.md` i `README.md` opisują stan faktyczny — potwierdzone ręcznie 2026-08-24

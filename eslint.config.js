@@ -69,6 +69,10 @@ const astroConfig = tseslint.config({
 });
 
 export default tseslint.config(
+  {
+    // Pliki generowane: `npm run db:types` i `wrangler types` nadpisują je w całości.
+    ignores: ["src/db/database.types.ts", "worker-configuration.d.ts"],
+  },
   includeIgnoreFile(gitignorePath),
   baseConfig,
   reactConfig,
