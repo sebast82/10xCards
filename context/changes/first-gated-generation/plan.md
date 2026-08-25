@@ -769,30 +769,30 @@ Cykl obowiązujący przy każdej zmianie schematu, ustalony w F-02: `npm run db:
 
 #### Automated
 
-- [x] 2.1 Migracja aplikuje się czysto: `npm run db:reset`
-- [x] 2.2 Testy bazy przechodzą: `npm run db:test`
-- [x] 2.3 Typy przeładowane: `npm run db:types`
-- [x] 2.4 Typy zgodne ze schematem: `npx astro check`
-- [x] 2.5 Lint przechodzi: `npm run lint`
+- [x] 2.1 Migracja aplikuje się czysto: `npm run db:reset` — 3ffee55
+- [x] 2.2 Testy bazy przechodzą: `npm run db:test` — 3ffee55
+- [x] 2.3 Typy przeładowane: `npm run db:types` — 3ffee55
+- [x] 2.4 Typy zgodne ze schematem: `npx astro check` — 3ffee55
+- [x] 2.5 Lint przechodzi: `npm run lint` — 3ffee55
 
 #### Manual
 
-- [x] 2.6 Asercja izolacji faktycznie testuje mechanizm (próba z `security definer` daje czerwony wynik)
-- [x] 2.7 Migracja wypchnięta na chmurę i funkcja widoczna w Dashboardzie
-- [x] 2.8 Ciało funkcji zaczyna się od `for update` na wierszu zlecenia
+- [x] 2.6 Asercja izolacji faktycznie testuje mechanizm (próba z `security definer` daje czerwony wynik) — 3ffee55
+- [x] 2.7 Migracja wypchnięta na chmurę i funkcja widoczna w Dashboardzie — 3ffee55
+- [x] 2.8 Ciało funkcji zaczyna się od `for update` na wierszu zlecenia — 3ffee55
 
 ### Phase 3: Adapter OpenRoutera jako czyste funkcje
 
 #### Automated
 
-- [ ] 3.1 Testy przechodzą: `npm test`
-- [ ] 3.2 Typy się zgadzają: `npx astro check`
-- [ ] 3.3 Lint przechodzi: `npm run lint`
-- [ ] 3.4 Adapter nie odwołuje się do `console` ani do `astro:env`
+- [x] 3.1 Testy przechodzą: `npm test`
+- [x] 3.2 Typy się zgadzają: `npx astro check`
+- [x] 3.3 Lint przechodzi: `npm run lint`
+- [x] 3.4 Adapter nie odwołuje się do `console` ani do `astro:env`
 
 #### Manual
 
-- [ ] 3.5 Prompt sprawdzony ręcznie na własnym tekście — propozycje atomowe, w języku wejścia, w limitach
+- [x] 3.5 Prompt sprawdzony ręcznie na własnym tekście — propozycje atomowe, w języku wejścia, w limitach
 
 ### Phase 4: `POST /api/generations`
 
