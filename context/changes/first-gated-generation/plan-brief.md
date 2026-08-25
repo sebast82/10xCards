@@ -19,13 +19,13 @@ Na `/generate` użytkownik wkleja 200–10 000 znaków, dostaje listę propozycj
 
 | Decyzja | Wybór | Dlaczego | Źródło |
 | --- | --- | --- | --- |
-| Model | `google/gemini-2.5-flash` | Latencja, nie cena, jest kryterium przy wymaganiu „30 sekund": 0,57 s do pierwszego tokenu wobec 3,79 s `gpt-5-mini` przy tej samej cenie | Research |
+| Model | `google/gemini-2.5-flash` | Latencja, nie cena, jest kryterium przy wymaganiu „30 sekund": 0,57 s do pierwszego tokenu wobec 3,79 s `gpt-5-mini` przy tej samej cenie. Rozumowanie jest w tym modelu domyślnie włączone — `max_tokens` musi mieścić jego tokeny, a przewaga latencyjna wymaga potwierdzenia w fazie 9 | Research + przegląd planu |
 | Klient LLM | Czysty `fetch`, bez SDK | Limit 3 MB na Workera; SDK ciągnie zależności zakładające Node, a API to jeden POST z JSON-em | Research |
 | Nietrwałość tekstu | Pięć niezależnych zamknięć | Transport tylko w ciele POST (logi zapisują URL, nie ciało), `no-console: "error"` w ścieżkach serwerowych, brak kolumny w bazie, ZDR u dostawcy, redakcja błędów | Research |
 | Odczyt kolekcji | SSR na `/deck`, bez `GET /api/flashcards` | Wymaganie S-02 spełnia zwykły odczyt w frontmatterze; endpoint powstanie w S-03, gdy będzie znał swoje wymagania | Plan |
 | Zapis fiszek | Per fiszka, nie zbiorczo | Natychmiastowa informacja zwrotna; błąd jednej karty nie przewraca całego przeglądu | Plan |
-| Liczniki akceptacji | Funkcja RPC **przeliczająca** z `flashcards` | Idempotentna — podwójny klik ani retry nie zawyżają pomiaru, dla którego cała slice powstała; `security invoker`, więc RLS obowiązuje | Plan |
-| Granice wejścia | 200–10 000 znaków, sufit `min(30, ⌈znaki/400⌉)` | Górna z budżetu CPU 10 ms, dolna z odwracalności SHA-256 dla krótkich tekstów | Plan |
+| Liczniki akceptacji | Funkcja RPC **przeliczająca** z `flashcards`, z `for update` na wierszu zlecenia | Przeliczanie daje idempotencję wobec retry; blokada wiersza domyka wyścig między równoległymi zapisami, który zaniżałby pomiar. `security invoker`, więc RLS obowiązuje | Plan + przegląd planu |
+| Granice wejścia | 200–10 000 znaków, sufit `min(25, ⌈znaki/400⌉)` | Górna z budżetu CPU 10 ms, dolna z odwracalności SHA-256 dla krótkich tekstów; sufit 25 = `⌈10 000/400⌉`, więc obie wartości zmienia się razem | Plan + przegląd planu |
 | Ochrona kosztu | Limit dobowy na użytkownika → `429` | Pierwszy endpoint, który kosztuje pieniądze za żądanie; indeks `(user_id, created_at desc)` już istnieje, więc to kilkanaście linii | Plan |
 | Zero Data Retention | Fallback przy braku trasy, **widoczny** w odpowiedzi i UI | Generowanie zawsze działa, ale ciche obniżenie gwarancji prywatności byłoby gorsze niż jej brak — `privacyMode` żyje tyle, co odpowiedź | Plan |
 | Model interakcji | Lista kart z edycją w miejscu | Jeden komponent na trzy akcje, zero nowych zależności; `ai` vs `ai_edited` wynika z porównania treści, nie z faktu wejścia w edycję | Plan |
@@ -46,7 +46,7 @@ Na `/generate` użytkownik wkleja 200–10 000 znaków, dostaje listę propozycj
 endpoint → serwis generowania
    ├─ limit dobowy (RLS + indeks user_id, created_at)
    ├─ SHA-256 przez crypto.subtle
-   ├─ adapter OpenRoutera (fetch, json_schema, zdr → fallback)
+   ├─ adapter OpenRoutera (fetch, json_schema, zdr → fallback, timeout 45 s)
    └─ insert generations (z jawnym generated_count)
    ▼  { generationId, model, privacyMode, proposals[] }
 przegląd w pamięci przeglądarki — odrzucenie nie wywołuje niczego
@@ -54,8 +54,8 @@ przegląd w pamięci przeglądarki — odrzucenie nie wywołuje niczego
    ▼
 endpoint → serwis fiszek
    ├─ weryfikacja własności generation_id (FK nie przechodzi przez RLS)
-   ├─ insert flashcards (source + createNewCard() = 12 pól)
-   └─ rpc recount_generation_acceptance
+   ├─ insert flashcards (front, back, source + 9 pól z createNewCard())
+   └─ rpc recount_generation_acceptance (for update → count → update)
    ▼
 /deck — odczyt SSR, izolacja przez RLS
 ```
@@ -87,6 +87,8 @@ Kolejność faz wynika z jednej zasady: **wszystko, co da się zweryfikować aut
 - **Limit dobowy 20 wybrany „z sufitu".** Jego sens to zamiana nieograniczonego kosztu w policzalny, nie precyzja; do korekty po pierwszym tygodniu.
 - **Odświeżenie strony gubi niezapisany przegląd.** Świadomy kompromis: brak utrwalania propozycji jest tym, co spełnia twarde ograniczenie „odrzucone nie trafiają do bazy" — z definicji, a nie przez czyszczenie.
 - **Rola `authenticated` nadal ma domyślne `TRUNCATE`/`TRIGGER`/`REFERENCES`** (otwarte ustalenie z przeglądu F-02). Poza zakresem S-02, ale warte wiedzy przy dotykaniu uprawnień w fazie 2.
+- **Koszt i latencja są nieoszacowane, dopóki nie znamy udziału tokenów rozumowania.** `gemini-2.5-flash` ma rozumowanie włączone domyślnie, a rozlicza je po stawce wyjścia — szacunek ~0,006 $ za generowanie i przewaga 0,57 s TTFT są dolnymi granicami, nie prognozami. `max_tokens = 8_000 + cap * 400` daje zapas; pomiar `reasoning_tokens` w fazie 9 rozstrzyga, czy zostać przy tym modelu, wyłączyć rozumowanie, czy zejść na `flash-lite`.
+- **Podział `ai` / `ai_edited` jest deklarowany przez klienta, nie zmierzony.** Serwer nie utrwala propozycji, więc flagi `edited` nie ma czym zweryfikować. Bez znaczenia przy pomiarze na własnym materiale, istotne przy porównywaniu modeli.
 
 ## Success Criteria (Summary)
 

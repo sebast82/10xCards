@@ -93,7 +93,7 @@ Faza 9 to weryfikacja na `workerd`. `astro dev` nie jest `workerd` — [context/
 
 ---
 
-## Faza 1: Fundament serwerowy
+## Phase 1: Fundament serwerowy
 
 ### Overview
 
@@ -159,7 +159,7 @@ Sekret OpenRoutera, klient Supabase w `App.Locals`, mechaniczne wymuszenie zakaz
 
 ---
 
-## Faza 2: Funkcja przeliczająca liczniki akceptacji
+## Phase 2: Funkcja przeliczająca liczniki akceptacji
 
 ### Overview
 
@@ -179,6 +179,16 @@ Trzy liczniki w `public.generations` są jedynym instrumentem pomiaru obu kryter
 
 Idempotencja wynika z tego, że wartość jest **przeliczana**, nie inkrementowana — to jest cała różnica względem naiwnego `+ 1` i powód, dla którego ten wariant został wybrany.
 
+**Blokada wiersza zlecenia jest wiążąca, nie optymalizacją.** Pierwszą instrukcją w ciele funkcji musi być `perform 1 from public.generations where id = p_generation_id for update;`. Idempotencja chroni przed powtórzeniem tego samego żądania, ale **nie** przed dwoma różnymi żądaniami naraz — a zapis per fiszka (faza 5) przy liście do 25 kart czyni je normą, nie skrajnością. Bez blokady, w `read committed`:
+
+```
+T_A: insert karta1 · count → 1
+T_B: insert karta2 · count → 2 · update = 2 (commit)
+T_A: update = 1 (commit)          ← licznik pokazuje 1 przy dwóch fiszkach
+```
+
+`count(*)` wykonuje się **przed** pobraniem blokady wiersza `generations`, więc sama blokada wierszowa na `update` tego nie serializuje. Kierunek błędu to zaniżenie — czyli cicha degradacja dokładnie tej liczby, dla której pomiaru cała slice powstała. `for update` na początku funkcji ustawia całą sekwencję count→update pod jedną blokadą.
+
 #### 2. Test funkcji
 
 **File**: `supabase/tests/recount_generation_acceptance.test.sql`
@@ -188,6 +198,8 @@ Idempotencja wynika z tego, że wartość jest **przeliczana**, nie inkrementowa
 **Contract**: pgTAP w konwencji [supabase/tests/rls_flashcards.test.sql](supabase/tests/rls_flashcards.test.sql). Cztery asercje: (a) po dodaniu fiszek `ai` i `ai_edited` liczniki mają właściwe wartości; (b) drugie wywołanie na tym samym zleceniu nie zmienia wyniku; (c) wywołanie przez innego użytkownika nie zmienia liczników właściciela; (d) wynik nie łamie CHECK `generations_accepted_total_leq_generated`.
 
 **Uwaga metodyczna z przeglądu F-02**: test, który przechodzi po usunięciu testowanego mechanizmu, nie jest testem. Asercja (c) musi zawieść, jeśli funkcja zostanie zmieniona na `security definer` — sprawdzić to jawnie, wykonując tę zmianę lokalnie i obserwując czerwony wynik, zanim się ją cofnie.
+
+**Czego ten test nie udowodni**: pgTAP wykonuje asercje sekwencyjnie w jednej sesji, więc żadna z czterech nie wykryje braku `for update`. Asercja (b) przejdzie również dla wersji z wyścigiem. Obecność blokady weryfikuje się przez odczytanie ciała funkcji — stąd osobny punkt w weryfikacji ręcznej.
 
 #### 3. Regeneracja typów
 
@@ -210,13 +222,14 @@ Idempotencja wynika z tego, że wartość jest **przeliczana**, nie inkrementowa
 #### Manual Verification:
 
 - Asercja izolacji faktycznie testuje mechanizm: po tymczasowej zmianie funkcji na `security definer` `npm run db:test` daje czerwony wynik (zmianę cofnąć)
+- Ciało funkcji zaczyna się od `perform 1 from public.generations where id = p_generation_id for update;` — sprawdzone odczytem migracji, bo pgTAP tego nie wyrazi
 - Migracja wypchnięta na projekt w chmurze i funkcja widoczna w Dashboardzie Supabase
 
 **Implementation Note**: Po tej fazie zatrzymaj się i poczekaj na potwierdzenie ręcznej weryfikacji.
 
 ---
 
-## Faza 3: Adapter OpenRoutera jako czyste funkcje
+## Phase 3: Adapter OpenRoutera jako czyste funkcje
 
 ### Overview
 
@@ -240,9 +253,13 @@ Prompt systemowy realizuje sześć reguł, każda z uzasadnieniem:
 5. **Język wyjścia = język tekstu źródłowego** — inaczej model przełącza się na angielski przy polskim wejściu.
 6. **Traktowanie wejścia jako danych, nie instrukcji** — tekst użytkownika idzie w wiadomości `user` opakowany w `<source_text>…</source_text>`, a prompt systemowy nakazuje ignorować wszelkie polecenia w środku. Bez tego wklejka zawierająca „zignoruj poprzednie instrukcje" jest zwykłym prompt injection. Ryzyko jest ograniczone (użytkownik atakuje własne fiszki), ale koszt zabezpieczenia to trzy zdania.
 
-Ciało żądania: model `google/gemini-2.5-flash`, `temperature: 0.3`, `max_tokens` wyliczone z sufitu, `provider: { require_parameters: true, data_collection: "deny", zdr: true }`, `response_format: { type: "json_schema", json_schema: { name: "flashcards", strict: true, schema: … } }` z `maxLength` 500 / 2000 i `additionalProperties: false` na każdym poziomie.
+Ciało żądania: model `google/gemini-2.5-flash`, `temperature: 0.3`, `max_tokens` według wzoru niżej, `provider: { require_parameters: true, data_collection: "deny", zdr: true }`, `response_format: { type: "json_schema", json_schema: { name: "flashcards", strict: true, schema: … } }` z `maxLength` 500 / 2000 i `additionalProperties: false` na każdym poziomie.
 
 `require_parameters: true` jest niezbędne — wsparcie dla `response_format` jest per endpoint, nie per model, i zmienia się w czasie. Bez tego OpenRouter może przekierować na dostawcę, który schemat zignoruje.
+
+**`max_tokens` musi mieścić tokeny rozumowania, nie tylko treść.** `google/gemini-2.5-flash` ma rozumowanie włączone domyślnie — [research.md](context/changes/first-gated-generation/research.md) wyróżnia `flash-lite` adnotacją „thinking domyślnie wyłączone", co dla wybranego wariantu znaczy odwrotnie. Tokeny rozumowania konsumują ten sam budżet co odpowiedź, więc `max_tokens` ustawiony na sam rozmiar treści daje `finish_reason: "length"`, obcięty JSON i błąd **przy każdym generowaniu**, a nie w rzadkim przypadku brzegowym.
+
+Wzór: `max_tokens = 8_000 + cap * 400`. Składnik stały to zapas na rozumowanie, składnik proporcjonalny to treść (≈ 400 tokenów na fiszkę przy limitach 500 / 2000 znaków). Wartość jest sufitem bezpieczeństwa, nie prognozą zużycia — płaci się za tokeny faktycznie wygenerowane. Zapas 8 000 wybrany z górką i do skorygowania po pomiarze z fazy 9.
 
 #### 2. Sufit liczby propozycji
 
@@ -250,7 +267,9 @@ Ciało żądania: model `google/gemini-2.5-flash`, `temperature: 0.3`, `max_toke
 
 **Intent**: Wyliczyć górną liczbę propozycji proporcjonalnie do długości wejścia, z sufitem — sufit jest potrzebny z powodu `max_tokens` i budżetu CPU na parsowanie, nie z powodu modelu.
 
-**Contract**: `SOURCE_TEXT_MIN = 200`, `SOURCE_TEXT_MAX = 10_000`, `MAX_FLASHCARDS = 30`; funkcja `proposalCap(length: number): number` zwracająca `Math.min(MAX_FLASHCARDS, Math.ceil(length / 400))`. Te stałe są jedynym źródłem prawdy dla walidacji w fazie 4 i dla komunikatów w interfejsie w fazie 6.
+**Contract**: `SOURCE_TEXT_MIN = 200`, `SOURCE_TEXT_MAX = 10_000`, `MAX_FLASHCARDS = 25`; funkcja `proposalCap(length: number): number` zwracająca `Math.min(MAX_FLASHCARDS, Math.ceil(length / 400))`. Te stałe są jedynym źródłem prawdy dla walidacji w fazie 4 i dla komunikatów w interfejsie w fazie 6.
+
+`MAX_FLASHCARDS = 25`, a nie 30, bo `⌈SOURCE_TEXT_MAX / 400⌉ = 25` — przy górnym limicie 10 000 znaków wyższy sufit byłby nieosiągalny, a zatem nietestowalny i mylący dla każdego, kto później będzie stroił te liczby. Obie wartości trzeba zmieniać razem.
 
 #### 3. Parsowanie i walidacja odpowiedzi
 
@@ -261,6 +280,8 @@ Ciało żądania: model `google/gemini-2.5-flash`, `temperature: 0.3`, `max_toke
 **Contract**: `parseGenerationResponse(raw: unknown): FlashcardProposal[]`, gdzie `FlashcardProposal = { front: string; back: string }`. Kroki: walidacja koperty (`choices[0].message.content` jako string), `JSON.parse`, walidacja Zodem tablicy z `front` i `back` przyciętymi przez `.trim()` i ograniczonymi do 500 / 2000 znaków, odrzucenie pustych, przycięcie do `proposalCap`.
 
 Odrzucone elementy **nie** powodują błędu całego generowania — model bywa nadgorliwy, a lista krótsza o jedną pozycję jest lepsza niż komunikat o awarii. Błąd rzucany jest tylko wtedy, gdy po walidacji nie zostaje ani jedna propozycja.
+
+**`finish_reason: "length"` obsługiwany osobno, przed `JSON.parse`.** Obcięta odpowiedź jest nieprawidłowym JSON-em i bez tego rozpoznania dałaby ten sam komunikat co awaria modelu — czyli mylący, bo przyczyną jest wyczerpany budżet tokenów (najpewniej przez rozumowanie), a nie dostawca. Osobny typ błędu, mapowany w fazie 4 na `502`, z komunikatem wskazującym na skrócenie tekstu źródłowego jako obejście.
 
 Rzucany błąd nie może zawierać tekstu źródłowego ani surowej treści odpowiedzi — patrz „Critical Implementation Details". Stały komunikat, bez interpolacji.
 
@@ -274,6 +295,8 @@ Rzucany błąd nie może zawierać tekstu źródłowego ani surowej treści odpo
 
 Pierwsza próba: żądanie z fazy 1 tej listy (`zdr: true`). Jeśli OpenRouter odpowie brakiem dostępnego endpointu — druga próba z `zdr` usuniętym, `data_collection: "deny"` zachowanym, i `privacyMode: "standard"` w wyniku. Każdy inny błąd (401, 429, 5xx, timeout) leci dalej bez ponowienia.
 
+**Timeout musi być ustanowiony jawnie.** `fetch` na `workerd` nie ma domyślnego limitu po stronie aplikacji, a limit 10 ms CPU nie obejmuje czekania na sieć — zawieszony dostawca zostawia użytkownika przy spływającym spędzie w nieskończoność, wprost wbrew wymaganiu „pierwsze fiszki w ciągu 30 sekund". Oba wywołania (pierwsza próba i fallback) dostają `signal: AbortSignal.timeout(45_000)`. Wartość leży powyżej budżetu 30 s celowo: timeout ma sygnalizować awarię, nie ucinać wolnego, ale poprawnego generowania. `AbortError` mapuje się w fazie 4 na `502`.
+
 Fallback jest **jawny w kontrakcie zwracanym z funkcji** — nie jest logowany (Z2 zakazuje `console.*` na tej ścieżce) i nie jest zapisywany w bazie. Informacja żyje tyle, co odpowiedź, i trafia do interfejsu w fazie 6. To rozstrzyga jedyną wadę fallbacku: gdyby pula ZDR okazała się trwale pusta, aplikacja działałaby miesiącami z nieobowiązującą gwarancją prywatności i nikt by się nie dowiedział.
 
 Rozpoznanie „brak trasy" wymaga sprawdzenia empirycznego przy pierwszym uruchomieniu — OpenRouter sygnalizuje to kodem `404` z komunikatem o braku dostępnego dostawcy. Dopóki nie potwierdzone na żywym kluczu, warunek ma obejmować `404` z ciałem zawierającym wzmiankę o dostawcy, a nie dowolny `404`.
@@ -284,7 +307,7 @@ Rozpoznanie „brak trasy" wymaga sprawdzenia empirycznego przy pierwszym urucho
 
 **Intent**: Pokryć testami dokładnie to, co da się pokryć bez sieci — parsowanie i arytmetykę sufitu.
 
-**Contract**: Vitest w konwencji [src/lib/srs/scheduler.test.ts](src/lib/srs/scheduler.test.ts). Przypadki dla `parse`: poprawna odpowiedź; `content` niebędący JSON-em; brakujące `back`; `front` dłuższy niż 500 znaków (odrzucony, reszta zachowana); `front` z samych spacji (odrzucony); pusta tablica po walidacji (rzuca); więcej propozycji niż sufit (przycięte). Przypadki dla `limits`: 200 znaków → 1, 10 000 → 25, wartość dająca więcej niż 30 → 30.
+**Contract**: Vitest w konwencji [src/lib/srs/scheduler.test.ts](src/lib/srs/scheduler.test.ts). Przypadki dla `parse`: poprawna odpowiedź; `content` niebędący JSON-em; `finish_reason: "length"` (osobny typ błędu, nie ten sam co uszkodzony JSON); brakujące `back`; `front` dłuższy niż 500 znaków (odrzucony, reszta zachowana); `front` z samych spacji (odrzucony); pusta tablica po walidacji (rzuca); więcej propozycji niż sufit (przycięte). Przypadki dla `limits`: 200 znaków → 1, 10 000 → 25, wartość na granicy sufitu (9 601 → 25, 9 600 → 24).
 
 Dodatkowy test, który pilnuje wymagania niefunkcjonalnego: komunikat błędu rzucanego przez `parse` nie zawiera fragmentu wejścia. Bez niego zakaz z „Critical Implementation Details" jest komentarzem, nie kontraktem.
 
@@ -305,7 +328,7 @@ Dodatkowy test, który pilnuje wymagania niefunkcjonalnego: komunikat błędu rz
 
 ---
 
-## Faza 4: `POST /api/generations`
+## Phase 4: `POST /api/generations`
 
 ### Overview
 
@@ -373,7 +396,7 @@ Kształt ciała błędu (`{ error: string }`) obowiązuje wszystkie kolejne endp
 
 ---
 
-## Faza 5: `POST /api/flashcards`
+## Phase 5: `POST /api/flashcards`
 
 ### Overview
 
@@ -395,6 +418,8 @@ Zapis pojedynczej zaakceptowanej propozycji. Dwie rzeczy, których nie widać w 
 Kontrakt SRS jest ortogonalny wobec pochodzenia fiszki — `createNewCard()` nie wie i nie musi wiedzieć, skąd fiszka pochodzi. Serwis składa oba wymiary samodzielnie i to jest dokładnie to, co F-01 miało dostarczyć.
 
 Decyzja `ai` vs `ai_edited` zapada tutaj, raz — trigger `flashcards_prevent_source_change` zablokuje późniejszą zmianę.
+
+**Ograniczenie pomiaru, warte odnotowania przy interpretacji liczb w fazie 9**: `edited` przychodzi od klienta i serwer nie ma czym go zweryfikować — propozycje nigdzie nie są utrwalane, co jest tą samą decyzją, na której stoi twarde ograniczenie „odrzucone nie trafiają do bazy". Podział na `accepted_unedited_count` i `accepted_edited_count` jest więc deklarowany, nie zmierzony. Dla pomiaru na własnym materiale to bez znaczenia; przy porównywaniu modeli albo prezentowaniu wskaźnika 75% na zewnątrz — nie.
 
 #### 2. Endpoint
 
@@ -437,7 +462,7 @@ Metoda `GET` **nie powstaje** w tej fazie — `/deck` czyta w SSR.
 
 ---
 
-## Faza 6: Ekran `/generate`
+## Phase 6: Ekran `/generate`
 
 ### Overview
 
@@ -465,11 +490,11 @@ Zachowanie formularza: licznik znaków z progami `SOURCE_TEXT_MIN` / `SOURCE_TEX
 
 Zachowanie listy: każda propozycja to karta z przyciskami **Zapisz / Edytuj / Odrzuć**. „Edytuj" zamienia treść w dwa pola z **Zapisz** i **Anuluj**; `edited` w żądaniu jest `true` wtedy i tylko wtedy, gdy zapisana treść różni się od wygenerowanej — porównanie treści, nie fakt wejścia w tryb edycji, bo inaczej wejście i wyjście bez zmian fałszuje pomiar `accepted_unedited_count`. Zapisana karta przechodzi w stan `saved` i nie daje się już zmienić — edycja po zapisie to S-03.
 
-Nad listą licznik postępu („zapisano 4 z 17"), bo przy suficie 30 kart lista jest długa i bez tego użytkownik gubi orientację.
+Nad listą licznik postępu („zapisano 4 z 17"), bo przy suficie 25 kart lista jest długa i bez tego użytkownik gubi orientację.
 
 Przy `privacyMode === "standard"` nad listą pojawia się dyskretna adnotacja, że to generowanie wykonano bez trybu Zero Data Retention. Bez niej fallback z fazy 3 byłby niewidoczny, a niewidoczne obniżenie gwarancji prywatności jest gorsze niż jej brak.
 
-Błąd generowania: komunikat z przyciskiem ponowienia, tekst źródłowy zachowany w polu. Błąd zapisu pojedynczej karty: komunikat przy tej karcie, reszta listy nietknięta.
+Błąd generowania: komunikat z przyciskiem ponowienia, tekst źródłowy zachowany w polu. Błąd zapisu pojedynczej karty: komunikat przy tej karcie, reszta listy nietknięta. Żądanie do `/api/generations` dostaje własny `AbortSignal.timeout(60_000)` — powyżej 45 s z adaptera, żeby serwerowy komunikat błędu zdążył dotrzeć przed przerwaniem po stronie klienta; zerwane połączenie ma kończyć się tym samym stanem `error`, a nie wiecznym `generating`.
 
 **Odrzucenie usuwa kartę wyłącznie ze stanu komponentu.** Żadnego żądania, żadnego zapisu — twarde ograniczenie „odrzucone propozycje nie trafiają do bazy" spełnia się z definicji.
 
@@ -521,7 +546,7 @@ Błąd generowania: komunikat z przyciskiem ponowienia, tekst źródłowy zachow
 
 ---
 
-## Faza 7: Ekran `/deck` i nawigacja
+## Phase 7: Ekran `/deck` i nawigacja
 
 ### Overview
 
@@ -572,7 +597,7 @@ Domknięcie przepływu: zaakceptowane fiszki muszą być gdzieś widoczne, inacz
 
 ---
 
-## Faza 8: Ujednolicenie systemu stylów
+## Phase 8: Ujednolicenie systemu stylów
 
 ### Overview
 
@@ -610,7 +635,7 @@ Aplikacja ma dziś dwa systemy stylów: tokeny shadcn w `src/styles/global.css` 
 
 ---
 
-## Faza 9: Weryfikacja na wdrożonej instancji
+## Phase 9: Weryfikacja na wdrożonej instancji
 
 ### Overview
 
@@ -654,6 +679,7 @@ Aplikacja ma dziś dwa systemy stylów: tokeny shadcn w `src/styles/global.css` 
 
 - Na `https://10x-cards.sebger82.workers.dev` przepływ od wklejenia do `/deck` działa od początku do końca
 - `privacyMode` zwracany przez API — odnotować, czy pula ZDR jest dostępna dla `google/gemini-2.5-flash`; jeśli fallback włącza się zawsze, podjąć decyzję o zmianie modelu (to jedyne pytanie, którego nie dało się rozstrzygnąć bez żywego klucza)
+- `usage.completion_tokens_details.reasoning_tokens` odnotowane dla dwóch generowań — to jedyny moment, w którym da się zweryfikować zapas w `max_tokens`, przeliczyć rzeczywisty koszt i sprawdzić, czy przewaga latencyjna, dla której wybrano ten model, faktycznie obowiązuje przy włączonym rozumowaniu. Ani jedno generowanie nie kończy się `finish_reason: "length"`
 - Wiersz w `public.generations` ma poprawne wszystkie trzy liczniki po przejściu przez przegląd
 - `wrangler tail` w trakcie generowania **nie** pokazuje fragmentu wklejonego tekstu — ani w logach wywołań, ani w komunikatach błędów
 - Pierwszy pomiar kryterium: `accepted_unedited_count / generated_count` odnotowany dla przynajmniej dwóch własnych tekstów
@@ -691,13 +717,13 @@ Testów jednostkowych nie piszemy dla endpointów ani komponentów — pierwsze 
 
 ## Performance Considerations
 
-**Limit 10 ms CPU na Cloudflare Workers Free** to jedyne realne ryzyko wydajnościowe. Czekanie na odpowiedź modelu nie liczy się do budżetu; `JSON.parse` i mapowanie propozycji — tak. Mitygacja jest wbudowana w decyzje: górny limit 10 000 znaków, sufit 30 propozycji, jeden `JSON.parse` na payloadzie ~20 KB, zero transformacji per-znak. Przekroczenie objawia się kodem `1102`.
+**Limit 10 ms CPU na Cloudflare Workers Free** to jedyne realne ryzyko wydajnościowe. Czekanie na odpowiedź modelu nie liczy się do budżetu; `JSON.parse` i mapowanie propozycji — tak. Mitygacja jest wbudowana w decyzje: górny limit 10 000 znaków, sufit 25 propozycji, jeden `JSON.parse` na payloadzie ~20 KB, zero transformacji per-znak. Przekroczenie objawia się kodem `1102`.
 
 **50 subrequestów i 6 równoczesnych połączeń wychodzących.** Generowanie zużywa: 1 zapytanie o limit dobowy + 1 POST do OpenRoutera + 1 insert = 3. Zapis fiszki: 1 select własności + 1 insert + 1 RPC = 3 na fiszkę, ale w osobnych żądaniach HTTP, więc limit dotyczy każdego z osobna. Zapas jest duży.
 
-**Koszt.** Tekst 10 000 znaków ≈ 3 000 tokenów wejścia, 20 fiszek ≈ 2 000 tokenów wyjścia — przy cenie `google/gemini-2.5-flash` (0,30 $ / 2,50 $ za 1M) to ~0,006 $ za generowanie. Limit dobowy 20 daje sufit ~0,12 $ na użytkownika na dobę.
+**Koszt.** Tekst 10 000 znaków ≈ 3 000 tokenów wejścia, 20 fiszek ≈ 2 000 tokenów wyjścia — przy cenie `google/gemini-2.5-flash` (0,30 $ / 2,50 $ za 1M) to ~0,006 $ za generowanie. Limit dobowy 20 daje sufit ~0,12 $ na użytkownika na dobę. **Ten szacunek nie obejmuje tokenów rozumowania**, które w tym modelu są włączone domyślnie i rozliczane po stawce wyjścia — rzeczywisty koszt jest więc wyższy o nieznany dziś mnożnik. Pomiar w fazie 9 (`reasoning_tokens`) jest warunkiem, żeby ta liczba — i wynikająca z niej wartość `DAILY_GENERATION_LIMIT` — miała pokrycie.
 
-**Latencja.** Wybór `google/gemini-2.5-flash` zamiast tańszego `flash-lite` czy równie drogiego `gpt-5-mini` jest podyktowany wymaganiem „pierwsze fiszki w ciągu 30 sekund": 0,57 s do pierwszego tokenu i 63 tps mieszczą 20 fiszek w budżecie z zapasem, podczas gdy `gpt-5-mini` startuje po 3,79 s przy tej samej cenie.
+**Latencja.** Wybór `google/gemini-2.5-flash` zamiast tańszego `flash-lite` czy równie drogiego `gpt-5-mini` jest podyktowany wymaganiem „pierwsze fiszki w ciągu 30 sekund": 0,57 s do pierwszego tokenu i 63 tps mieszczą 20 fiszek w budżecie z zapasem, podczas gdy `gpt-5-mini` startuje po 3,79 s przy tej samej cenie. **Zastrzeżenie**: 0,57 s to czas do pierwszego tokenu bez rozumowania. Faza rozumowania poprzedza pierwszy token treści, więc przy włączonym rozumowaniu przewaga względem `gpt-5-mini` może się skurczyć albo zniknąć. Jeśli pomiar z fazy 9 to potwierdzi, otwarte są dwa wyjścia: `reasoning: { enabled: false }` albo zejście na `flash-lite`, gdzie rozumowanie jest wyłączone domyślnie.
 
 ## Migration Notes
 
@@ -753,6 +779,7 @@ Cykl obowiązujący przy każdej zmianie schematu, ustalony w F-02: `npm run db:
 
 - [ ] 2.6 Asercja izolacji faktycznie testuje mechanizm (próba z `security definer` daje czerwony wynik)
 - [ ] 2.7 Migracja wypchnięta na chmurę i funkcja widoczna w Dashboardzie
+- [ ] 2.8 Ciało funkcji zaczyna się od `for update` na wierszu zlecenia
 
 ### Phase 3: Adapter OpenRoutera jako czyste funkcje
 
@@ -817,6 +844,7 @@ Cykl obowiązujący przy każdej zmianie schematu, ustalony w F-02: `npm run db:
 - [ ] 6.7 `source` rozróżnia `ai` i `ai_edited`, a wejście w edycję bez zmian daje `ai`
 - [ ] 6.8 Licznik postępu zgadza się z liczbą zapisanych
 - [ ] 6.9 Błąd generowania pokazuje komunikat z ponowieniem i zachowuje tekst
+- [ ] 6.10 Odświeżenie strony w trakcie przeglądu gubi niezapisane propozycje
 
 ### Phase 7: Ekran `/deck` i nawigacja
 
@@ -845,8 +873,9 @@ Cykl obowiązujący przy każdej zmianie schematu, ustalony w F-02: `npm run db:
 #### Manual
 
 - [ ] 8.5 Rejestracja, logowanie i wylogowanie działają bez zmian
-- [ ] 8.6 Komunikat z `?error=` i banner konfiguracji nadal się wyświetlają
+- [ ] 8.6 Komunikat błędu z `?error=` nadal się wyświetla
 - [ ] 8.7 Ekrany wyglądają spójnie
+- [ ] 8.8 Banner braku konfiguracji nadal się wyświetla
 
 ### Phase 9: Weryfikacja na wdrożonej instancji
 
@@ -863,3 +892,4 @@ Cykl obowiązujący przy każdej zmianie schematu, ustalony w F-02: `npm run db:
 - [ ] 9.6 Wszystkie trzy liczniki poprawne po przejściu przez przegląd
 - [ ] 9.7 `wrangler tail` nie pokazuje wklejonego tekstu ani w logach, ani w błędach
 - [ ] 9.8 Pierwszy pomiar `accepted_unedited_count / generated_count` dla dwóch własnych tekstów
+- [ ] 9.9 `reasoning_tokens` odnotowane; żadne generowanie nie kończy się `finish_reason: "length"`

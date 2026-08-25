@@ -121,8 +121,8 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 - **Parallel with:** —
 - **Blockers:** —
 - **Unknowns:**
-  - Który model przez OpenRouter i jaki kształt promptu daje 75% akceptacji bez istotnych zmian? — Owner: user. Block: no (start na dowolnym rozsądnym modelu; kryterium mierzy się na własnych tekstach po pierwszym uruchomieniu).
-  - Jak zagwarantować, że wklejony tekst nie zostaje nigdzie po zakończeniu żądania (zakaz trwałego zapisu z wymagań niefunkcjonalnych) — również w logach? — Owner: user. Block: no.
+  - Który model przez OpenRouter i jaki kształt promptu daje 75% akceptacji bez istotnych zmian? — Owner: user. Block: no (start na dowolnym rozsądnym modelu; kryterium mierzy się na własnych tekstach po pierwszym uruchomieniu). **Zamknięte 2026-08-25** — rekomendacja w `context/changes/first-gated-generation/research.md`, pomiar w fazie 9 planu.
+  - Jak zagwarantować, że wklejony tekst nie zostaje nigdzie po zakończeniu żądania (zakaz trwałego zapisu z wymagań niefunkcjonalnych) — również w logach? — Owner: user. Block: no. **Zamknięte 2026-08-25** — pięć niezależnych zamknięć zamiast jednej decyzji; szczegóły w `research.md`.
 - **Risk:** To jest gwiazda przewodnia i jednocześnie największa niewiadoma produktowa — jakości propozycji nie da się przewidzieć z PRD, tylko zmierzyć na własnym materiale. Sekwencjonowane zaraz po fundamencie i logowaniu, bo im później ten pomiar, tym mniej wieczorów zostaje na poprawę promptu. Odrzucone propozycje nie mogą trafiać do bazy — inaczej kryterium „75% fiszek w kolekcji pochodzi z AI" przestaje cokolwiek mierzyć.
 - **Status:** in progress (otwarte 2026-08-25 — `context/changes/first-gated-generation/`)
 
@@ -182,7 +182,7 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 | F-01       | `srs-algorithm-contract`        | #1    | Kontrakt algorytmu powtórek i stanu harmonogramu         | done                  | Zarchiwizowane 2026-08-24; issue zamknięte             |
 | F-02       | `flashcards-schema-isolation`   | #2    | Schemat fiszek i izolacja danych per użytkownik          | done                  | Wdrożone lokalnie i zdalnie 2026-08-25; issue zamknięte |
 | S-01       | `deployed-auth-baseline`        | #3    | Rejestracja i logowanie na wdrożonej instancji           | done                  | Zweryfikowane na produkcji 2026-08-21; issue zamknięte |
-| S-02       | `first-gated-generation`        | Generowanie fiszek z tekstu: przegląd, akceptacja, zapis | in progress           | Otwarte 2026-08-25; folder zmiany utworzony; issue #4 otwarte |
+| S-02       | `first-gated-generation`        | #4    | Generowanie fiszek z tekstu: przegląd, akceptacja, zapis | in progress           | Otwarte 2026-08-25; plan po przeglądzie (`status: plan_reviewed`) |
 | S-03       | `manual-card-edit-delete`       | #5    | Poprawianie i usuwanie zapisanych fiszek                 | no                    | Czeka na S-02                                          |
 | S-04       | `manual-card-create`            | #6    | Ręczne tworzenie fiszki                                  | no                    | Czeka na S-02                                          |
 | S-05       | `srs-review-session`            | #7    | Sesja powtórkowa z algorytmem spaced repetition          | no                    | Czeka na F-02 i S-02; domyka pętlę                     |
