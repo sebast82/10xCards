@@ -785,31 +785,31 @@ Cykl obowiązujący przy każdej zmianie schematu, ustalony w F-02: `npm run db:
 
 #### Automated
 
-- [x] 3.1 Testy przechodzą: `npm test`
-- [x] 3.2 Typy się zgadzają: `npx astro check`
-- [x] 3.3 Lint przechodzi: `npm run lint`
-- [x] 3.4 Adapter nie odwołuje się do `console` ani do `astro:env`
+- [x] 3.1 Testy przechodzą: `npm test` — fd3b3a2
+- [x] 3.2 Typy się zgadzają: `npx astro check` — fd3b3a2
+- [x] 3.3 Lint przechodzi: `npm run lint` — fd3b3a2
+- [x] 3.4 Adapter nie odwołuje się do `console` ani do `astro:env` — fd3b3a2
 
 #### Manual
 
-- [x] 3.5 Prompt sprawdzony ręcznie na własnym tekście — propozycje atomowe, w języku wejścia, w limitach
+- [x] 3.5 Prompt sprawdzony ręcznie na własnym tekście — propozycje atomowe, w języku wejścia, w limitach — fd3b3a2
 
 ### Phase 4: `POST /api/generations`
 
 #### Automated
 
-- [ ] 4.1 Typy się zgadzają: `npx astro check`
-- [ ] 4.2 Lint przechodzi, w tym `no-console: "error"`: `npm run lint`
-- [ ] 4.3 Build przechodzi: `npm run build`
-- [ ] 4.4 Testy przechodzą: `npm test`
+- [x] 4.1 Typy się zgadzają: `npx astro check`
+- [x] 4.2 Lint przechodzi, w tym `no-console: "error"`: `npm run lint`
+- [x] 4.3 Build przechodzi: `npm run build`
+- [x] 4.4 Testy przechodzą: `npm test`
 
 #### Manual
 
-- [ ] 4.5 Żądanie bez sesji zwraca `401`, nie `500`
-- [ ] 4.6 Za krótki tekst zwraca `400`, a komunikat nie zawiera wejścia
-- [ ] 4.7 Poprawne żądanie zwraca propozycje i `generationId`
-- [ ] 4.8 Wiersz w `generations` ma niezerowy `generated_count` i poprawny skrót; kolumny z tekstem brak
-- [ ] 4.9 `wrangler tail` nie pokazuje fragmentu wklejonego tekstu
+- [x] 4.5 Żądanie bez sesji zwraca `401`, nie `500`
+- [x] 4.6 Za krótki tekst zwraca `400`, a komunikat nie zawiera wejścia
+- [x] 4.7 Poprawne żądanie zwraca propozycje i `generationId`
+- [x] 4.8 Wiersz w `generations` ma niezerowy `generated_count` i poprawny skrót; kolumny z tekstem brak
+- [x] 4.9 `wrangler tail` nie pokazuje fragmentu wklejonego tekstu
 
 ### Phase 5: `POST /api/flashcards`
 
