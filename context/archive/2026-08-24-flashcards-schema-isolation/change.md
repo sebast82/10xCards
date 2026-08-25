@@ -1,10 +1,10 @@
 ---
 change_id: flashcards-schema-isolation
 title: Schemat fiszek i izolacja danych per użytkownik
-status: done
+status: archived
 created: 2026-08-24
 updated: 2026-08-25
-archived_at: null
+archived_at: 2026-08-25T12:45:00Z
 ---
 
 ## Notes
