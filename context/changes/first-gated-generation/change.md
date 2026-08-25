@@ -1,7 +1,7 @@
 ---
 change_id: first-gated-generation
 title: Generowanie fiszek z wklejonego tekstu — przegląd, akceptacja, zapis
-status: new
+status: preparing
 created: 2026-08-25
 updated: 2026-08-25
 archived_at: null
@@ -21,3 +21,8 @@ każdą akceptuje / poprawia przed zapisem / odrzuca, a zaakceptowane trafiają 
   - Który model przez OpenRouter i jaki kształt promptu daje 75% akceptacji bez istotnych zmian?
   - Jak zagwarantować, że wklejony tekst nie zostaje nigdzie po zakończeniu żądania — również w logach?
 - Twarde ograniczenie: odrzucone propozycje nie mogą trafiać do bazy.
+
+## Artefakty
+
+- `research.md` (2026-08-25) — obie niewiadome zamknięte rekomendacjami; pięć decyzji projektowych
+  przeniesionych do `/10x-plan` (sekcja Open Questions).
