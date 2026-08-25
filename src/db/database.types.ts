@@ -124,7 +124,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      recount_generation_acceptance: {
+        Args: { p_generation_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       flashcard_source: "ai" | "ai_edited" | "manual"

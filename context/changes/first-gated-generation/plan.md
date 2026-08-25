@@ -755,31 +755,31 @@ Cykl obowiązujący przy każdej zmianie schematu, ustalony w F-02: `npm run db:
 
 #### Automated
 
-- [x] 1.1 Typy się zgadzają: `npx astro sync && npx astro check`
-- [x] 1.2 Lint przechodzi: `npm run lint`
-- [x] 1.3 Build przechodzi: `npm run build`
-- [x] 1.4 Nowa reguła działa: `console.log` w endpointcie daje błąd, nie ostrzeżenie
+- [x] 1.1 Typy się zgadzają: `npx astro sync && npx astro check` — 881f950
+- [x] 1.2 Lint przechodzi: `npm run lint` — 881f950
+- [x] 1.3 Build przechodzi: `npm run build` — 881f950
+- [x] 1.4 Nowa reguła działa: `console.log` w endpointcie daje błąd, nie ostrzeżenie — 881f950
 
 #### Manual
 
-- [x] 1.5 Bez `OPENROUTER_API_KEY` strona pokazuje banner i nadal działa
-- [x] 1.6 Po dodaniu klucza banner znika
+- [x] 1.5 Bez `OPENROUTER_API_KEY` strona pokazuje banner i nadal działa — 881f950
+- [x] 1.6 Po dodaniu klucza banner znika — 881f950
 
 ### Phase 2: Funkcja przeliczająca liczniki akceptacji
 
 #### Automated
 
-- [ ] 2.1 Migracja aplikuje się czysto: `npm run db:reset`
-- [ ] 2.2 Testy bazy przechodzą: `npm run db:test`
-- [ ] 2.3 Typy przeładowane: `npm run db:types`
-- [ ] 2.4 Typy zgodne ze schematem: `npx astro check`
-- [ ] 2.5 Lint przechodzi: `npm run lint`
+- [x] 2.1 Migracja aplikuje się czysto: `npm run db:reset`
+- [x] 2.2 Testy bazy przechodzą: `npm run db:test`
+- [x] 2.3 Typy przeładowane: `npm run db:types`
+- [x] 2.4 Typy zgodne ze schematem: `npx astro check`
+- [x] 2.5 Lint przechodzi: `npm run lint`
 
 #### Manual
 
-- [ ] 2.6 Asercja izolacji faktycznie testuje mechanizm (próba z `security definer` daje czerwony wynik)
-- [ ] 2.7 Migracja wypchnięta na chmurę i funkcja widoczna w Dashboardzie
-- [ ] 2.8 Ciało funkcji zaczyna się od `for update` na wierszu zlecenia
+- [x] 2.6 Asercja izolacji faktycznie testuje mechanizm (próba z `security definer` daje czerwony wynik)
+- [x] 2.7 Migracja wypchnięta na chmurę i funkcja widoczna w Dashboardzie
+- [x] 2.8 Ciało funkcji zaczyna się od `for update` na wierszu zlecenia
 
 ### Phase 3: Adapter OpenRoutera jako czyste funkcje
 
