@@ -3,12 +3,16 @@ import Layout from "@/layouts/Layout.astro";
 
 const { supabase } = Astro.locals;
 
+// Sufit chroni budżet 10 ms CPU — pełna paginacja przyjdzie z `GET /api/flashcards` w S-03.
+const PAGE_SIZE = 50;
+
 // RLS jest jedynym mechanizmem izolacji — filtr po `user_id` byłby wyłącznie wygodą.
 const { data, error } = supabase
   ? await supabase
       .from("flashcards")
       .select("id, front, back, source, created_at")
       .order("created_at", { ascending: false })
+      .range(0, PAGE_SIZE - 1)
   : { data: null, error: null };
 
 const flashcards = data ?? [];
@@ -52,7 +56,9 @@ const dateFormatter = new Intl.DateTimeFormat("pl-PL", { dateStyle: "medium", ti
     {
       flashcards.length > 0 && (
         <section class="flex flex-col gap-4">
-          <span class="text-muted-foreground text-sm">{flashcards.length} fiszek</span>
+          <span class="text-muted-foreground text-sm">
+            {flashcards.length} fiszek{flashcards.length === PAGE_SIZE && " (najnowsze)"}
+          </span>
           {flashcards.map((flashcard) => (
             <article class="bg-card text-card-foreground flex flex-col gap-3 rounded-xl border p-6 shadow-sm">
               <div class="flex flex-wrap items-center justify-between gap-2">

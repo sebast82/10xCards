@@ -5,7 +5,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { BACK_MAX_LENGTH, FRONT_MAX_LENGTH, SOURCE_TEXT_MAX, SOURCE_TEXT_MIN } from "@/lib/openrouter/limits";
+import { BACK_MAX_LENGTH, FRONT_MAX_LENGTH, SOURCE_TEXT_MAX, SOURCE_TEXT_MIN } from "@/lib/limits";
 
 // Powyżej 45 s z adaptera: serwerowy komunikat błędu ma zdążyć dotrzeć przed przerwaniem po stronie klienta.
 const GENERATE_TIMEOUT_MS = 60_000;

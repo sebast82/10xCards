@@ -1,4 +1,4 @@
-import { BACK_MAX_LENGTH, FRONT_MAX_LENGTH, proposalCap } from "./limits";
+import { BACK_MAX_LENGTH, FRONT_MAX_LENGTH, proposalCap } from "@/lib/limits";
 
 export const MODEL = "google/gemini-2.5-flash";
 
@@ -79,6 +79,12 @@ function buildSchema(): Record<string, unknown> {
   };
 }
 
+// Reguła 6 promptu to mitygacja miękka — model może jej nie usłuchać. Znacznik usuwamy twardo,
+// żeby wklejony tekst nie mógł wyjść poza własne ogrodzenie i podszyć się pod instrukcje.
+function fenceSafe(sourceText: string): string {
+  return sourceText.replaceAll("<source_text>", "").replaceAll("</source_text>", "");
+}
+
 export function buildChatRequest(sourceText: string): ChatRequest {
   const cap = proposalCap(sourceText.length);
 
@@ -95,7 +101,7 @@ export function buildChatRequest(sourceText: string): ChatRequest {
       { role: "system", content: SYSTEM_PROMPT },
       {
         role: "user",
-        content: `Utwórz fiszki na podstawie poniższego materiału. Maksymalna liczba fiszek: ${String(cap)}.\n\n<source_text>\n${sourceText}\n</source_text>`,
+        content: `Utwórz fiszki na podstawie poniższego materiału. Maksymalna liczba fiszek: ${String(cap)}.\n\n<source_text>\n${fenceSafe(sourceText)}\n</source_text>`,
       },
     ],
     response_format: {

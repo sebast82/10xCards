@@ -38,10 +38,12 @@ export async function createAiFlashcard({
   edited,
 }: CreateAiFlashcardInput): Promise<{ id: string }> {
   // Klucz obcy nie przechodzi przez RLS — bez tego zapytania cudze `generationId` przeszłoby bez przeszkód.
+  // `status` zawęża do zleceń zakończonych: wiersz `pending`/`failed` ma `generated_count = 0` i wywaliłby CHECK.
   const { data: generation, error: lookupError } = await supabase
     .from("generations")
     .select("id")
     .eq("id", generationId)
+    .eq("status", "succeeded")
     .maybeSingle();
 
   if (lookupError) {
@@ -75,7 +77,16 @@ export async function createAiFlashcard({
 
   // Liczniki są przeliczane, nie inkrementowane, więc nieudane wywołanie naprawi kolejny zapis w tym zleceniu.
   // Zgłoszenie błędu po udanym inserie kazałoby użytkownikowi ponowić zapis i zdublować fiszkę.
-  await supabase.rpc("recount_generation_acceptance", { p_generation_id: generationId });
+  // Ostatnia fiszka w zleceniu nie ma jednak kto naprawić — stąd sygnał. Do logu idzie sam kod błędu:
+  // to jedyny instrument pomiaru kryterium 75%, a cicha awaria zaniża je bez śladu.
+  const { error: recountError } = await supabase.rpc("recount_generation_acceptance", {
+    p_generation_id: generationId,
+  });
+
+  if (recountError) {
+    // eslint-disable-next-line no-console -- kod błędu Postgresa, bez treści użytkownika
+    console.warn("recount_generation_acceptance failed", recountError.code);
+  }
 
   return { id: data.id };
 }

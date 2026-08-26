@@ -1,3 +1,5 @@
+// Progi współdzielone przez wyspę React, walidację serwerową i adapter modelu — stąd neutralna lokalizacja:
+// import z `lib/openrouter/**` wciągałby domenę serwerową do bundla klienckiego.
 export const SOURCE_TEXT_MIN = 200;
 export const SOURCE_TEXT_MAX = 10_000;
 

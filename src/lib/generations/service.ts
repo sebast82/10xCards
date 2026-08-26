@@ -1,8 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/db/database.types";
-import { generateFlashcards, type PrivacyMode } from "@/lib/openrouter/client";
-import type { FlashcardProposal } from "@/lib/openrouter/parse";
+import { generateFlashcards, OpenRouterError, type PrivacyMode } from "@/lib/openrouter/client";
+import { GenerationParseError, type FlashcardProposal } from "@/lib/openrouter/parse";
+import { MODEL } from "@/lib/openrouter/prompt";
 
 // Wartość z sufitu — zamienia nieograniczony koszt w policzalny. Do skorygowania po pierwszym tygodniu.
 export const DAILY_GENERATION_LIMIT = 20;
@@ -65,6 +66,18 @@ async function assertWithinDailyLimit(supabase: SupabaseClient<Database>, userId
   }
 }
 
+// Do bazy trafia sam kod bledu — CHECK `generations_error_code_shape` odrzuci cokolwiek dluzszego.
+function failureCode(caught: unknown): string {
+  if (caught instanceof OpenRouterError || caught instanceof GenerationParseError) {
+    return caught.code;
+  }
+  return "unknown";
+}
+
+async function markFailed(supabase: SupabaseClient<Database>, generationId: string, code: string): Promise<void> {
+  await supabase.from("generations").update({ status: "failed", error_code: code }).eq("id", generationId);
+}
+
 export async function createGeneration({
   supabase,
   userId,
@@ -76,30 +89,51 @@ export async function createGeneration({
 
   const sourceTextHash = await sha256Hex(sourceText);
 
-  const startedAt = Date.now();
-  const outcome = await generateFlashcards(apiKey, sourceText);
-  const generationDuration = Date.now() - startedAt;
-
-  const { data, error } = await supabase
+  // Rezerwacja przed wywołaniem modelu: dopiero istniejący wiersz sprawia, że limit dobowy obejmuje
+  // generowania równoległe i nieudane — a te też są płatne. Bez niej N żądań naraz widzi ten sam licznik.
+  const { data: reservation, error: reserveError } = await supabase
     .from("generations")
     .insert({
       user_id: userId,
-      model: outcome.model,
+      model: MODEL,
       source_text_length: sourceText.length,
       source_text_hash: sourceTextHash,
-      // Jawnie, mimo default 0: pominięcie wywala pierwszą akceptację CHECK-iem `accepted_total_leq_generated`.
-      generated_count: outcome.proposals.length,
-      generation_duration: generationDuration,
+      generation_duration: 0,
+      status: "pending",
     })
     .select("id")
     .single();
+
+  if (reserveError) {
+    throw new GenerationServiceError("persist_failed");
+  }
+
+  const startedAt = Date.now();
+  let outcome;
+  try {
+    outcome = await generateFlashcards(apiKey, sourceText);
+  } catch (caught) {
+    await markFailed(supabase, reservation.id, failureCode(caught));
+    throw caught;
+  }
+
+  const { error } = await supabase
+    .from("generations")
+    .update({
+      model: outcome.model,
+      // Jawnie, mimo default 0: pominięcie wywala pierwszą akceptację CHECK-iem `accepted_total_leq_generated`.
+      generated_count: outcome.proposals.length,
+      generation_duration: Date.now() - startedAt,
+      status: "succeeded",
+    })
+    .eq("id", reservation.id);
 
   if (error) {
     throw new GenerationServiceError("persist_failed");
   }
 
   return {
-    generationId: data.id,
+    generationId: reservation.id,
     model: outcome.model,
     privacyMode: outcome.privacyMode,
     proposals: outcome.proposals,

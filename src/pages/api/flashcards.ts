@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 import { z } from "zod";
 
 import { createAiFlashcard, FlashcardServiceError } from "@/lib/flashcards/service";
-import { BACK_MAX_LENGTH, FRONT_MAX_LENGTH } from "@/lib/openrouter/limits";
+import { BACK_MAX_LENGTH, FRONT_MAX_LENGTH } from "@/lib/limits";
 
 // Komunikaty są stałe. Wstawienie `error.issues` wypuściłoby treść fiszki w odpowiedzi.
 const MESSAGES = {

@@ -1,7 +1,7 @@
 /* eslint-disable no-console -- jednorazowy skrypt diagnostyczny, poza ścieżką żądania */
 import { readFileSync } from "node:fs";
 import { generateFlashcards } from "../src/lib/openrouter/client";
-import { proposalCap, SOURCE_TEXT_MAX, SOURCE_TEXT_MIN } from "../src/lib/openrouter/limits";
+import { proposalCap, SOURCE_TEXT_MAX, SOURCE_TEXT_MIN } from "../src/lib/limits";
 import { buildChatRequest } from "../src/lib/openrouter/prompt";
 
 const USAGE = "Użycie: npm run try:prompt -- <ścieżka-do-pliku-z-tekstem> [--dry]";

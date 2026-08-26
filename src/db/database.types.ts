@@ -82,12 +82,14 @@ export type Database = {
           accepted_edited_count: number
           accepted_unedited_count: number
           created_at: string
+          error_code: string | null
           generated_count: number
           generation_duration: number
           id: string
           model: string
           source_text_hash: string
           source_text_length: number
+          status: Database["public"]["Enums"]["generation_status"]
           updated_at: string
           user_id: string
         }
@@ -95,12 +97,14 @@ export type Database = {
           accepted_edited_count?: number
           accepted_unedited_count?: number
           created_at?: string
+          error_code?: string | null
           generated_count?: number
           generation_duration: number
           id?: string
           model: string
           source_text_hash: string
           source_text_length: number
+          status?: Database["public"]["Enums"]["generation_status"]
           updated_at?: string
           user_id: string
         }
@@ -108,12 +112,14 @@ export type Database = {
           accepted_edited_count?: number
           accepted_unedited_count?: number
           created_at?: string
+          error_code?: string | null
           generated_count?: number
           generation_duration?: number
           id?: string
           model?: string
           source_text_hash?: string
           source_text_length?: number
+          status?: Database["public"]["Enums"]["generation_status"]
           updated_at?: string
           user_id?: string
         }
@@ -131,6 +137,7 @@ export type Database = {
     }
     Enums: {
       flashcard_source: "ai" | "ai_edited" | "manual"
+      generation_status: "pending" | "succeeded" | "failed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -259,6 +266,7 @@ export const Constants = {
   public: {
     Enums: {
       flashcard_source: ["ai", "ai_edited", "manual"],
+      generation_status: ["pending", "succeeded", "failed"],
     },
   },
 } as const

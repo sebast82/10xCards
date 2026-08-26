@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { createGeneration, GenerationServiceError } from "@/lib/generations/service";
 import { OpenRouterError } from "@/lib/openrouter/client";
-import { SOURCE_TEXT_MAX, SOURCE_TEXT_MIN } from "@/lib/openrouter/limits";
+import { SOURCE_TEXT_MAX, SOURCE_TEXT_MIN } from "@/lib/limits";
 import { GenerationParseError } from "@/lib/openrouter/parse";
 
 // Komunikaty są stałe. Wstawienie `error.issues` wypuściłoby tekst źródłowy w odpowiedzi.

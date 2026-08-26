@@ -1,7 +1,7 @@
 ---
 change_id: first-gated-generation
 title: Generowanie fiszek z wklejonego tekstu — przegląd, akceptacja, zapis
-status: implemented
+status: impl_reviewed
 created: 2026-08-25
 updated: 2026-08-26
 archived_at: null
@@ -29,3 +29,7 @@ każdą akceptuje / poprawia przed zapisem / odrzuca, a zaakceptowane trafiają 
 - `plan.md` (2026-08-25) — 9 faz; wszystkie pięć decyzji z researchu rozstrzygniętych.
 - `plan-brief.md` (2026-08-25) — dwustronicowe streszczenie z tabelą decyzji.
 - `reviews/plan-review.md` (2026-08-25) — 6 findings (3 critical), wszystkie naprawione w planie; werdykt REVISE → SOUND.
+- `reviews/impl-review.md` (2026-08-26) — 10 findings (1 critical); werdykt REJECTED wg rubryki,
+  F1–F8 naprawione w triage'u.
+- `scripts/try-prompt.ts` + skrypt npm `try:prompt` (2026-08-25) — lokalne narzędzie do ręcznego
+  sprawdzania promptu (faza 3, weryfikacja ręczna). Poza `src/`, nie trafia do bundla Workera.

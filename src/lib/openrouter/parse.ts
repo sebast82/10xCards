@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BACK_MAX_LENGTH, FRONT_MAX_LENGTH, MAX_FLASHCARDS } from "./limits";
+import { BACK_MAX_LENGTH, FRONT_MAX_LENGTH, MAX_FLASHCARDS } from "@/lib/limits";
 
 export interface FlashcardProposal {
   front: string;

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { proposalCap } from "./limits";
+import { proposalCap } from "@/lib/limits";
 import { parseGenerationResponse, type FlashcardProposal } from "./parse";
 import { buildChatRequest, MODEL, type ChatRequest } from "./prompt";
 
@@ -47,25 +47,24 @@ interface HttpOutcome {
   body: string;
 }
 
-async function postChatCompletion(apiKey: string, request: ChatRequest): Promise<HttpOutcome> {
-  let response: Response;
-
+async function postChatCompletion(apiKey: string, request: ChatRequest, signal: AbortSignal): Promise<HttpOutcome> {
   try {
-    response = await fetch(OPENROUTER_ENDPOINT, {
+    const response = await fetch(OPENROUTER_ENDPOINT, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(request),
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      signal,
     });
+
+    // Odczyt body w tym samym `try`: zerwanie połączenia w trakcie strumienia też musi dać `OpenRouterError`.
+    return { ok: response.ok, status: response.status, body: await response.text() };
   } catch (error) {
     const timedOut = error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError");
     throw new OpenRouterError(timedOut ? "timeout" : "network");
   }
-
-  return { ok: response.ok, status: response.status, body: await response.text() };
 }
 
 function withoutZdr(request: ChatRequest): ChatRequest {
@@ -76,12 +75,15 @@ function withoutZdr(request: ChatRequest): ChatRequest {
 export async function generateFlashcards(apiKey: string, sourceText: string): Promise<GenerationOutcome> {
   const request = buildChatRequest(sourceText);
 
+  // Jeden budżet na obie próby: dwa niezależne timeouty sumowałyby się do 90 s i przebijały limit klienta.
+  const signal = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
+
   let privacyMode: PrivacyMode = "zdr";
-  let outcome = await postChatCompletion(apiKey, request);
+  let outcome = await postChatCompletion(apiKey, request, signal);
 
   if (outcome.status === 404 && ZDR_ROUTE_MISSING.test(outcome.body)) {
     privacyMode = "standard";
-    outcome = await postChatCompletion(apiKey, withoutZdr(request));
+    outcome = await postChatCompletion(apiKey, withoutZdr(request), signal);
   }
 
   if (!outcome.ok) {
