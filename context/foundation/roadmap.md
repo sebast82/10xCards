@@ -182,7 +182,7 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 | F-01       | `srs-algorithm-contract`        | #1    | Kontrakt algorytmu powtórek i stanu harmonogramu         | done                  | Zarchiwizowane 2026-08-24; issue zamknięte             |
 | F-02       | `flashcards-schema-isolation`   | #2    | Schemat fiszek i izolacja danych per użytkownik          | done                  | Wdrożone lokalnie i zdalnie 2026-08-25; issue zamknięte |
 | S-01       | `deployed-auth-baseline`        | #3    | Rejestracja i logowanie na wdrożonej instancji           | done                  | Zweryfikowane na produkcji 2026-08-21; issue zamknięte |
-| S-02       | `first-gated-generation`        | #4    | Generowanie fiszek z tekstu: przegląd, akceptacja, zapis | done                  | Zarchiwizowane 2026-08-26; przegląd implementacji: 10 findings, 9 naprawionych |
+| S-02       | `first-gated-generation`        | #4    | Generowanie fiszek z tekstu: przegląd, akceptacja, zapis | done                  | Zarchiwizowane 2026-08-26; przegląd implementacji: 10 findings, 9 naprawionych; issue zamknięte |
 | S-03       | `manual-card-edit-delete`       | #5    | Poprawianie i usuwanie zapisanych fiszek                 | no                    | Czeka na S-02                                          |
 | S-04       | `manual-card-create`            | #6    | Ręczne tworzenie fiszki                                  | no                    | Czeka na S-02                                          |
 | S-05       | `srs-review-session`            | #7    | Sesja powtórkowa z algorytmem spaced repetition          | no                    | Czeka na F-02 i S-02; domyka pętlę                     |
