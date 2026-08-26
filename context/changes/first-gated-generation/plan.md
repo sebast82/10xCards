@@ -850,32 +850,32 @@ Cykl obowiązujący przy każdej zmianie schematu, ustalony w F-02: `npm run db:
 
 #### Automated
 
-- [x] 7.1 Typy się zgadzają: `npx astro check`
-- [x] 7.2 Lint przechodzi: `npm run lint`
-- [x] 7.3 Build przechodzi: `npm run build`
+- [x] 7.1 Typy się zgadzają: `npx astro check` — a60b377
+- [x] 7.2 Lint przechodzi: `npm run lint` — a60b377
+- [x] 7.3 Build przechodzi: `npm run build` — a60b377
 
 #### Manual
 
-- [x] 7.4 Zapisane fiszki widoczne na `/deck` z właściwym pochodzeniem
-- [x] 7.5 Konto bez fiszek widzi stan pusty z odnośnikiem do `/generate`
-- [x] 7.6 Drugie konto nie widzi cudzych fiszek
-- [x] 7.7 Odnośniki z `/dashboard` prowadzą do obu ekranów
+- [x] 7.4 Zapisane fiszki widoczne na `/deck` z właściwym pochodzeniem — a60b377
+- [x] 7.5 Konto bez fiszek widzi stan pusty z odnośnikiem do `/generate` — a60b377
+- [x] 7.6 Drugie konto nie widzi cudzych fiszek — a60b377
+- [x] 7.7 Odnośniki z `/dashboard` prowadzą do obu ekranów — a60b377
 
 ### Phase 8: Ujednolicenie systemu stylów
 
 #### Automated
 
-- [ ] 8.1 Typy się zgadzają: `npx astro check`
-- [ ] 8.2 Lint przechodzi: `npm run lint`
-- [ ] 8.3 Build przechodzi: `npm run build`
-- [ ] 8.4 `git diff` nie zawiera zmian poza atrybutami klas i importami
+- [x] 8.1 Typy się zgadzają: `npx astro check`
+- [x] 8.2 Lint przechodzi: `npm run lint`
+- [x] 8.3 Build przechodzi: `npm run build`
+- [x] 8.4 `git diff` nie zawiera zmian poza atrybutami klas i importami
 
 #### Manual
 
-- [ ] 8.5 Rejestracja, logowanie i wylogowanie działają bez zmian
-- [ ] 8.6 Komunikat błędu z `?error=` nadal się wyświetla
-- [ ] 8.7 Ekrany wyglądają spójnie
-- [ ] 8.8 Banner braku konfiguracji nadal się wyświetla
+- [x] 8.5 Rejestracja, logowanie i wylogowanie działają bez zmian
+- [x] 8.6 Komunikat błędu z `?error=` nadal się wyświetla
+- [x] 8.7 Ekrany wyglądają spójnie
+- [x] 8.8 Banner braku konfiguracji nadal się wyświetla
 
 ### Phase 9: Weryfikacja na wdrożonej instancji
 
