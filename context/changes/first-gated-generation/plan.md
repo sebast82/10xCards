@@ -865,24 +865,24 @@ Cykl obowiązujący przy każdej zmianie schematu, ustalony w F-02: `npm run db:
 
 #### Automated
 
-- [x] 8.1 Typy się zgadzają: `npx astro check`
-- [x] 8.2 Lint przechodzi: `npm run lint`
-- [x] 8.3 Build przechodzi: `npm run build`
-- [x] 8.4 `git diff` nie zawiera zmian poza atrybutami klas i importami
+- [x] 8.1 Typy się zgadzają: `npx astro check` — 535db36
+- [x] 8.2 Lint przechodzi: `npm run lint` — 535db36
+- [x] 8.3 Build przechodzi: `npm run build` — 535db36
+- [x] 8.4 `git diff` nie zawiera zmian poza atrybutami klas i importami — 535db36
 
 #### Manual
 
-- [x] 8.5 Rejestracja, logowanie i wylogowanie działają bez zmian
-- [x] 8.6 Komunikat błędu z `?error=` nadal się wyświetla
-- [x] 8.7 Ekrany wyglądają spójnie
-- [x] 8.8 Banner braku konfiguracji nadal się wyświetla
+- [x] 8.5 Rejestracja, logowanie i wylogowanie działają bez zmian — 535db36
+- [x] 8.6 Komunikat błędu z `?error=` nadal się wyświetla — 535db36
+- [x] 8.7 Ekrany wyglądają spójnie — 535db36
+- [x] 8.8 Banner braku konfiguracji nadal się wyświetla — 535db36
 
 ### Phase 9: Weryfikacja na wdrożonej instancji
 
 #### Automated
 
-- [ ] 9.1 Build produkcyjny przechodzi: `npm run build`
-- [ ] 9.2 `npx wrangler dev` startuje bez błędów
+- [x] 9.1 Build produkcyjny przechodzi: `npm run build`
+- [x] 9.2 `npx wrangler dev` startuje bez błędów
 - [ ] 9.3 Pełny zestaw bramek CI zielony na `master`
 
 #### Manual
