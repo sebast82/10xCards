@@ -798,35 +798,35 @@ Cykl obowiązujący przy każdej zmianie schematu, ustalony w F-02: `npm run db:
 
 #### Automated
 
-- [x] 4.1 Typy się zgadzają: `npx astro check`
-- [x] 4.2 Lint przechodzi, w tym `no-console: "error"`: `npm run lint`
-- [x] 4.3 Build przechodzi: `npm run build`
-- [x] 4.4 Testy przechodzą: `npm test`
+- [x] 4.1 Typy się zgadzają: `npx astro check` — f47f43d
+- [x] 4.2 Lint przechodzi, w tym `no-console: "error"`: `npm run lint` — f47f43d
+- [x] 4.3 Build przechodzi: `npm run build` — f47f43d
+- [x] 4.4 Testy przechodzą: `npm test` — f47f43d
 
 #### Manual
 
-- [x] 4.5 Żądanie bez sesji zwraca `401`, nie `500`
-- [x] 4.6 Za krótki tekst zwraca `400`, a komunikat nie zawiera wejścia
-- [x] 4.7 Poprawne żądanie zwraca propozycje i `generationId`
-- [x] 4.8 Wiersz w `generations` ma niezerowy `generated_count` i poprawny skrót; kolumny z tekstem brak
-- [x] 4.9 `wrangler tail` nie pokazuje fragmentu wklejonego tekstu
+- [x] 4.5 Żądanie bez sesji zwraca `401`, nie `500` — f47f43d
+- [x] 4.6 Za krótki tekst zwraca `400`, a komunikat nie zawiera wejścia — f47f43d
+- [x] 4.7 Poprawne żądanie zwraca propozycje i `generationId` — f47f43d
+- [x] 4.8 Wiersz w `generations` ma niezerowy `generated_count` i poprawny skrót; kolumny z tekstem brak — f47f43d
+- [x] 4.9 `wrangler tail` nie pokazuje fragmentu wklejonego tekstu — f47f43d
 
 ### Phase 5: `POST /api/flashcards`
 
 #### Automated
 
-- [ ] 5.1 Typy się zgadzają: `npx astro check`
-- [ ] 5.2 Lint przechodzi: `npm run lint`
-- [ ] 5.3 Build przechodzi: `npm run build`
-- [ ] 5.4 Testy przechodzą: `npm test`
+- [x] 5.1 Typy się zgadzają: `npx astro check`
+- [x] 5.2 Lint przechodzi: `npm run lint`
+- [x] 5.3 Build przechodzi: `npm run build`
+- [x] 5.4 Testy przechodzą: `npm test`
 
 #### Manual
 
-- [ ] 5.5 Zapis z poprawnym `generationId` zwraca `201` i tworzy wiersz z 9 polami harmonogramu
-- [ ] 5.6 Zapis z cudzym `generationId` zwraca `404` i nie tworzy wiersza
-- [ ] 5.7 Liczniki po dwóch zapisach (jeden edytowany) pokazują `1` i `1`
-- [ ] 5.8 Powtórzone żądanie nie zawyża liczników
-- [ ] 5.9 `front` o długości 501 znaków zwraca `400`, nie `500`
+- [x] 5.5 Zapis z poprawnym `generationId` zwraca `201` i tworzy wiersz z 9 polami harmonogramu
+- [x] 5.6 Zapis z cudzym `generationId` zwraca `404` i nie tworzy wiersza
+- [x] 5.7 Liczniki po dwóch zapisach (jeden edytowany) pokazują `1` i `1`
+- [x] 5.8 Powtórzone żądanie nie zawyża liczników
+- [x] 5.9 `front` o długości 501 znaków zwraca `400`, nie `500`
 
 ### Phase 6: Ekran `/generate`
 

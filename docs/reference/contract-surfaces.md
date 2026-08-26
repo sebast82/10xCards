@@ -38,7 +38,8 @@ S-06 nie wprowadza nowych tras — zmienia zachowanie `/generate`.
 | `/api/auth/signin`    | POST          | Logowanie                                                | przepływ auth                | istnieje    | —          |
 | `/api/auth/signout`   | POST          | Wylogowanie                                              | przepływ auth                | istnieje    | —          |
 | `/api/generations`    | POST          | Zlecenie generowania propozycji z wklejonego tekstu      | `locals.user`, 401 bez sesji | istnieje    | S-02       |
-| `/api/flashcards`     | GET, POST     | Odczyt kolekcji, zapis zaakceptowanej lub ręcznej fiszki | `locals.user`, 401 bez sesji | proponowane | S-02, S-04 |
+| `/api/flashcards`     | POST          | Zapis zaakceptowanej propozycji AI, w S-04 też ręcznej   | `locals.user`, 401 bez sesji | istnieje    | S-02, S-04 |
+| `/api/flashcards`     | GET           | Odczyt kolekcji                                          | `locals.user`, 401 bez sesji | proponowane | S-03       |
 | `/api/flashcards/:id` | PATCH, DELETE | Edycja i usunięcie zapisanej fiszki                      | `locals.user`, 401 bez sesji | proponowane | S-03       |
 | `/api/reviews`        | GET, POST     | Pobranie fiszek na sesję, zapis oceny                    | `locals.user`, 401 bez sesji | proponowane | S-05       |
 
