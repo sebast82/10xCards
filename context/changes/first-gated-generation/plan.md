@@ -815,36 +815,36 @@ Cykl obowiązujący przy każdej zmianie schematu, ustalony w F-02: `npm run db:
 
 #### Automated
 
-- [x] 5.1 Typy się zgadzają: `npx astro check`
-- [x] 5.2 Lint przechodzi: `npm run lint`
-- [x] 5.3 Build przechodzi: `npm run build`
-- [x] 5.4 Testy przechodzą: `npm test`
+- [x] 5.1 Typy się zgadzają: `npx astro check` — 10a7c7c
+- [x] 5.2 Lint przechodzi: `npm run lint` — 10a7c7c
+- [x] 5.3 Build przechodzi: `npm run build` — 10a7c7c
+- [x] 5.4 Testy przechodzą: `npm test` — 10a7c7c
 
 #### Manual
 
-- [x] 5.5 Zapis z poprawnym `generationId` zwraca `201` i tworzy wiersz z 9 polami harmonogramu
-- [x] 5.6 Zapis z cudzym `generationId` zwraca `404` i nie tworzy wiersza
-- [x] 5.7 Liczniki po dwóch zapisach (jeden edytowany) pokazują `1` i `1`
-- [x] 5.8 Powtórzone żądanie nie zawyża liczników
-- [x] 5.9 `front` o długości 501 znaków zwraca `400`, nie `500`
+- [x] 5.5 Zapis z poprawnym `generationId` zwraca `201` i tworzy wiersz z 9 polami harmonogramu — 10a7c7c
+- [x] 5.6 Zapis z cudzym `generationId` zwraca `404` i nie tworzy wiersza — 10a7c7c
+- [x] 5.7 Liczniki po dwóch zapisach (jeden edytowany) pokazują `1` i `1` — 10a7c7c
+- [x] 5.8 Powtórzone żądanie nie zawyża liczników — 10a7c7c
+- [x] 5.9 `front` o długości 501 znaków zwraca `400`, nie `500` — 10a7c7c
 
 ### Phase 6: Ekran `/generate`
 
 #### Automated
 
-- [ ] 6.1 Typy się zgadzają: `npx astro check`
-- [ ] 6.2 Lint przechodzi, w tym `react-compiler`: `npm run lint`
-- [ ] 6.3 Build przechodzi: `npm run build`
+- [x] 6.1 Typy się zgadzają: `npx astro check`
+- [x] 6.2 Lint przechodzi, w tym `react-compiler`: `npm run lint`
+- [x] 6.3 Build przechodzi: `npm run build`
 
 #### Manual
 
-- [ ] 6.4 Niezalogowany na `/generate` trafia na `/auth/signin`
-- [ ] 6.5 Generowanie daje listę propozycji w rozsądnym czasie
-- [ ] 6.6 Zapis, edycja i odrzucenie działają per karta; odrzucona nie trafia do bazy
-- [ ] 6.7 `source` rozróżnia `ai` i `ai_edited`, a wejście w edycję bez zmian daje `ai`
-- [ ] 6.8 Licznik postępu zgadza się z liczbą zapisanych
-- [ ] 6.9 Błąd generowania pokazuje komunikat z ponowieniem i zachowuje tekst
-- [ ] 6.10 Odświeżenie strony w trakcie przeglądu gubi niezapisane propozycje
+- [x] 6.4 Niezalogowany na `/generate` trafia na `/auth/signin`
+- [x] 6.5 Generowanie daje listę propozycji w rozsądnym czasie
+- [x] 6.6 Zapis, edycja i odrzucenie działają per karta; odrzucona nie trafia do bazy
+- [x] 6.7 `source` rozróżnia `ai` i `ai_edited`, a wejście w edycję bez zmian daje `ai`
+- [x] 6.8 Licznik postępu zgadza się z liczbą zapisanych
+- [x] 6.9 Błąd generowania pokazuje komunikat z ponowieniem i zachowuje tekst
+- [x] 6.10 Odświeżenie strony w trakcie przeglądu gubi niezapisane propozycje
 
 ### Phase 7: Ekran `/deck` i nawigacja
 

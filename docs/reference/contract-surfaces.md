@@ -20,7 +20,7 @@ Rejestr **nazw nośnych** — tych, które muszą pozostać spójne między zmia
 | `/auth/signup`        | publiczna | Rejestracja                                       | istnieje    | —                               |
 | `/auth/confirm-email` | publiczna | Powrót z linku potwierdzającego                   | istnieje    | —                               |
 | `/dashboard`          | chroniona | Ekran po zalogowaniu                              | istnieje    | —                               |
-| `/generate`           | chroniona | Wklejenie tekstu, przegląd propozycji, akceptacja | proponowane | S-02                            |
+| `/generate`           | chroniona | Wklejenie tekstu, przegląd propozycji, akceptacja | istnieje    | S-02                            |
 | `/deck`               | chroniona | Kolekcja fiszek użytkownika                       | proponowane | S-02, rozszerzana w S-03 i S-04 |
 | `/review`             | chroniona | Sesja powtórkowa                                  | proponowane | S-05                            |
 
