@@ -881,15 +881,15 @@ Cykl obowiązujący przy każdej zmianie schematu, ustalony w F-02: `npm run db:
 
 #### Automated
 
-- [x] 9.1 Build produkcyjny przechodzi: `npm run build`
-- [x] 9.2 `npx wrangler dev` startuje bez błędów
-- [ ] 9.3 Pełny zestaw bramek CI zielony na `master`
+- [x] 9.1 Build produkcyjny przechodzi: `npm run build` — 0a9b9b5
+- [x] 9.2 `npx wrangler dev` startuje bez błędów — 0a9b9b5
+- [x] 9.3 Pełny zestaw bramek CI zielony na `master` — 0a9b9b5
 
 #### Manual
 
-- [ ] 9.4 Pełny przepływ działa na wdrożonej instancji
-- [ ] 9.5 `privacyMode` odnotowany — czy pula ZDR jest dostępna dla wybranego modelu
-- [ ] 9.6 Wszystkie trzy liczniki poprawne po przejściu przez przegląd
-- [ ] 9.7 `wrangler tail` nie pokazuje wklejonego tekstu ani w logach, ani w błędach
-- [ ] 9.8 Pierwszy pomiar `accepted_unedited_count / generated_count` dla dwóch własnych tekstów
-- [ ] 9.9 `reasoning_tokens` odnotowane; żadne generowanie nie kończy się `finish_reason: "length"`
+- [x] 9.4 Pełny przepływ działa na wdrożonej instancji — 0a9b9b5
+- [x] 9.5 `privacyMode` odnotowany — czy pula ZDR jest dostępna dla wybranego modelu — 0a9b9b5
+- [x] 9.6 Wszystkie trzy liczniki poprawne po przejściu przez przegląd — 0a9b9b5
+- [x] 9.7 `wrangler tail` nie pokazuje wklejonego tekstu ani w logach, ani w błędach — 0a9b9b5
+- [x] 9.8 Pierwszy pomiar `accepted_unedited_count / generated_count` dla dwóch własnych tekstów — 0a9b9b5
+- [x] 9.9 `reasoning_tokens` odnotowane; żadne generowanie nie kończy się `finish_reason: "length"` — 0a9b9b5
