@@ -4,7 +4,7 @@ version: 1
 status: draft
 created: 2026-08-21
 updated: 2026-08-26
-prd_version: 2
+prd_version: 3
 main_goal: speed
 top_blocker: time
 ---
@@ -41,9 +41,11 @@ Deklaracja właściciela produktu brzmiała: gwiazdą jest **cała pętla** (rej
 | F-02 | `flashcards-schema-isolation`   | (fundament) fiszki mają trwały schemat ze znacznikiem pochodzenia, a każdy użytkownik widzi wyłącznie swoje | F-01          | Access Control, FR-008                          | done     |
 | S-01 | `deployed-auth-baseline`        | zarejestrować się, zalogować i wylogować na wdrożonej instancji                                             | —             | FR-001, FR-002, Access Control                  | done     |
 | S-02 | `first-gated-generation`        | wkleić tekst, przejrzeć propozycje AI i zapisać zaakceptowane do swojej kolekcji                            | F-02, S-01    | US-01, FR-003, FR-004, FR-008                   | done     |
+| S-07 | `app-shell-navigation`          | przechodzić między wszystkimi funkcjami z jednej, stałej nawigacji — bez cofania w przeglądarce             | S-02          | Non-Functional Requirements, FR-008             | proposed |
 | S-03 | `manual-card-edit-delete`       | poprawić treść zapisanej fiszki i usunąć zbędną                                                             | S-02          | FR-006, FR-007                                  | proposed |
 | S-04 | `manual-card-create`            | dodać własną fiszkę ręcznie, bez udziału AI                                                                 | S-02          | FR-005                                          | proposed |
 | S-05 | `srs-review-session`            | uruchomić sesję powtórkową i ocenić fiszki według algorytmu spaced repetition                               | F-02, S-02    | FR-009, Success Criteria §Guardrails            | proposed |
+| S-08 | `visual-polish-pass`            | (wykończenie) korzystać z aplikacji o spójnym wyglądzie, z czytelnymi stanami pustej listy, ładowania i błędu | S-03, S-04, S-05, S-07 | US-01, FR-004, FR-008                | proposed |
 | S-06 | `streaming-generation-progress` | widzieć pierwsze fiszki i postęp już w trakcie generowania, bez czekania na całość                          | S-02          | US-01, FR-003, Non-Functional Requirements      | proposed |
 
 ## Streams
@@ -56,6 +58,7 @@ Pomoc nawigacyjna — grupuje elementy dzielące ten sam łańcuch zależności.
 | B      | Pętla generowania    | `F-01` → `F-02` → `S-02` → `S-06` | Ścieżka gwiazdy przewodniej; przy celu `speed` ma pierwszeństwo w każdym remisie.                                |
 | C      | Zarządzanie kolekcją | `S-03` / `S-04` (równolegle)      | Dołącza do Stream B w `S-02`; oba elementy niezależne od siebie.                                                 |
 | D      | Pętla nauki          | `S-05`                            | Dołącza do Stream B w `S-02`, a kontrakt bierze z `F-01`; domyka pętlę zadeklarowaną przez właściciela produktu. |
+| E      | Powłoka i wykończenie | `S-07` → `S-08`                   | Dołącza do Stream B w `S-02`. `S-07` idzie przed Stream C i D, bo każdy ich ekran podpina się do powłoki; `S-08` zbiera je wszystkie, więc czeka na ostatni. |
 
 ## Baseline
 
@@ -126,13 +129,26 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 - **Risk:** To jest gwiazda przewodnia i jednocześnie największa niewiadoma produktowa — jakości propozycji nie da się przewidzieć z PRD, tylko zmierzyć na własnym materiale. Sekwencjonowane zaraz po fundamencie i logowaniu, bo im później ten pomiar, tym mniej wieczorów zostaje na poprawę promptu. Odrzucone propozycje nie mogą trafiać do bazy — inaczej kryterium „75% fiszek w kolekcji pochodzi z AI" przestaje cokolwiek mierzyć.
 - **Status:** done
 
+### S-07: Stała nawigacja obejmująca wszystkie funkcje
+
+- **Outcome:** użytkownik może przejść do dowolnej funkcji aplikacji — generowania, własnej kolekcji, sesji nauki, wylogowania — z jednej nawigacji obecnej na każdym ekranie, i w każdej chwili widzi, w której funkcji się znajduje. Przycisk „wstecz" przeglądarki przestaje być narzędziem poruszania się po aplikacji.
+- **Change ID:** `app-shell-navigation`
+- **PRD refs:** Non-Functional Requirements, FR-008, Access Control
+- **Unlocks:** S-03, S-04, S-05 (każdy dokłada ekran, który podpina się do gotowej powłoki zamiast wymuszać przeróbkę wstecz), S-08 (jednolity punkt odniesienia dla wyglądu)
+- **Prerequisites:** S-02
+- **Parallel with:** S-06
+- **Blockers:** —
+- **Unknowns:** —
+- **Risk:** Wbrew pierwszemu wrażeniu to nie kosmetyka, tylko luka funkcjonalna: bez tego elementu użytkownik nie ma jak przejść z kolekcji do generowania inaczej niż cofając historię przeglądarki, a po S-05 dojdzie trzecia funkcja bez wejścia. Stąd pozycja przed Stream C i D, choć formalnie nic go tam nie blokuje: S-03, S-04 i S-05 każdy dodaje ekran, więc powłoka zbudowana po nich to retrofit trzech ekranów naraz zamiast trzech dopisanych wpisów. Wymaganie niefunkcjonalne PRD dopisane 2026-08-26 (dostępność każdej funkcji z trwałej nawigacji) jest kotwicą tego elementu — wcześniej roadmapa milczała na ten temat, bo milczał PRD. Zakres celowo wąski: struktura nawigacji i wskazanie bieżącego miejsca, bez przebudowy wyglądu — ten idzie osobno w S-08, po powstaniu ostatniego ekranu.
+- **Status:** proposed
+
 ### S-03: Poprawianie i usuwanie zapisanych fiszek
 
 - **Outcome:** użytkownik może zmienić treść pytania lub odpowiedzi w zapisanej fiszce i trwale usunąć fiszkę ze swojej kolekcji.
 - **Change ID:** `manual-card-edit-delete`
 - **PRD refs:** FR-006, FR-007
 - **Prerequisites:** S-02
-- **Parallel with:** S-04, S-05, S-06
+- **Parallel with:** S-04, S-05, S-06, S-07
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Edycja po zapisie to inna operacja niż poprawka propozycji przed akceptacją z S-02 — jeśli obie trafią do jednego przebiegu, formularz zacznie obsługiwać dwa różne stany. Usuwanie jest nieodwracalne (PRD świadomie odrzucił soft delete), więc potwierdzenie akcji jest częścią zakresu, a nie ozdobnikiem.
@@ -144,7 +160,7 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 - **Change ID:** `manual-card-create`
 - **PRD refs:** FR-005
 - **Prerequisites:** S-02
-- **Parallel with:** S-03, S-05, S-06
+- **Parallel with:** S-03, S-05, S-06, S-07
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Najmniejszy element pętli, świadomie po S-02: ręczne dodawanie korzysta z tego samego zapisu i tej samej listy, więc zbudowane po generowaniu nie tworzy drugiej ścieżki zapisu. Odwrotna kolejność oznaczałaby przerabianie formularza pod przepływ AI.
@@ -156,7 +172,7 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 - **Change ID:** `srs-review-session`
 - **PRD refs:** FR-009, Success Criteria §Guardrails
 - **Prerequisites:** F-02, S-02
-- **Parallel with:** S-03, S-04, S-06
+- **Parallel with:** S-03, S-04, S-06, S-07
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Kontrakt algorytmu i pola stanu przychodzą gotowe z F-01, więc ryzyko tego elementu nie leży już w wyborze rozwiązania, tylko w jego wpięciu. PRD stawia tu jedyny twardy warunek brzegowy: sesja nauki musi działać poprawnie niezależnie od źródła fiszek — po S-04 w kolekcji są zarówno fiszki z AI, jak i ręczne, i obie muszą wchodzić do harmonogramu tak samo. Domyka pętlę zadeklarowaną przez właściciela produktu, więc przy celu `speed` nie schodzi poniżej S-06 w kolejce.
@@ -168,11 +184,24 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 - **Change ID:** `streaming-generation-progress`
 - **PRD refs:** US-01, FR-003, Non-Functional Requirements
 - **Prerequisites:** S-02
-- **Parallel with:** S-03, S-04, S-05
+- **Parallel with:** S-03, S-04, S-05, S-07
 - **Blockers:** —
 - **Unknowns:**
   - Czy limity środowiska (czas CPU, liczba podzapytań, równoległe połączenia wychodzące — opisane w `infrastructure.md`) pozwalają na przyrostowe dostarczanie bez zmiany planu hostingu? — Owner: user. Block: no.
-- **Risk:** Świadomie oddzielone od S-02, żeby pomiar jakości propozycji nie czekał na strojenie strumieniowania. Jedyny element poza pętlą — przy celu `speed` i głównym ryzyku `time` to pierwszy kandydat do odłożenia, jeśli termin zacznie napierać: generowanie zbiorcze spełnia FR-003, tylko gorzej się go używa.
+- **Risk:** Świadomie oddzielone od S-02, żeby pomiar jakości propozycji nie czekał na strojenie strumieniowania. Jedyny element poza pętlą — przy celu `speed` i głównym ryzyku `time` to pierwszy kandydat do odłożenia, jeśli termin zacznie napierać: generowanie zbiorcze spełnia FR-003, tylko gorzej się go używa. **2026-08-26:** ten warunek się ziścił — wygląd aplikacji stał się bramką publicznego debiutu, więc S-06 ustępuje miejsca w kamieniu milowym `MVP — pętla` elementowi S-08 i zostaje w `Bufor — do przycięcia`. To odłożenie jest **warunkowe, nie ostateczne**: jeśli pętla MVP (S-07, S-03, S-04, S-05, S-08) domknie się przed 2026-08-31, S-06 wraca do kolejki i zostaje dokończony przed debiutem — wymaganie niefunkcjonalne PRD o pierwszych fiszkach w 30 sekund pozostaje w mocy i nie zostało uchylone.
+- **Status:** proposed
+
+### S-08: Przegląd wizualny przed debiutem
+
+- **Outcome:** (wykończenie) użytkownik napotyka spójny wygląd na wszystkich ekranach — jedną skalę typografii i odstępów, jednolite formularze, przyciski i listy — oraz czytelne stany: pusta kolekcja, trwające ładowanie, błąd operacji.
+- **Change ID:** `visual-polish-pass`
+- **PRD refs:** US-01, FR-004, FR-008
+- **Unlocks:** publiczny debiut
+- **Prerequisites:** S-03, S-04, S-05, S-07
+- **Parallel with:** —
+- **Blockers:** —
+- **Unknowns:** —
+- **Risk:** Jedyny element roadmapy, który nie daje użytkownikowi nowej możliwości, więc formalnie nie jest przekrojem — stąd znacznik `(wykończenie)` i pozycja na samym końcu. Polerowanie ekranu, zanim on istnieje, to praca do wyrzucenia: każdy element Stream C i D dokłada widoki, więc przebieg uruchomiony wcześniej trzeba by powtórzyć. Mimo to stoi w roadmapie, a nie obok niej — wygląd jest warunkiem debiutu, a rzecz niesekwencjonowana zawsze przegrywa o wieczór z elementem, który ma swój wiersz w tabeli. Zakres domknięty listą ekranów istniejących w chwili startu i spójnością tego, co już jest; przeprojektowanie interfejsu od nowa nie mieści się w terminie 2026-08-31. Jako ostatni element przed debiutem jest też ostatnim buforem — jeśli czas się skończy, przycina się jego głębokość, nie elementy pętli przed nim.
 - **Status:** proposed
 
 ## Backlog Handoff
@@ -183,21 +212,24 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 | F-02       | `flashcards-schema-isolation`   | #2    | Schemat fiszek i izolacja danych per użytkownik          | done                  | Wdrożone lokalnie i zdalnie 2026-08-25; issue zamknięte |
 | S-01       | `deployed-auth-baseline`        | #3    | Rejestracja i logowanie na wdrożonej instancji           | done                  | Zweryfikowane na produkcji 2026-08-21; issue zamknięte |
 | S-02       | `first-gated-generation`        | #4    | Generowanie fiszek z tekstu: przegląd, akceptacja, zapis | done                  | Zarchiwizowane 2026-08-26; przegląd implementacji: 10 findings, 9 naprawionych; issue zamknięte |
-| S-03       | `manual-card-edit-delete`       | #5    | Poprawianie i usuwanie zapisanych fiszek                 | no                    | Czeka na S-02                                          |
-| S-04       | `manual-card-create`            | #6    | Ręczne tworzenie fiszki                                  | no                    | Czeka na S-02                                          |
-| S-05       | `srs-review-session`            | #7    | Sesja powtórkowa z algorytmem spaced repetition          | no                    | Czeka na F-02 i S-02; domyka pętlę                     |
-| S-06       | `streaming-generation-progress` | #8    | Przyrostowe generowanie i widoczny postęp                | no                    | Czeka na S-02; pierwszy kandydat do odłożenia          |
+| S-07       | `app-shell-navigation`          | #11   | Stała nawigacja obejmująca wszystkie funkcje              | yes                   | Odblokowane przez S-02; następny w kolejce — idzie przed S-03/S-04/S-05, żeby ich ekrany podpinały się do gotowej powłoki |
+| S-03       | `manual-card-edit-delete`       | #5    | Poprawianie i usuwanie zapisanych fiszek                 | yes                   | Odblokowane przez S-02                                 |
+| S-04       | `manual-card-create`            | #6    | Ręczne tworzenie fiszki                                  | yes                   | Odblokowane przez S-02                                 |
+| S-05       | `srs-review-session`            | #7    | Sesja powtórkowa z algorytmem spaced repetition          | yes                   | Odblokowane przez F-02 i S-02; domyka pętlę            |
+| S-08       | `visual-polish-pass`            | #12   | Przegląd wizualny przed debiutem                         | no                    | Czeka na S-03, S-04, S-05 i S-07; ostatni przed debiutem i ostatni bufor |
+| S-06       | `streaming-generation-progress` | #8    | Przyrostowe generowanie i widoczny postęp                | no                    | Czeka na S-02; odłożone 2026-08-26 na rzecz S-08 — odłożenie warunkowe, wraca do kolejki, jeśli pętla MVP domknie się przed terminem |
 
-Kamienie milowe: F-01–S-05 w `MVP — pętla` (termin 2026-08-31), S-06 w `Bufor — do przycięcia`.
+Kamienie milowe: F-01–S-05, S-07 i S-08 w `MVP — pętla` (termin 2026-08-31), S-06 w `Bufor — do przycięcia`.
 
 ## Open Roadmap Questions
 
-Brak otwartych pytań — oba rozstrzygnięto 2026-08-21.
+Brak otwartych pytań — wszystkie rozstrzygnięte.
 
 **Rozstrzygnięte**
 
 1. **Które metody logowania wdrożyć w MVP?** → **tylko email+hasło**. Pełny cykl jest już w kodzie, więc koszt zerowy; przy celu `speed` każda dodatkowa metoda to konfiguracja, która nie przybliża żadnego kryterium sukcesu. OAuth i logowanie bez hasła zostają w `## Parked`. Wpływ: S-01 potwierdza istniejącą ścieżkę, nie dodaje nowej. Issue #9 (zamknięte).
 2. **Czy dane odróżniają fiszkę z AI od ręcznej?** → **tak, znacznik pochodzenia w tabeli fiszek**. Bez niego drugie kryterium sukcesu („75% kolekcji pochodzi z AI") jest niemierzalne, a pochodzenia nie da się odtworzyć wstecz. Wpływ: znacznik wchodzi tą samą migracją co reszta schematu w F-02, które wraca ze stanu `blocked` do `proposed`. Issue #10 (zamknięte).
+3. **Czy prace nad nawigacją i wyglądem należą do roadmapy, czy idą obok niej?** — rozstrzygnięte 2026-08-26: **do roadmapy, ale rozbite na dwa elementy o różnym ryzyku i różnym miejscu w sekwencji**. Nawigacja to luka funkcjonalna, nie kosmetyka — wchodzi jako S-07 przed Stream C i D, bo każdy ich ekran podpina się do powłoki. Wygląd nie daje nowej możliwości, więc jest przebiegiem wykończeniowym S-08 na końcu, po powstaniu ostatniego ekranu. Obok roadmapy nie mogą iść, bo są bramką publicznego debiutu, a rzecz niesekwencjonowana przegrywa o wieczór z każdą sekwencjonowaną. Wpływ: PRD podbity do v3 o wymaganie niefunkcjonalne o trwałej nawigacji (kotwica dla S-07); S-06 odłożone do `Bufor — do przycięcia` na rzecz S-08.
 
 ## Parked
 

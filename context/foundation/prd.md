@@ -1,6 +1,6 @@
 ---
 project: "10xCards"
-version: 2
+version: 3
 status: draft
 created: 2026-07-10
 context_type: greenfield
@@ -84,6 +84,7 @@ Samouczek — osoba ucząca się samodzielnie, budująca narzędzie pod własne 
 ## Non-Functional Requirements
 
 - Użytkownik widzi pierwsze wygenerowane fiszki w ciągu 30 sekund od zlecenia, z ciągłym widocznym postępem podczas generowania. Kolejne fiszki mogą pojawiać się przyrostowo, a użytkownik może przeglądać już przygotowane.
+- Każda funkcja aplikacji jest osiągalna z trwałej nawigacji obecnej na każdym ekranie. Użytkownik nie musi polegać na przycisku „wstecz" przeglądarki ani na ręcznym wpisywaniu adresu, żeby przejść między funkcjami, i w każdej chwili widzi, w której z nich się znajduje.
 - Tekst źródłowy wklejony przez użytkownika nie pozostaje w storage aplikacji po zakończeniu operacji generowania — nie jest dostępny dla operatora ani użytkownika po zakończeniu żądania, które go przetworzyło.
 - Produkt działa poprawnie na najnowszych wersjach przeglądarek z silnikiem Chromium.
 - Fiszki i dane konta użytkownika są retencjonowane bez ograniczenia czasowego (dopóki użytkownik nie usunie konta lub fiszek).
