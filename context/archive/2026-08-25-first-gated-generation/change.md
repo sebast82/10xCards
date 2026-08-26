@@ -1,10 +1,10 @@
 ---
 change_id: first-gated-generation
 title: Generowanie fiszek z wklejonego tekstu — przegląd, akceptacja, zapis
-status: impl_reviewed
+status: archived
 created: 2026-08-25
 updated: 2026-08-26
-archived_at: null
+archived_at: 2026-08-26T11:50:37Z
 ---
 
 ## Notes
