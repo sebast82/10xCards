@@ -832,34 +832,34 @@ Cykl obowiązujący przy każdej zmianie schematu, ustalony w F-02: `npm run db:
 
 #### Automated
 
-- [x] 6.1 Typy się zgadzają: `npx astro check`
-- [x] 6.2 Lint przechodzi, w tym `react-compiler`: `npm run lint`
-- [x] 6.3 Build przechodzi: `npm run build`
+- [x] 6.1 Typy się zgadzają: `npx astro check` — dbe5b53
+- [x] 6.2 Lint przechodzi, w tym `react-compiler`: `npm run lint` — dbe5b53
+- [x] 6.3 Build przechodzi: `npm run build` — dbe5b53
 
 #### Manual
 
-- [x] 6.4 Niezalogowany na `/generate` trafia na `/auth/signin`
-- [x] 6.5 Generowanie daje listę propozycji w rozsądnym czasie
-- [x] 6.6 Zapis, edycja i odrzucenie działają per karta; odrzucona nie trafia do bazy
-- [x] 6.7 `source` rozróżnia `ai` i `ai_edited`, a wejście w edycję bez zmian daje `ai`
-- [x] 6.8 Licznik postępu zgadza się z liczbą zapisanych
-- [x] 6.9 Błąd generowania pokazuje komunikat z ponowieniem i zachowuje tekst
-- [x] 6.10 Odświeżenie strony w trakcie przeglądu gubi niezapisane propozycje
+- [x] 6.4 Niezalogowany na `/generate` trafia na `/auth/signin` — dbe5b53
+- [x] 6.5 Generowanie daje listę propozycji w rozsądnym czasie — dbe5b53
+- [x] 6.6 Zapis, edycja i odrzucenie działają per karta; odrzucona nie trafia do bazy — dbe5b53
+- [x] 6.7 `source` rozróżnia `ai` i `ai_edited`, a wejście w edycję bez zmian daje `ai` — dbe5b53
+- [x] 6.8 Licznik postępu zgadza się z liczbą zapisanych — dbe5b53
+- [x] 6.9 Błąd generowania pokazuje komunikat z ponowieniem i zachowuje tekst — dbe5b53
+- [x] 6.10 Odświeżenie strony w trakcie przeglądu gubi niezapisane propozycje — dbe5b53
 
 ### Phase 7: Ekran `/deck` i nawigacja
 
 #### Automated
 
-- [ ] 7.1 Typy się zgadzają: `npx astro check`
-- [ ] 7.2 Lint przechodzi: `npm run lint`
-- [ ] 7.3 Build przechodzi: `npm run build`
+- [x] 7.1 Typy się zgadzają: `npx astro check`
+- [x] 7.2 Lint przechodzi: `npm run lint`
+- [x] 7.3 Build przechodzi: `npm run build`
 
 #### Manual
 
-- [ ] 7.4 Zapisane fiszki widoczne na `/deck` z właściwym pochodzeniem
-- [ ] 7.5 Konto bez fiszek widzi stan pusty z odnośnikiem do `/generate`
-- [ ] 7.6 Drugie konto nie widzi cudzych fiszek
-- [ ] 7.7 Odnośniki z `/dashboard` prowadzą do obu ekranów
+- [x] 7.4 Zapisane fiszki widoczne na `/deck` z właściwym pochodzeniem
+- [x] 7.5 Konto bez fiszek widzi stan pusty z odnośnikiem do `/generate`
+- [x] 7.6 Drugie konto nie widzi cudzych fiszek
+- [x] 7.7 Odnośniki z `/dashboard` prowadzą do obu ekranów
 
 ### Phase 8: Ujednolicenie systemu stylów
 

@@ -21,7 +21,7 @@ Rejestr **nazw nośnych** — tych, które muszą pozostać spójne między zmia
 | `/auth/confirm-email` | publiczna | Powrót z linku potwierdzającego                   | istnieje    | —                               |
 | `/dashboard`          | chroniona | Ekran po zalogowaniu                              | istnieje    | —                               |
 | `/generate`           | chroniona | Wklejenie tekstu, przegląd propozycji, akceptacja | istnieje    | S-02                            |
-| `/deck`               | chroniona | Kolekcja fiszek użytkownika                       | proponowane | S-02, rozszerzana w S-03 i S-04 |
+| `/deck`               | chroniona | Kolekcja fiszek użytkownika                       | istnieje    | S-02, rozszerzana w S-03 i S-04 |
 | `/review`             | chroniona | Sesja powtórkowa                                  | proponowane | S-05                            |
 
 **Decyzja (2026-08-22):** ekran po zalogowaniu zostaje pod `/dashboard`. Rozważano `/home` — odrzucone, bo `/dashboard` działa, jest chroniony przez middleware i zweryfikowany na produkcji, a zmiana nazwy niosłaby ryzyko regresji w przepływie auth bez zysku dla użytkownika.
