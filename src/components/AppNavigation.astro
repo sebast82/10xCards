@@ -1,0 +1,45 @@
+---
+import { isNavigationItemActive, navigationItems } from "@/lib/navigation";
+
+const email = Astro.locals.user?.email ?? "";
+const pathname = Astro.url.pathname;
+---
+
+<header class="bg-background border-b px-4 py-3">
+  <div class="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-x-5 gap-y-3">
+    <a href="/dashboard" class="shrink-0 font-bold">10xCards</a>
+
+    <nav aria-label="Główna nawigacja" class="flex flex-wrap items-center gap-1">
+      {
+        navigationItems.map((item) => {
+          const isActive = isNavigationItemActive(pathname, item.href);
+
+          return (
+            <a
+              href={item.href}
+              aria-current={isActive ? "page" : undefined}
+              class:list={[
+                "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground",
+              ]}
+            >
+              {item.label}
+            </a>
+          );
+        })
+      }
+    </nav>
+
+    <div class="ml-auto flex max-w-full min-w-0 items-center gap-3 text-sm">
+      <span class="text-muted-foreground min-w-0 truncate" title={email}>{email}</span>
+      <form method="POST" action="/api/auth/signout" class="shrink-0">
+        <button
+          type="submit"
+          class="hover:bg-accent hover:text-accent-foreground rounded-md border px-3 py-2 font-medium transition-colors"
+        >
+          Wyloguj
+        </button>
+      </form>
+    </div>
+  </div>
+</header>
