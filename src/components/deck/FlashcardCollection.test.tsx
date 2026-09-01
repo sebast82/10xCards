@@ -26,6 +26,10 @@ function renderCollection(cards = CARDS) {
   return render(<FlashcardCollection flashcards={cards} pageSize={50} />);
 }
 
+function renderCappedCollection(cards = CARDS, pageSize = 50) {
+  return render(<FlashcardCollection flashcards={cards} pageSize={pageSize} />);
+}
+
 function mockFetch(response: Response) {
   const fetchMock = vi.fn().mockResolvedValue(response);
   vi.stubGlobal("fetch", fetchMock);
@@ -38,6 +42,126 @@ afterEach(() => {
 });
 
 describe("FlashcardCollection", () => {
+  it("opens and cancels a manual create draft", async () => {
+    const user = userEvent.setup();
+    renderCollection();
+
+    await user.click(screen.getByRole("button", { name: "Dodaj fiszkę" }));
+    await user.type(screen.getByRole("textbox", { name: "Przód nowej fiszki" }), "Draft przodu");
+    await user.type(screen.getByRole("textbox", { name: "Tył nowej fiszki" }), "Draft tyłu");
+    await user.click(screen.getByRole("button", { name: "Anuluj" }));
+
+    expect(screen.queryByRole("textbox", { name: "Przód nowej fiszki" })).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Dodaj fiszkę" }));
+    expect(screen.getByRole<HTMLTextAreaElement>("textbox", { name: "Przód nowej fiszki" }).value).toBe("");
+    expect(screen.getByRole<HTMLTextAreaElement>("textbox", { name: "Tył nowej fiszki" }).value).toBe("");
+  });
+
+  it("validates manual create content on the client", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    renderCollection();
+
+    await user.click(screen.getByRole("button", { name: "Dodaj fiszkę" }));
+    await user.click(screen.getByRole("button", { name: "Zapisz fiszkę" }));
+
+    expect(screen.getByText("Przód fiszki może mieć do 500 znaków, a tył do 2000.")).toBeTruthy();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("retains a manual create draft after a failed request", async () => {
+    const user = userEvent.setup();
+    mockFetch(new Response(JSON.stringify({ error: "Nie udało się utworzyć fiszki." }), { status: 500 }));
+    renderCollection();
+
+    await user.click(screen.getByRole("button", { name: "Dodaj fiszkę" }));
+    await user.type(screen.getByRole("textbox", { name: "Przód nowej fiszki" }), "Nowe pytanie");
+    await user.type(screen.getByRole("textbox", { name: "Tył nowej fiszki" }), "Nowa odpowiedź");
+    await user.click(screen.getByRole("button", { name: "Zapisz fiszkę" }));
+
+    expect(await screen.findByText("Nie udało się utworzyć fiszki.")).toBeTruthy();
+    expect(screen.getByRole<HTMLTextAreaElement>("textbox", { name: "Przód nowej fiszki" }).value).toBe("Nowe pytanie");
+    expect(screen.queryByText("Nowe pytanie")).toBeTruthy();
+  });
+
+  it("posts the exact manual payload and prepends the confirmed card", async () => {
+    const user = userEvent.setup();
+    const fetchMock = mockFetch(
+      new Response(JSON.stringify({ id: "card-new", created_at: "2026-09-01T12:00:00Z" }), { status: 201 }),
+    );
+    renderCollection();
+
+    await user.click(screen.getByRole("button", { name: "Dodaj fiszkę" }));
+    await user.type(screen.getByRole("textbox", { name: "Przód nowej fiszki" }), "  Nowe pytanie  ");
+    await user.type(screen.getByRole("textbox", { name: "Tył nowej fiszki" }), "  Nowa odpowiedź  ");
+    await user.click(screen.getByRole("button", { name: "Zapisz fiszkę" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Nowe pytanie")).toBeTruthy();
+    });
+    expect(screen.queryByRole("textbox", { name: "Przód nowej fiszki" })).toBeNull();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/flashcards",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ front: "Nowe pytanie", back: "Nowa odpowiedź" }),
+      }),
+    );
+    expect(screen.getAllByText("Ręczna")).toHaveLength(2);
+  });
+
+  it("preserves the page-size cap after a successful manual prepend", async () => {
+    const user = userEvent.setup();
+    mockFetch(new Response(JSON.stringify({ id: "card-new", created_at: "2026-09-01T12:00:00Z" }), { status: 201 }));
+    renderCappedCollection(CARDS, 2);
+
+    await user.click(screen.getByRole("button", { name: "Dodaj fiszkę" }));
+    await user.type(screen.getByRole("textbox", { name: "Przód nowej fiszki" }), "Nowe pytanie");
+    await user.type(screen.getByRole("textbox", { name: "Tył nowej fiszki" }), "Nowa odpowiedź");
+    await user.click(screen.getByRole("button", { name: "Zapisz fiszkę" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Nowe pytanie")).toBeTruthy();
+    });
+    expect(screen.getByText("Pierwsze pytanie")).toBeTruthy();
+    expect(screen.queryByText("Drugie pytanie")).toBeNull();
+    expect(screen.getByText("2 fiszek (najnowsze)")).toBeTruthy();
+  });
+
+  it("creates a manual card from the empty collection state", async () => {
+    const user = userEvent.setup();
+    mockFetch(new Response(JSON.stringify({ id: "card-new", created_at: "2026-09-01T12:00:00Z" }), { status: 201 }));
+    renderCollection([]);
+
+    await user.click(screen.getByRole("button", { name: "Dodaj fiszkę" }));
+    expect(screen.getByRole("link", { name: "Generuj fiszki" }).getAttribute("href")).toBe("/generate");
+    await user.type(screen.getByRole("textbox", { name: "Przód nowej fiszki" }), "Pytanie z pustej listy");
+    await user.type(screen.getByRole("textbox", { name: "Tył nowej fiszki" }), "Odpowiedź z pustej listy");
+    await user.click(screen.getByRole("button", { name: "Zapisz fiszkę" }));
+
+    expect(await screen.findByText("Pytanie z pustej listy")).toBeTruthy();
+    expect(screen.queryByText("Nie masz jeszcze żadnych fiszek.")).toBeNull();
+    expect(screen.getByText("Ręczna")).toBeTruthy();
+  });
+
+  it("keeps manual create and card editing mutually exclusive", async () => {
+    const user = userEvent.setup();
+    renderCollection();
+
+    await user.click(screen.getAllByRole("button", { name: "Edytuj" })[0]);
+    expect(screen.getByRole<HTMLButtonElement>("button", { name: "Dodaj fiszkę" }).disabled).toBe(true);
+    await user.click(screen.getByRole("button", { name: "Anuluj" }));
+
+    await user.click(screen.getByRole("button", { name: "Dodaj fiszkę" }));
+    for (const button of screen.getAllByRole<HTMLButtonElement>("button", { name: "Edytuj" })) {
+      expect(button.disabled).toBe(true);
+    }
+    for (const button of screen.getAllByRole<HTMLButtonElement>("button", { name: "Usuń" })) {
+      expect(button.disabled).toBe(true);
+    }
+  });
+
   it("retains a draft and shows a card-specific error after a failed save", async () => {
     const user = userEvent.setup();
     mockFetch(new Response(JSON.stringify({ error: "Nie udało się zapisać fiszki." }), { status: 500 }));

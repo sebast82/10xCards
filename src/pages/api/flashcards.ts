@@ -18,11 +18,13 @@ const contentSchema = {
   back: z.string().trim().min(1).max(BACK_MAX_LENGTH),
 } as const;
 
-const aiRequestSchema = z.object({
-  generationId: z.uuid(),
-  ...contentSchema,
-  edited: z.boolean(),
-}).strict();
+const aiRequestSchema = z
+  .object({
+    generationId: z.uuid(),
+    ...contentSchema,
+    edited: z.boolean(),
+  })
+  .strict();
 
 const manualRequestSchema = z.object(contentSchema).strict();
 
@@ -63,21 +65,22 @@ export const POST: APIRoute = async ({ locals, request }) => {
   }
 
   try {
-    const result = "generationId" in parsed.data
-      ? await createAiFlashcard({
-          supabase,
-          userId: user.id,
-          generationId: parsed.data.generationId,
-          front: parsed.data.front,
-          back: parsed.data.back,
-          edited: parsed.data.edited,
-        })
-      : await createManualFlashcard({
-          supabase,
-          userId: user.id,
-          front: parsed.data.front,
-          back: parsed.data.back,
-        });
+    const result =
+      "generationId" in parsed.data
+        ? await createAiFlashcard({
+            supabase,
+            userId: user.id,
+            generationId: parsed.data.generationId,
+            front: parsed.data.front,
+            back: parsed.data.back,
+            edited: parsed.data.edited,
+          })
+        : await createManualFlashcard({
+            supabase,
+            userId: user.id,
+            front: parsed.data.front,
+            back: parsed.data.back,
+          });
 
     return json(result, 201);
   } catch (caught) {

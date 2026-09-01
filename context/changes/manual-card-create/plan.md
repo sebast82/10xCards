@@ -183,25 +183,25 @@ No database migration or data backfill is expected. The existing nullable `gener
 
 #### Automated
 
-- [x] 1.1 Pass service tests for owner-scoped manual insertion, SRS defaults, timestamps, errors, and no KPI recount
-- [x] 1.2 Pass POST route tests for manual creation, validation, errors, and the unchanged AI request contract
-- [x] 1.3 Pass the production build for service and API contracts
+- [x] 1.1 Pass service tests for owner-scoped manual insertion, SRS defaults, timestamps, errors, and no KPI recount — a6a2a3e
+- [x] 1.2 Pass POST route tests for manual creation, validation, errors, and the unchanged AI request contract — a6a2a3e
+- [x] 1.3 Pass the production build for service and API contracts — a6a2a3e
 
 #### Manual
 
-- [x] 1.5 Verify persisted manual provenance, null generation, ownership, and SRS schedule
-- [x] 1.6 Verify manual creation leaves KPI counts unchanged and AI creation still succeeds
+- [x] 1.5 Verify persisted manual provenance, null generation, ownership, and SRS schedule — a6a2a3e
+- [x] 1.6 Verify manual creation leaves KPI counts unchanged and AI creation still succeeds — a6a2a3e
 
 ### Phase 2: Inline Collection Creation
 
 #### Automated
 
-- [ ] 2.1 Pass component tests for the inline form, local prepend, errors, empty state, and mode exclusion
-- [ ] 2.2 Pass the complete TypeScript test suite, including AI creation and edit/delete regressions
-- [ ] 2.3 Pass lint and production build
+- [x] 2.1 Pass component tests for the inline form, local prepend, errors, empty state, and mode exclusion
+- [x] 2.2 Pass the complete TypeScript test suite, including AI creation and edit/delete regressions
+- [x] 2.3 Pass lint and production build
 
 #### Manual
 
-- [ ] 2.4 Verify create, reload persistence, edit/delete reuse, and empty-state behavior in Chromium
-- [ ] 2.5 Verify cancel and forced failure preserve draft state without phantom cards
-- [ ] 2.6 Verify accessible loading states and mutual exclusion between create and edit modes
+- [x] 2.4 Verify create, reload persistence, edit/delete reuse, and empty-state behavior in Chromium
+- [x] 2.5 Verify cancel and forced failure preserve draft state without phantom cards
+- [x] 2.6 Verify accessible loading states and mutual exclusion between create and edit modes

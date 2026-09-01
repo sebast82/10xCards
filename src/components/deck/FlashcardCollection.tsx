@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Loader2, Pencil, Save, Trash2, X } from "lucide-react";
+import { Loader2, Pencil, Plus, Save, Trash2, X } from "lucide-react";
 
 import {
   AlertDialog,
@@ -59,13 +59,29 @@ function readError(payload: unknown, fallback: string): string {
   return fallback;
 }
 
+function parseCreateResult(payload: unknown): { id: string; created_at: string } | null {
+  if (typeof payload !== "object" || payload === null) return null;
+  const { id, created_at } = payload as Record<string, unknown>;
+
+  if (typeof id !== "string" || typeof created_at !== "string") return null;
+  return { id, created_at };
+}
+
 export default function FlashcardCollection({ flashcards: initialFlashcards, pageSize }: FlashcardCollectionProps) {
   const [flashcards, setFlashcards] = useState(initialFlashcards);
+  const [creating, setCreating] = useState(false);
+  const [createDraft, setCreateDraft] = useState<Draft>({ front: "", back: "" });
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [drafts, setDrafts] = useState<Partial<Record<string, Draft>>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const cardBusy = savingId !== null || deletingId !== null;
+  const createBlocksCards = createOpen || creating;
+  const canStartCreate = editingId === null && !cardBusy && !createBlocksCards;
 
   function setError(id: string, message: string | null) {
     setErrors((previous) => {
@@ -78,9 +94,62 @@ export default function FlashcardCollection({ flashcards: initialFlashcards, pag
   }
 
   function startEditing(card: Flashcard) {
+    if (createBlocksCards) return;
+
     setEditingId(card.id);
     setDrafts((previous) => ({ ...previous, [card.id]: { front: card.front, back: card.back } }));
     setError(card.id, null);
+  }
+
+  function startCreating() {
+    if (!canStartCreate) return;
+
+    setCreateOpen(true);
+    setCreateError(null);
+  }
+
+  function cancelCreating() {
+    setCreateOpen(false);
+    setCreateDraft({ front: "", back: "" });
+    setCreateError(null);
+  }
+
+  async function saveNewCard() {
+    const front = createDraft.front.trim();
+    const back = createDraft.back.trim();
+    if (!front || !back || front.length > FRONT_MAX_LENGTH || back.length > BACK_MAX_LENGTH) {
+      setCreateError(`Przód fiszki może mieć do ${FRONT_MAX_LENGTH} znaków, a tył do ${BACK_MAX_LENGTH}.`);
+      return;
+    }
+
+    setCreating(true);
+    setCreateError(null);
+    try {
+      const response = await fetch("/api/flashcards", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ front, back }),
+      });
+      const payload = await readJson(response);
+      if (!response.ok) {
+        setCreateError(readError(payload, FALLBACK_ERROR));
+        return;
+      }
+
+      const created = parseCreateResult(payload);
+      if (!created) {
+        setCreateError(FALLBACK_ERROR);
+        return;
+      }
+
+      setFlashcards((previous) => [{ ...created, front, back, source: "manual" }, ...previous].slice(0, pageSize));
+      setCreateDraft({ front: "", back: "" });
+      setCreateOpen(false);
+    } catch {
+      setCreateError("Nie udało się połączyć z serwerem. Spróbuj ponownie.");
+    } finally {
+      setCreating(false);
+    }
   }
 
   function updateDraft(id: string, patch: Partial<Draft>) {
@@ -148,28 +217,83 @@ export default function FlashcardCollection({ flashcards: initialFlashcards, pag
     }
   }
 
-  if (flashcards.length === 0) {
-    return (
-      <div className="text-muted-foreground flex flex-col items-start gap-3 rounded-xl border p-6">
-        <p className="text-sm">Nie masz jeszcze żadnych fiszek.</p>
-        <Button asChild>
-          <a href="/generate">Generuj fiszki</a>
-        </Button>
-      </div>
-    );
-  }
-
   return (
     <section className="flex flex-col gap-4" aria-label="Kolekcja fiszek">
-      <span className="text-muted-foreground text-sm">
-        {flashcards.length} fiszek{flashcards.length === pageSize && " (najnowsze)"}
-      </span>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <span className="text-muted-foreground text-sm">
+          {flashcards.length} fiszek{flashcards.length === pageSize && " (najnowsze)"}
+        </span>
+        <Button
+          type="button"
+          size="sm"
+          disabled={!canStartCreate}
+          onClick={() => {
+            startCreating();
+          }}
+        >
+          <Plus /> Dodaj fiszkę
+        </Button>
+      </div>
+
+      {createOpen && (
+        <Card>
+          <CardContent className="flex flex-col gap-3">
+            <h2 className="text-base font-semibold">Nowa fiszka</h2>
+            <Textarea
+              aria-label="Przód nowej fiszki"
+              value={createDraft.front}
+              maxLength={FRONT_MAX_LENGTH}
+              disabled={creating}
+              onChange={(event) => {
+                setCreateDraft((previous) => ({ ...previous, front: event.target.value }));
+              }}
+            />
+            <Textarea
+              aria-label="Tył nowej fiszki"
+              value={createDraft.back}
+              maxLength={BACK_MAX_LENGTH}
+              disabled={creating}
+              onChange={(event) => {
+                setCreateDraft((previous) => ({ ...previous, back: event.target.value }));
+              }}
+            />
+            {createError && <p className="text-destructive text-sm">{createError}</p>}
+          </CardContent>
+          <CardFooter className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              size="sm"
+              disabled={creating}
+              onClick={() => {
+                void saveNewCard();
+              }}
+            >
+              {creating ? <Loader2 className="animate-spin" /> : <Save />}
+              {creating ? "Zapisuję…" : "Zapisz fiszkę"}
+            </Button>
+            <Button type="button" size="sm" variant="ghost" disabled={creating} onClick={cancelCreating}>
+              <X /> Anuluj
+            </Button>
+          </CardFooter>
+        </Card>
+      )}
+
+      {flashcards.length === 0 && (
+        <div className="text-muted-foreground flex flex-col items-start gap-3 rounded-xl border p-6">
+          <p className="text-sm">Nie masz jeszcze żadnych fiszek.</p>
+          <Button asChild>
+            <a href="/generate">Generuj fiszki</a>
+          </Button>
+        </div>
+      )}
+
       {flashcards.map((card) => {
         const isEditing = editingId === card.id;
         const isSaving = savingId === card.id;
         const isDeleting = deletingId === card.id;
         const draft = drafts[card.id] ?? { front: card.front, back: card.back };
         const busy = isSaving || isDeleting;
+        const actionDisabled = busy || editingId !== null || createBlocksCards;
 
         return (
           <Card key={card.id}>
@@ -241,7 +365,7 @@ export default function FlashcardCollection({ flashcards: initialFlashcards, pag
                     type="button"
                     size="sm"
                     variant="outline"
-                    disabled={busy || editingId !== null}
+                    disabled={actionDisabled}
                     onClick={() => {
                       startEditing(card);
                     }}
@@ -250,7 +374,7 @@ export default function FlashcardCollection({ flashcards: initialFlashcards, pag
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button type="button" size="sm" variant="ghost" disabled={busy || editingId !== null}>
+                      <Button type="button" size="sm" variant="ghost" disabled={actionDisabled}>
                         <Trash2 /> Usuń
                       </Button>
                     </AlertDialogTrigger>

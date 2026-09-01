@@ -67,7 +67,9 @@ describe("flashcards POST API", () => {
   it("rejects malformed and mixed request bodies before service work", async () => {
     const malformed = await POST(context({ body: { front: "", back: "Odpowiedź." } }));
     const mixed = await POST(
-      context({ body: { generationId: GENERATION_ID, front: "Pytanie?", back: "Odpowiedź.", edited: false, source: "manual" } }),
+      context({
+        body: { generationId: GENERATION_ID, front: "Pytanie?", back: "Odpowiedź.", edited: false, source: "manual" },
+      }),
     );
     const ambiguous = await POST(context({ body: { front: "Pytanie?", back: "Odpowiedź.", edited: false } }));
 
@@ -85,7 +87,9 @@ describe("flashcards POST API", () => {
   });
 
   it("maps manual persistence failures to the static response", async () => {
-    const response = await POST(context({ supabase: new SupabaseStub([{ data: null, error: { message: "boom" } }]).asClient() }));
+    const response = await POST(
+      context({ supabase: new SupabaseStub([{ data: null, error: { message: "boom" } }]).asClient() }),
+    );
 
     expect(response.status).toBe(500);
     await expect(response.json()).resolves.toEqual({ error: "Nie udało się zapisać fiszki. Spróbuj ponownie." });

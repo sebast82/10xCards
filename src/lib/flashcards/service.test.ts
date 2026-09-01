@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { createAiFlashcard, createManualFlashcard, deleteFlashcard, FlashcardServiceError, updateFlashcard } from "./service";
+import {
+  createAiFlashcard,
+  createManualFlashcard,
+  deleteFlashcard,
+  FlashcardServiceError,
+  updateFlashcard,
+} from "./service";
 import { SupabaseStub } from "@/lib/test-support/supabase-stub";
 
 const GENERATION_ID = "11111111-1111-4111-8111-111111111111";
@@ -130,7 +136,9 @@ describe("createAiFlashcard", () => {
 
 describe("createManualFlashcard", () => {
   it("stores an owner-scoped manual card with a null generation link", async () => {
-    const supabase = new SupabaseStub([{ data: { id: FLASHCARD_ID, created_at: "2026-09-01T12:00:00Z" }, error: null }]);
+    const supabase = new SupabaseStub([
+      { data: { id: FLASHCARD_ID, created_at: "2026-09-01T12:00:00Z" }, error: null },
+    ]);
 
     await expect(createManualFlashcard(manualInput({ supabase: supabase.asClient() }))).resolves.toEqual({
       id: FLASHCARD_ID,
@@ -151,7 +159,9 @@ describe("createManualFlashcard", () => {
   });
 
   it("writes the complete initial schedule and does not recount generation metrics", async () => {
-    const supabase = new SupabaseStub([{ data: { id: FLASHCARD_ID, created_at: "2026-09-01T12:00:00Z" }, error: null }]);
+    const supabase = new SupabaseStub([
+      { data: { id: FLASHCARD_ID, created_at: "2026-09-01T12:00:00Z" }, error: null },
+    ]);
 
     await createManualFlashcard(manualInput({ supabase: supabase.asClient() }));
 
