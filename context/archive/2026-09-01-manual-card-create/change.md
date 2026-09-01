@@ -1,10 +1,10 @@
 ---
 change_id: manual-card-create
 title: Manual card create
-status: impl_reviewed
+status: archived
 created: 2026-09-01
 updated: 2026-09-01
-archived_at: null
+archived_at: 2026-09-01T21:44:29Z
 ---
 
 ## Notes
