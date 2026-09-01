@@ -78,6 +78,8 @@ This project uses [Supabase](https://supabase.com/) for authentication. Environm
 
 Requires [Docker](https://www.docker.com/) and ~7 GB RAM.
 
+The repository uses database port `55432` for local Supabase because the default `54322` can be unavailable on Windows. Use the endpoints printed by `npx supabase status` when configuring local environment files.
+
 1. Create your `.env` file:
 
 ```bash
