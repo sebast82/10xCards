@@ -183,14 +183,14 @@ No database migration or data backfill is expected. The existing nullable `gener
 
 #### Automated
 
-- [ ] 1.1 Pass service tests for owner-scoped manual insertion, SRS defaults, timestamps, errors, and no KPI recount
-- [ ] 1.2 Pass POST route tests for manual creation, validation, errors, and the unchanged AI request contract
-- [ ] 1.3 Pass the production build for service and API contracts
+- [x] 1.1 Pass service tests for owner-scoped manual insertion, SRS defaults, timestamps, errors, and no KPI recount
+- [x] 1.2 Pass POST route tests for manual creation, validation, errors, and the unchanged AI request contract
+- [x] 1.3 Pass the production build for service and API contracts
 
 #### Manual
 
-- [ ] 1.5 Verify persisted manual provenance, null generation, ownership, and SRS schedule
-- [ ] 1.6 Verify manual creation leaves KPI counts unchanged and AI creation still succeeds
+- [x] 1.5 Verify persisted manual provenance, null generation, ownership, and SRS schedule
+- [x] 1.6 Verify manual creation leaves KPI counts unchanged and AI creation still succeeds
 
 ### Phase 2: Inline Collection Creation
 

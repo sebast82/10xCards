@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createAiFlashcard, deleteFlashcard, FlashcardServiceError, updateFlashcard } from "./service";
+import { createAiFlashcard, createManualFlashcard, deleteFlashcard, FlashcardServiceError, updateFlashcard } from "./service";
 import { SupabaseStub } from "@/lib/test-support/supabase-stub";
 
 const GENERATION_ID = "11111111-1111-4111-8111-111111111111";
@@ -15,6 +15,16 @@ function input(overrides: Partial<Parameters<typeof createAiFlashcard>[0]> = {})
     front: "Pytanie?",
     back: "Odpowiedź.",
     edited: false,
+    ...overrides,
+  };
+}
+
+function manualInput(overrides: Partial<Parameters<typeof createManualFlashcard>[0]> = {}) {
+  return {
+    supabase: new SupabaseStub([]).asClient(),
+    userId: USER_ID,
+    front: "  Pytanie ręczne?  ",
+    back: "  Odpowiedź ręczna.  ",
     ...overrides,
   };
 }
@@ -115,6 +125,59 @@ describe("createAiFlashcard", () => {
     await expect(createAiFlashcard(input({ supabase: supabase.asClient() }))).rejects.toBeInstanceOf(
       FlashcardServiceError,
     );
+  });
+});
+
+describe("createManualFlashcard", () => {
+  it("stores an owner-scoped manual card with a null generation link", async () => {
+    const supabase = new SupabaseStub([{ data: { id: FLASHCARD_ID, created_at: "2026-09-01T12:00:00Z" }, error: null }]);
+
+    await expect(createManualFlashcard(manualInput({ supabase: supabase.asClient() }))).resolves.toEqual({
+      id: FLASHCARD_ID,
+      created_at: "2026-09-01T12:00:00Z",
+    });
+
+    expect(supabase.queries[0]).toMatchObject({
+      table: "flashcards",
+      operation: "insert",
+      payload: {
+        user_id: USER_ID,
+        generation_id: null,
+        front: "Pytanie ręczne?",
+        back: "Odpowiedź ręczna.",
+        source: "manual",
+      },
+    });
+  });
+
+  it("writes the complete initial schedule and does not recount generation metrics", async () => {
+    const supabase = new SupabaseStub([{ data: { id: FLASHCARD_ID, created_at: "2026-09-01T12:00:00Z" }, error: null }]);
+
+    await createManualFlashcard(manualInput({ supabase: supabase.asClient() }));
+
+    expect(Object.keys(supabase.queries[0].payload ?? {})).toEqual(
+      expect.arrayContaining([
+        "due",
+        "stability",
+        "difficulty",
+        "scheduled_days",
+        "learning_steps",
+        "reps",
+        "lapses",
+        "state",
+        "last_review",
+      ]),
+    );
+    expect(supabase.queries).toHaveLength(1);
+    expect(supabase.rpcCalls).toEqual([]);
+  });
+
+  it("surfaces a manual insert failure as a typed persistence error", async () => {
+    const supabase = new SupabaseStub([{ data: null, error: { message: "boom" } }]);
+
+    await expect(createManualFlashcard(manualInput({ supabase: supabase.asClient() }))).rejects.toMatchObject({
+      code: "persist_failed",
+    });
   });
 });
 

@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
 
-import { createAiFlashcard, FlashcardServiceError } from "@/lib/flashcards/service";
+import { createAiFlashcard, createManualFlashcard, FlashcardServiceError } from "@/lib/flashcards/service";
 import { BACK_MAX_LENGTH, FRONT_MAX_LENGTH } from "@/lib/limits";
 
 // Komunikaty są stałe. Wstawienie `error.issues` wypuściłoby treść fiszki w odpowiedzi.
@@ -13,12 +13,20 @@ const MESSAGES = {
 } as const;
 
 // Progi muszą być dokładnie te z CHECK-ów w bazie — rozjazd o jeden znak daje 500 zamiast komunikatu.
-const requestSchema = z.object({
-  generationId: z.uuid(),
+const contentSchema = {
   front: z.string().trim().min(1).max(FRONT_MAX_LENGTH),
   back: z.string().trim().min(1).max(BACK_MAX_LENGTH),
+} as const;
+
+const aiRequestSchema = z.object({
+  generationId: z.uuid(),
+  ...contentSchema,
   edited: z.boolean(),
-});
+}).strict();
+
+const manualRequestSchema = z.object(contentSchema).strict();
+
+const requestSchema = z.union([aiRequestSchema, manualRequestSchema]);
 
 function json(body: unknown, status: number): Response {
   return new Response(JSON.stringify(body), {
@@ -55,14 +63,21 @@ export const POST: APIRoute = async ({ locals, request }) => {
   }
 
   try {
-    const result = await createAiFlashcard({
-      supabase,
-      userId: user.id,
-      generationId: parsed.data.generationId,
-      front: parsed.data.front,
-      back: parsed.data.back,
-      edited: parsed.data.edited,
-    });
+    const result = "generationId" in parsed.data
+      ? await createAiFlashcard({
+          supabase,
+          userId: user.id,
+          generationId: parsed.data.generationId,
+          front: parsed.data.front,
+          back: parsed.data.back,
+          edited: parsed.data.edited,
+        })
+      : await createManualFlashcard({
+          supabase,
+          userId: user.id,
+          front: parsed.data.front,
+          back: parsed.data.back,
+        });
 
     return json(result, 201);
   } catch (caught) {

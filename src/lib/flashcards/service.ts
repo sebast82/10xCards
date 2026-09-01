@@ -30,6 +30,13 @@ export interface CreateAiFlashcardInput {
   edited: boolean;
 }
 
+export interface CreateManualFlashcardInput {
+  supabase: SupabaseClient<Database>;
+  userId: string;
+  front: string;
+  back: string;
+}
+
 export interface UpdateFlashcardInput {
   supabase: SupabaseClient<Database>;
   userId: string;
@@ -104,6 +111,34 @@ export async function createAiFlashcard({
   }
 
   return { id: data.id };
+}
+
+export async function createManualFlashcard({
+  supabase,
+  userId,
+  front,
+  back,
+}: CreateManualFlashcardInput): Promise<{ id: string; created_at: string }> {
+  const schedule = createScheduler().createNewCard(new Date());
+
+  const { data, error } = await supabase
+    .from("flashcards")
+    .insert({
+      user_id: userId,
+      generation_id: null,
+      front: front.trim(),
+      back: back.trim(),
+      source: "manual",
+      ...schedule,
+    })
+    .select("id, created_at")
+    .single();
+
+  if (error) {
+    throw new FlashcardServiceError("persist_failed");
+  }
+
+  return { id: data.id, created_at: data.created_at };
 }
 
 export async function updateFlashcard({
