@@ -42,7 +42,7 @@ Deklaracja właściciela produktu brzmiała: gwiazdą jest **cała pętla** (rej
 | S-01 | `deployed-auth-baseline`        | zarejestrować się, zalogować i wylogować na wdrożonej instancji                                             | —             | FR-001, FR-002, Access Control                  | done     |
 | S-02 | `first-gated-generation`        | wkleić tekst, przejrzeć propozycje AI i zapisać zaakceptowane do swojej kolekcji                            | F-02, S-01    | US-01, FR-003, FR-004, FR-008                   | done     |
 | S-07 | `app-shell-navigation`          | przechodzić między wszystkimi funkcjami z jednej, stałej nawigacji — bez cofania w przeglądarce             | S-02          | Non-Functional Requirements, FR-008             | done     |
-| S-03 | `manual-card-edit-delete`       | poprawić treść zapisanej fiszki i usunąć zbędną                                                             | S-02          | FR-006, FR-007                                  | proposed |
+| S-03 | `manual-card-edit-delete`       | poprawić treść zapisanej fiszki i usunąć zbędną                                                             | S-02          | FR-006, FR-007                                  | planning |
 | S-04 | `manual-card-create`            | dodać własną fiszkę ręcznie, bez udziału AI                                                                 | S-02          | FR-005                                          | proposed |
 | S-05 | `srs-review-session`            | uruchomić sesję powtórkową i ocenić fiszki według algorytmu spaced repetition                               | F-02, S-02    | FR-009, Success Criteria §Guardrails            | proposed |
 | S-08 | `visual-polish-pass`            | (wykończenie) korzystać z aplikacji o spójnym wyglądzie, z czytelnymi stanami pustej listy, ładowania i błędu | S-03, S-04, S-05, S-07 | US-01, FR-004, FR-008                | proposed |
@@ -152,7 +152,7 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Edycja po zapisie to inna operacja niż poprawka propozycji przed akceptacją z S-02 — jeśli obie trafią do jednego przebiegu, formularz zacznie obsługiwać dwa różne stany. Usuwanie jest nieodwracalne (PRD świadomie odrzucił soft delete), więc potwierdzenie akcji jest częścią zakresu, a nie ozdobnikiem.
-- **Status:** proposed
+- **Status:** planning
 
 ### S-04: Ręczne tworzenie fiszki
 
