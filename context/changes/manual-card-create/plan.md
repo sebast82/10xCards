@@ -100,7 +100,7 @@ Expose manual creation on the collection screen and lock its interaction and fai
 
 **Intent**: Add an inline manual-card form above the list while preserving the existing collection, empty, edit, delete, and card-specific error states.
 
-**Contract**: A clearly labeled Add action opens a two-textarea form using `FRONT_MAX_LENGTH` and `BACK_MAX_LENGTH`. Save trims and validates both fields, submits the manual POST body, disables relevant controls in flight, and on success prepends a card built from the submitted content plus server `id` and `created_at`, with `source: "manual"`; it then clears and closes the form. Cancel clears and closes it without a request. Failed validation or requests keep the form and draft visible with a localized error.
+**Contract**: A clearly labeled Add action opens a two-textarea form using `FRONT_MAX_LENGTH` and `BACK_MAX_LENGTH`. Save trims and validates both fields, submits the manual POST body, disables relevant controls in flight, and on success prepends a card built from the submitted content plus server `id` and `created_at`, with `source: "manual"`, then slices local state to `pageSize`; it then clears and closes the form. Cancel clears and closes it without a request. Failed validation or requests keep the form and draft visible with a localized error.
 
 #### 2. Mutually exclusive collection modes
 
@@ -122,7 +122,7 @@ Expose manual creation on the collection screen and lock its interaction and fai
 
 #### Automated Verification:
 
-- Component tests cover open/cancel, client validation, failed-request draft retention, exact manual POST payload, successful prepend and close, empty-collection creation, and create/edit mutual exclusion: `npm test -- src/components/deck/FlashcardCollection.test.tsx`.
+- Component tests cover open/cancel, client validation, failed-request draft retention, exact manual POST payload, successful prepend and close, page-size cap preservation, empty-collection creation, and create/edit mutual exclusion: `npm test -- src/components/deck/FlashcardCollection.test.tsx`.
 - All TypeScript tests, including AI creation and edit/delete regressions, pass: `npm test`.
 - Lint and production build pass: `npm run lint` and `npm run build`.
 
@@ -202,5 +202,6 @@ No database migration or data backfill is expected. The existing nullable `gener
 
 #### Manual
 
-- [ ] 2.4 Verify create, cancel, failure, reload persistence, edit/delete reuse, and empty-state behavior in Chromium
-- [ ] 2.5 Verify accessible loading states and mutual exclusion between create and edit modes
+- [ ] 2.4 Verify create, reload persistence, edit/delete reuse, and empty-state behavior in Chromium
+- [ ] 2.5 Verify cancel and forced failure preserve draft state without phantom cards
+- [ ] 2.6 Verify accessible loading states and mutual exclusion between create and edit modes
