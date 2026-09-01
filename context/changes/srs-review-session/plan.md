@@ -399,27 +399,27 @@ None. No schema change. Existing rows are already valid schedule state.
 
 #### Automated
 
-- [x] 1.1 Unit tests pass: `npm test`
-- [x] 1.2 Type checking passes: `npm run astro check`
-- [x] 1.3 Linting passes: `npm run lint`
+- [x] 1.1 Unit tests pass: `npm test` — a8d0d5e
+- [x] 1.2 Type checking passes: `npm run astro check` — a8d0d5e
+- [x] 1.3 Linting passes: `npm run lint` — a8d0d5e
 
 #### Manual
 
-- [x] 1.4 `service.ts` reviewed: no `as ScheduleStateRow` cast, no schedule columns returned to callers
+- [x] 1.4 `service.ts` reviewed: no `as ScheduleStateRow` cast, no schedule columns returned to callers — a8d0d5e
 
 ### Phase 2: `/api/reviews` endpoint (GET + POST)
 
 #### Automated
 
-- [ ] 2.1 Route + service tests pass: `npm test`
-- [ ] 2.2 Type checking passes: `npm run astro check`
-- [ ] 2.3 Linting passes: `npm run lint`
-- [ ] 2.4 Existing `flashcards`/`generations` route tests still green (Phase 1 stub change is additive)
+- [x] 2.1 Route + service tests pass: `npm test`
+- [x] 2.2 Type checking passes: `npm run astro check`
+- [x] 2.3 Linting passes: `npm run lint`
+- [x] 2.4 Existing `flashcards`/`generations` route tests still green (Phase 1 stub change is additive)
 
 #### Manual
 
-- [ ] 2.5 GET `/api/reviews` logged out returns 401 with the Polish message
-- [ ] 2.6 POST with `grade: 5` returns 400, not 500
+- [x] 2.5 GET `/api/reviews` logged out returns 401 with the Polish message
+- [x] 2.6 POST with `grade: 5` returns 400, not 500
 
 ### Phase 3: Review island + `review.astro`
 
