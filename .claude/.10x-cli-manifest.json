@@ -1,8 +1,8 @@
 {
   "package": "@przeprogramowani/10x-cli",
-  "version": "1.10.0",
+  "version": "1.20.0",
   "manifestVersion": 3,
-  "lastApplied": "2026-08-24T12:50:41.430Z",
+  "lastApplied": "2026-09-01T21:41:23.390Z",
   "lessonId": "m2l4",
   "course": "10xdevs3",
   "tool": "claude-code",
@@ -132,10 +132,12 @@
       },
       "10x-roadmap": {
         "files": [
-          "SKILL.md"
+          "SKILL.md",
+          "references/milestone-state.md"
         ],
         "contentHashes": {
-          "SKILL.md": "149154434c4ddbb3d18ebe3c7cfe9b80c9f3f760d833fc9536bf8a302378210c"
+          "SKILL.md": "13bcf9574200b62da4ae38879b68e5c0555cd67bcafcb071fb98bb4c5c84b50e",
+          "references/milestone-state.md": "d84aad50043d0fdffd69336dcb1d5b72daa6258db43da8f155cbc1176e9a1f09"
         }
       },
       "10x-new": {
@@ -728,7 +730,7 @@
       "configs": []
     },
     "m2l4": {
-      "appliedAt": "2026-08-24T12:50:41.430Z",
+      "appliedAt": "2026-09-01T21:41:23.389Z",
       "skills": {
         "10x-init": {
           "files": [
@@ -804,6 +806,7 @@
         },
         "10x-roadmap": {
           "files": [
+            "references/milestone-state.md",
             "SKILL.md"
           ]
         },
