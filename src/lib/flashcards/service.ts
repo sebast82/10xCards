@@ -3,10 +3,11 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/db/database.types";
 import { createScheduler } from "@/lib/srs";
 
-export type FlashcardServiceErrorCode = "generation_not_found" | "persist_failed";
+export type FlashcardServiceErrorCode = "generation_not_found" | "flashcard_not_found" | "persist_failed";
 
 const ERROR_MESSAGES: Record<FlashcardServiceErrorCode, string> = {
   generation_not_found: "Nie znaleziono zlecenia generowania.",
+  flashcard_not_found: "Nie znaleziono fiszki.",
   persist_failed: "Nie udało się zapisać fiszki. Spróbuj ponownie.",
 };
 
@@ -27,6 +28,20 @@ export interface CreateAiFlashcardInput {
   front: string;
   back: string;
   edited: boolean;
+}
+
+export interface UpdateFlashcardInput {
+  supabase: SupabaseClient<Database>;
+  userId: string;
+  flashcardId: string;
+  front: string;
+  back: string;
+}
+
+export interface DeleteFlashcardInput {
+  supabase: SupabaseClient<Database>;
+  userId: string;
+  flashcardId: string;
 }
 
 export async function createAiFlashcard({
@@ -89,4 +104,80 @@ export async function createAiFlashcard({
   }
 
   return { id: data.id };
+}
+
+export async function updateFlashcard({
+  supabase,
+  userId,
+  flashcardId,
+  front,
+  back,
+}: UpdateFlashcardInput): Promise<{ id: string }> {
+  const { data, error } = await supabase
+    .from("flashcards")
+    .update({ front: front.trim(), back: back.trim() })
+    .eq("id", flashcardId)
+    .eq("user_id", userId)
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    throw new FlashcardServiceError("persist_failed");
+  }
+
+  if (!data) {
+    throw new FlashcardServiceError("flashcard_not_found");
+  }
+
+  return { id: data.id };
+}
+
+export async function deleteFlashcard({
+  supabase,
+  userId,
+  flashcardId,
+}: DeleteFlashcardInput): Promise<{ id: string }> {
+  const { data: card, error: lookupError } = await supabase
+    .from("flashcards")
+    .select("generation_id")
+    .eq("id", flashcardId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (lookupError) {
+    throw new FlashcardServiceError("persist_failed");
+  }
+
+  if (!card) {
+    throw new FlashcardServiceError("flashcard_not_found");
+  }
+
+  const { data: deleted, error: deleteError } = await supabase
+    .from("flashcards")
+    .delete()
+    .eq("id", flashcardId)
+    .eq("user_id", userId)
+    .select("id")
+    .maybeSingle();
+
+  if (deleteError) {
+    throw new FlashcardServiceError("persist_failed");
+  }
+
+  if (!deleted) {
+    throw new FlashcardServiceError("flashcard_not_found");
+  }
+
+  if (card.generation_id) {
+    const { error: recountError } = await supabase.rpc("recount_generation_acceptance", {
+      p_generation_id: card.generation_id,
+    });
+
+    if (recountError) {
+      // eslint-disable-next-line no-console -- kod błędu Postgresa, bez treści użytkownika
+      console.warn("recount_generation_acceptance failed", recountError.code);
+    }
+  }
+
+  return { id: deleted.id };
 }

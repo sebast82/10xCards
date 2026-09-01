@@ -10,7 +10,7 @@ export interface StubResult {
 
 export interface RecordedQuery {
   table: string;
-  operation: "select" | "insert" | "update";
+  operation: "select" | "insert" | "update" | "delete";
   payload?: Record<string, unknown>;
   filters: [string, unknown][];
 }
@@ -39,6 +39,11 @@ class StubQuery {
   update(payload: Record<string, unknown>): this {
     this.recorded.operation = "update";
     this.recorded.payload = payload;
+    return this;
+  }
+
+  delete(): this {
+    this.recorded.operation = "delete";
     return this;
   }
 

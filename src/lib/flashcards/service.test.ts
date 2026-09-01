@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { createAiFlashcard, FlashcardServiceError } from "./service";
+import { createAiFlashcard, deleteFlashcard, FlashcardServiceError, updateFlashcard } from "./service";
 import { SupabaseStub } from "@/lib/test-support/supabase-stub";
 
 const GENERATION_ID = "11111111-1111-4111-8111-111111111111";
 const USER_ID = "22222222-2222-4222-8222-222222222222";
+const FLASHCARD_ID = "33333333-3333-4333-8333-333333333333";
 
 function input(overrides: Partial<Parameters<typeof createAiFlashcard>[0]> = {}) {
   return {
@@ -114,5 +115,90 @@ describe("createAiFlashcard", () => {
     await expect(createAiFlashcard(input({ supabase: supabase.asClient() }))).rejects.toBeInstanceOf(
       FlashcardServiceError,
     );
+  });
+});
+
+describe("updateFlashcard", () => {
+  it("writes only trimmed content to the owner-visible card", async () => {
+    const supabase = new SupabaseStub([{ data: { id: FLASHCARD_ID }, error: null }]);
+
+    await expect(
+      updateFlashcard({
+        supabase: supabase.asClient(),
+        userId: USER_ID,
+        flashcardId: FLASHCARD_ID,
+        front: "  Pytanie?  ",
+        back: "  Odpowiedź.  ",
+      }),
+    ).resolves.toEqual({ id: FLASHCARD_ID });
+
+    expect(supabase.queries[0]).toMatchObject({
+      operation: "update",
+      payload: { front: "Pytanie?", back: "Odpowiedź." },
+      filters: [
+        ["id", FLASHCARD_ID],
+        ["user_id", USER_ID],
+      ],
+    });
+    expect(Object.keys(supabase.queries[0].payload ?? {})).toEqual(["front", "back"]);
+  });
+
+  it("maps an inaccessible card to a typed not-found error", async () => {
+    const supabase = new SupabaseStub([{ data: null, error: null }]);
+
+    await expect(
+      updateFlashcard({
+        supabase: supabase.asClient(),
+        userId: USER_ID,
+        flashcardId: FLASHCARD_ID,
+        front: "Pytanie?",
+        back: "Odpowiedź.",
+      }),
+    ).rejects.toMatchObject({ code: "flashcard_not_found" });
+  });
+});
+
+describe("deleteFlashcard", () => {
+  it("deletes an owned AI card and reconciles its generation metrics", async () => {
+    const supabase = new SupabaseStub([
+      { data: { generation_id: GENERATION_ID }, error: null },
+      { data: { id: FLASHCARD_ID }, error: null },
+      { data: null, error: null },
+    ]);
+
+    await expect(
+      deleteFlashcard({ supabase: supabase.asClient(), userId: USER_ID, flashcardId: FLASHCARD_ID }),
+    ).resolves.toEqual({ id: FLASHCARD_ID });
+
+    expect(supabase.queries[1]).toMatchObject({
+      operation: "delete",
+      filters: [
+        ["id", FLASHCARD_ID],
+        ["user_id", USER_ID],
+      ],
+    });
+    expect(supabase.rpcCalls).toEqual([
+      { name: "recount_generation_acceptance", args: { p_generation_id: GENERATION_ID } },
+    ]);
+  });
+
+  it("does not recount a manual card and maps a concurrent delete to not found", async () => {
+    const supabase = new SupabaseStub([
+      { data: { generation_id: null }, error: null },
+      { data: null, error: null },
+    ]);
+
+    await expect(
+      deleteFlashcard({ supabase: supabase.asClient(), userId: USER_ID, flashcardId: FLASHCARD_ID }),
+    ).rejects.toMatchObject({ code: "flashcard_not_found" });
+    expect(supabase.rpcCalls).toEqual([]);
+  });
+
+  it("maps persistence failures to a typed error", async () => {
+    const supabase = new SupabaseStub([{ data: null, error: { message: "boom" } }]);
+
+    await expect(
+      deleteFlashcard({ supabase: supabase.asClient(), userId: USER_ID, flashcardId: FLASHCARD_ID }),
+    ).rejects.toMatchObject({ code: "persist_failed" });
   });
 });
