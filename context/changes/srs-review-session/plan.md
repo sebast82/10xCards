@@ -20,7 +20,7 @@ Wire the finished FSRS contract from F-01 (`src/lib/srs`) into a working review 
 
 ## Desired End State
 
-A logged-in user opens `/review` from the persistent navigation. The page loads the cards due now (`due <= now()`), shows one at a time: question first, then — after pressing Space or clicking "Pokaż odpowiedź" — the answer plus four grade buttons labelled with the resulting interval ("Dobrze · za 3 dni"). Pressing `1`–`4` or clicking a button records the grade; the schedule advances server-side and the next card appears. A progress indicator reads "Karta 3 z 12". When the queue empties the island re-fetches; when the re-fetch is empty the session ends with a "to na dziś wszystko" screen. If nothing was due at all, the user sees the empty state with a link back to the deck. AI-sourced and manually-created cards are graded through the identical path. The whole loop is operable by keyboard and announced to screen readers.
+A logged-in user opens `/review` from the persistent navigation. The page loads the cards due now (`due <= now()`), shows one at a time: question first, then — after pressing Space or clicking "Pokaż odpowiedź" — the answer plus four grade buttons labelled with the resulting interval ("Dobrze · za 3 dni"). Pressing `1`–`4` or clicking a button records the grade; the schedule advances server-side and the next card appears. A progress indicator reads "Karta 3 z 12", where the denominator is a running total — cards already seen this session plus the cards left in the in-memory queue — so it grows if a re-fetch adds more due cards. It is deliberately not a fixed "N of M". When the queue empties the island re-fetches; when the re-fetch is empty the session ends with a "to na dziś wszystko" screen. If nothing was due at all, the user sees the empty state with a link back to the deck. AI-sourced and manually-created cards are graded through the identical path. The whole loop is operable by keyboard and announced to screen readers.
 
 Verify: `npm test` green (new service, route, island, stub, navigation tests), `npm run lint` and `astro check` clean, `npm run build` succeeds, and the manual guardrail checklist in `manual-verification.md` is complete including a deployed-instance run.
 
@@ -29,7 +29,7 @@ Verify: `npm test` green (new service, route, island, stub, navigation tests), `
 - SRS read path: every DB row must go through `scheduleStateRowSchema.safeParse` before `preview`/`applyGrade` — never `as ScheduleStateRow` ([schedule-state.ts:21-22](src/lib/srs/schedule-state.ts#L21-L22)).
 - Grade must be validated at the API boundary (`z.union([z.literal(1)..z.literal(4)])`), not deeper.
 - Endpoint anatomy to copy: frozen Polish `MESSAGES`, module-level Zod schemas in the route file, local `json()`/`error()` helpers, `getRequestContext` for multi-method routes ([\[id\].ts:33-51](src/pages/api/flashcards/[id].ts#L33-L51)), body parse in `try/catch`, service call in `try/catch` with `instanceof` dispatch ([flashcards.ts](src/pages/api/flashcards.ts)).
-- Response envelope: success is the bare service object (no `{ data }`), error is exactly `{ "error": "<polski komunikat>" }`. Status ladder: 401 → 503 → 400 → 404 → 500 (+ 409 here).
+- Response envelope: success is the bare service object (no `{ data }`) — POST returns `{ id }`; the one exception is `GET`, where the route wraps the service's `ReviewCard[]` in `{ cards }` so the island parses a named key, not a bare array. Error is exactly `{ "error": "<polski komunikat>" }`. Status ladder: 401 → 503 → 400 → 404 → 500 (+ 409 here).
 - Island status-machine precedent: `GenerateView.tsx` `ViewStatus` union + `updateProposal` patch helper ([GenerateView.tsx:13](src/components/generate/GenerateView.tsx#L13), [:90-92](src/components/generate/GenerateView.tsx#L90-L92)).
 - Queue query idiom: `.select("<explicit columns>").eq("user_id", userId).lte("due", nowIso).order("due", { ascending: true }).range(0, BATCH - 1)` — `.range` with a module constant, not `.limit()` ([deck.astro:8-17](src/pages/deck.astro#L8-L17)).
 - `reps` increments on every ts-fsrs `next()` call — a reliable monotonic guard for the conditional UPDATE.
@@ -47,10 +47,11 @@ Verify: `npm test` green (new service, route, island, stub, navigation tests), `
 - No `export const prerender` — `astro.config.mjs` sets `output: "server"` globally and no route in `src/` declares it.
 - No E2E/Playwright, no MSW (every plan since S-02 excludes E2E explicitly).
 - No client possession of schedule state — the POST body is `{ flashcardId, grade }` only; the server re-reads the row.
+- No re-computation of interval labels after the queue fetch. `intervals` are built once in the GET response with the request-time `now` and shown as-is; in a long session a late card's label is computed against a slightly stale `now`. Acceptable — labels are a "grade honestly" aid, not a commitment, and learning-step offsets are fixed minutes while review intervals are in days. Not worth a per-card refetch.
 
 ## Implementation Approach
 
-Five phases, bottom-up: (1) a `src/lib/reviews` service that owns the queue query, the schema-validated read, the grade application, and the guarded write, plus a Polish interval formatter; (2) the `/api/reviews` route that validates the grade at the boundary and maps typed service errors to the status ladder, unblocked by extending the Supabase stub; (3) the `review.astro` page and `ReviewSession` island — a status machine driving the question→answer→grade loop with keyboard control, focus management, and live-region announcements; (4) shell wiring — navigation (with its tripwire test), middleware, and the contract registry; (5) guardrail verification — an automated both-sources test plus a manual checklist run against the deployed Worker, captured in an evidence file.
+Five phases, bottom-up: (1) a `src/lib/reviews` service that owns the queue query, the schema-validated read, the grade application, and the guarded write, plus a Polish interval formatter — and the Supabase-stub extension its own tests need; (2) the `/api/reviews` route that validates the grade at the boundary and maps typed service errors to the status ladder; (3) the `review.astro` page and `ReviewSession` island — a status machine driving the question→answer→grade loop with keyboard control, focus management, and live-region announcements; (4) shell wiring — navigation (with its tripwire test), middleware, and the contract registry; (5) guardrail verification — an automated both-sources test plus a manual checklist run against the deployed Worker, captured in an evidence file.
 
 ## Critical Implementation Details
 
@@ -58,7 +59,7 @@ Five phases, bottom-up: (1) a `src/lib/reviews` service that owns the queue quer
 
 **Grade validation lives only at the API boundary (Phase 2).** The service receives an already-narrowed `Grade`. If a raw number reaches `applyGrade` it throws uncatchably in ts-fsrs.
 
-**Keyboard listener is the first `useEffect` + `document` listener in the codebase (Phase 3).** Attach `keydown` on `document`, gate handlers by current status (`Space`/`Enter` only in `question`, `1`–`4` only in `answer`, nothing during `grading`), and clean up on unmount. Focus moves to the primary action control on every card/phase transition via a `useRef` + effect keyed on card id + phase. A visually-hidden `role="status"` region announces card position and phase changes.
+**Keyboard listener is the first `useEffect` + `document` listener in the codebase (Phase 3).** Attach `keydown` on `document` in a `useEffect` **keyed on `status` + current card id** — the effect re-subscribes on every transition, so the handler always closes over fresh `status`/`queue`; each run removes its own listener in the cleanup. Do **not** attach once with `[]` deps and read state inside — that captures the mount-time card and `react-compiler`/`react-hooks/exhaustive-deps` (both `error` in `eslint.config.js`) would flag it. Gate handlers by current status (`Space`/`Enter` only in `question`, `1`–`4` only in `answer`, nothing during `grading`). Focus moves to the primary action control on every card/phase transition via a `useRef` + effect keyed on the same card id + phase. A visually-hidden `role="status"` region announces card position and phase changes.
 
 ## Phase 1: Session service + SRS read layer
 
@@ -97,13 +98,21 @@ A new `src/lib/reviews/` module owning every interaction with schedule state: th
 
 **Contract**: Add the glob to the existing server-paths array around [eslint.config.js:71-82](eslint.config.js#L71-L82). No other rule changes.
 
-#### 4. Service unit tests
+#### 4. Extend the Supabase stub
+
+**File**: `src/lib/test-support/supabase-stub.ts`
+
+**Intent**: Add the query-builder methods the queue query needs so the service (and, in Phase 2, the route) become testable. Same work S-03 did for `delete()`. This lands in Phase 1 because Phase 1's own tests are the first consumer — deferring it would make Phase 1's automated gate unreachable in isolation.
+
+**Contract**: Add `lte(column, value)` (push to `filters`, like `gte`), `order(column, options)` (record ordering, return `this`), `limit(n)` and `range(from, to)` (record, return `this`). `range`/`order` must also be awaitable via the existing `then` terminator so a `select…order…range` chain resolves. Keep the recorded shape backward-compatible — existing tests (`flashcards`, `generations`, `[id]`) must stay green.
+
+#### 5. Service unit tests
 
 **File**: `src/lib/reviews/service.test.ts`, `src/lib/reviews/interval.test.ts`
 
 **Intent**: Cover the queue query shape, the schema-invalid path, the happy grade path, the conflict path, and the not-found path; cover every formatter bucket boundary.
 
-**Contract**: `environment: "node"`, explicit `describe`/`it`/`expect` imports (no globals). Use `SupabaseStub` (extended in Phase 2 — sequence Phase 2's stub change first or land both together) with v4-shaped UUID constants. Assert `supabase.queries[n].filters` includes `["reps", <previous value>]` on the update. Deterministic `now` passed explicitly — no `vi.useFakeTimers()`.
+**Contract**: `environment: "node"`, explicit `describe`/`it`/`expect` imports (no globals). Use `SupabaseStub` (extended in item 4 above) with v4-shaped UUID constants. Assert `supabase.queries[n].filters` includes `["reps", <previous value>]` on the update. Deterministic `now` passed explicitly — no `vi.useFakeTimers()`.
 
 ### Success Criteria:
 
@@ -140,34 +149,26 @@ The HTTP surface: GET returns the due-card queue, POST records a grade. Multi-me
 - Module-level Zod: `gradeSchema = z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)])`; `postBodySchema = z.object({ flashcardId: z.uuid(), grade: gradeSchema }).strict()`.
 - Local `json()` / `error()` helpers copied verbatim from [flashcards.ts:33-42](src/pages/api/flashcards.ts#L33-L42).
 - `getRequestContext(locals)` returning `{ userId, supabase } | Response` per [\[id\].ts:33-51](src/pages/api/flashcards/[id].ts#L33-L51) (no id param for GET; POST parses `flashcardId` from the body).
-- `GET`: context gate → `json(await getReviewQueue({ supabase, userId, now }), 200)` where the body is `{ cards: ReviewCard[] }` (bare object). Service throw → 500 `unexpected`; `schedule_state_invalid` also → 500.
+- `GET`: context gate → `json({ cards: await getReviewQueue({ supabase, userId, now }) }, 200)`. The service returns `ReviewCard[]`; the **route** wraps it in `{ cards }` — the response body is `{ cards: ReviewCard[] }`, never a bare array. Service throw → 500 `unexpected`; `schedule_state_invalid` also → 500.
 - `POST`: context gate → body parse in `try/catch` (parse failure → same message as validation failure, 400) → `safeParse` → 400 on failure → `json(await applyReviewGrade({ ... }), 200)`. Error dispatch: `flashcard_not_found` → 404, `grade_conflict` → 409, else → 500.
 - No `export const prerender`.
 
-#### 2. Extend the Supabase stub
-
-**File**: `src/lib/test-support/supabase-stub.ts`
-
-**Intent**: Add the query-builder methods the queue query needs so the route and service become testable. Same work S-03 did for `delete()`.
-
-**Contract**: Add `lte(column, value)` (push to `filters`, like `gte`), `order(column, options)` (record ordering, return `this`), `limit(n)` and `range(from, to)` (record, return `this`). `range`/`order` must also be awaitable via the existing `then` terminator so a `select…order…range` chain resolves. Keep the recorded shape backward-compatible — existing tests must stay green.
-
-#### 3. Route tests
+#### 2. Route tests
 
 **File**: `src/pages/api/reviews.test.ts`
 
 **Intent**: Cover both methods across the full status ladder using the established route-test pattern.
 
-**Contract**: Local `context()` factory casting `as never` ([flashcards.test.ts:12-27](src/pages/api/flashcards.test.ts#L12-L27)); real `Request`/`Response`; `SupabaseStub` sequences. Cases: GET 401/503/200-with-cards/500-on-invalid-state; POST 401/503/400-bad-body/400-bad-grade(`0`,`5`)/404/409/200. Assert the 409 path returns `{ error: MESSAGES.conflict }` and the update carried the `reps` filter.
+**Contract**: Local `context()` factory casting `as never` ([flashcards.test.ts:12-27](src/pages/api/flashcards.test.ts#L12-L27)); real `Request`/`Response`; `SupabaseStub` sequences (stub already carries `lte`/`order`/`limit`/`range` from Phase 1). Cases: GET 401/503/200-with-cards/500-on-invalid-state; POST 401/503/400-bad-body/400-bad-grade(`0`,`5`)/404/409/200. Assert the 409 path returns `{ error: MESSAGES.conflict }` and the update carried the `reps` filter.
 
 ### Success Criteria:
 
 #### Automated Verification:
 
-- Route + stub + service tests pass: `npm test`
+- Route + service tests pass: `npm test`
 - Type checking passes: `npm run astro check`
 - Linting passes: `npm run lint`
-- Existing `flashcards`/`generations` route tests still green (stub change is additive)
+- Existing `flashcards`/`generations` route tests still green (Phase 1 stub change is additive)
 
 #### Manual Verification:
 
@@ -205,7 +206,7 @@ The user-facing loop: an empty `client:load` island (the `generate.astro` shape,
 - State: `queue: ReviewCard[]`, `reviewedCount: number`, `sessionTotal: number` (running denominator for "karta N z M" — the count of cards seen this session plus remaining queue), `error: string | null`.
 - Local `readJson` / `readError` copied verbatim from [GenerateView.tsx:37-53](src/components/generate/GenerateView.tsx#L37-L53); a hand-written `parseQueue` type-guard for `{ cards: [...] }` (no Zod — server-only).
 - Raw `fetch` inline, no API client. Grade POST body: `{ flashcardId, grade }`. On `!response.ok`: 409 → drop current card, advance, no error surfaced; other → status `error` with `readError`.
-- Keyboard: one `useEffect` attaching `keydown` on `document`, cleaned up on unmount. `Space`/`Enter` → reveal (only in `question`); `1`–`4` → grade (only in `answer`); ignored in `grading`. Do not intercept when a modifier key is held.
+- Keyboard: a `useEffect` attaching `keydown` on `document`, **keyed on `status` + `currentCard.id`** so it re-subscribes each transition and never closes over a stale card; cleanup removes the listener on every re-run and on unmount. `Space`/`Enter` → reveal (only in `question`); `1`–`4` → grade (only in `answer`); ignored in `grading`. Do not intercept when a modifier key is held. Do not use `[]` deps with state read inside the handler — `react-compiler` and `exhaustive-deps` are both `error`.
 - Focus: `useRef` on the primary control; `useEffect` keyed on `currentCard.id + status` calls `.focus()`.
 - Live region: visually-hidden `role="status" aria-live="polite"` announcing "Karta {n} z {m}" on each new card and "Odpowiedź odsłonięta" on reveal.
 - Progress: plain `<span>` "Karta {n} z {m}" (no `progress` primitive — matches the `GenerateView` counter [:247-249](src/components/generate/GenerateView.tsx#L247-L249)).
@@ -312,7 +313,15 @@ The PRD guardrail is a behavioural claim ("must work regardless of card source")
 
 **Contract**: Two cases feeding `applyReviewGrade` a stubbed row that would have `source: "manual"` and one `source: "ai"`; assert identical update payload shape and no branch on `source` (the service never selects or reads `source`). This is a regression guard, not a behavioural difference — document that in a comment.
 
-#### 2. Manual verification evidence file
+#### 2. `preview()` / `applyGrade()` parity test
+
+**File**: `src/lib/reviews/service.test.ts` (addition) or `src/lib/srs/scheduler.test.ts`
+
+**Intent**: The GET response labels a grade button with `preview(row, now)[grade].due`, but the actual write uses `applyGrade(row, now, grade)`. These call `scheduler.repeat()` and `scheduler.next()` respectively — assert they land on the same schedule state so a button's label never lies about what grading it does.
+
+**Contract**: For a fixed `(row, now)` and each `grade` in `1..4`, assert `preview(row, now)[grade]` deep-equals `applyGrade(row, now, grade)` (ignoring fields the service does not persist). One card in learning state, one in review state. Pure, deterministic — explicit `now`, no fake timers.
+
+#### 3. Manual verification evidence file
 
 **File**: `context/changes/srs-review-session/manual-verification.md`
 
@@ -325,6 +334,7 @@ The PRD guardrail is a behavioural claim ("must work regardless of card source")
 #### Automated Verification:
 
 - Both-sources test passes: `npm test`
+- `preview()` / `applyGrade()` parity test passes: `npm test`
 - Full suite green, lint clean, build succeeds
 
 #### Manual Verification:
@@ -343,6 +353,7 @@ The PRD guardrail is a behavioural claim ("must work regardless of card source")
 
 - `reviews/service.ts`: queue query column list + filters (`user_id`, `lte due`, `order due`, `range`); `schedule_state_invalid` on a malformed row; happy grade path; `grade_conflict` when the `reps` guard matches zero rows; `flashcard_not_found` on null pre-read.
 - `reviews/interval.ts`: each bucket boundary (59 min / 60 min, 23 h / 25 h, 47 h / 49 h, 29 d / 31 d).
+- `preview()` / `applyGrade()` parity: for a fixed `(row, now)` and each grade `1..4`, the previewed state equals the applied state (learning-state card + review-state card).
 - `supabase-stub.ts`: existing tests stay green; new `lte`/`order`/`range` recorded correctly.
 
 ### Integration Tests:
@@ -400,10 +411,10 @@ None. No schema change. Existing rows are already valid schedule state.
 
 #### Automated
 
-- [ ] 2.1 Route + stub + service tests pass: `npm test`
+- [ ] 2.1 Route + service tests pass: `npm test`
 - [ ] 2.2 Type checking passes: `npm run astro check`
 - [ ] 2.3 Linting passes: `npm run lint`
-- [ ] 2.4 Existing `flashcards`/`generations` route tests still green
+- [ ] 2.4 Existing `flashcards`/`generations` route tests still green (Phase 1 stub change is additive)
 
 #### Manual
 
@@ -448,10 +459,11 @@ None. No schema change. Existing rows are already valid schedule state.
 #### Automated
 
 - [ ] 5.1 Both-sources test passes: `npm test`
-- [ ] 5.2 Full suite green, lint clean, build succeeds
+- [ ] 5.2 `preview()` / `applyGrade()` parity test passes: `npm test`
+- [ ] 5.3 Full suite green, lint clean, build succeeds
 
 #### Manual
 
-- [ ] 5.3 `manual-verification.md` complete with DB-state observation for a manual and an AI card
-- [ ] 5.4 One full review session on the deployed instance; grade persisted; commit SHA recorded
-- [ ] 5.5 Deployed ts-fsrs interval labels match a local run for the same card state (F-01 parity question closed)
+- [ ] 5.4 `manual-verification.md` complete with DB-state observation for a manual and an AI card
+- [ ] 5.5 One full review session on the deployed instance; grade persisted; commit SHA recorded
+- [ ] 5.6 Deployed ts-fsrs interval labels match a local run for the same card state (F-01 parity question closed)
