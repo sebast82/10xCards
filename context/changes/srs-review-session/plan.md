@@ -442,25 +442,25 @@ None. No schema change. Existing rows are already valid schedule state.
 
 #### Automated
 
-- [x] 4.1 Navigation test passes with the new entry: `npm test`
-- [x] 4.2 Full suite green: `npm test`
-- [x] 4.3 Type checking passes: `npm run astro check`
-- [x] 4.4 Linting passes: `npm run lint`
-- [x] 4.5 Build succeeds: `npm run build`
+- [x] 4.1 Navigation test passes with the new entry: `npm test` — ff0937d
+- [x] 4.2 Full suite green: `npm test` — ff0937d
+- [x] 4.3 Type checking passes: `npm run astro check` — ff0937d
+- [x] 4.4 Linting passes: `npm run lint` — ff0937d
+- [x] 4.5 Build succeeds: `npm run build` — ff0937d
 
 #### Manual
 
-- [x] 4.6 "Powtórki" in the nav on every screen, marked current on `/review`
-- [x] 4.7 `/review` logged out redirects to `/auth/signin`
-- [x] 4.8 `contract-surfaces.md` matches `PROTECTED_ROUTES`
+- [x] 4.6 "Powtórki" in the nav on every screen, marked current on `/review` — ff0937d
+- [x] 4.7 `/review` logged out redirects to `/auth/signin` — ff0937d
+- [x] 4.8 `contract-surfaces.md` matches `PROTECTED_ROUTES` — ff0937d
 
 ### Phase 5: Guardrail verification
 
 #### Automated
 
-- [ ] 5.1 Both-sources test passes: `npm test`
-- [ ] 5.2 `preview()` / `applyGrade()` parity test passes: `npm test`
-- [ ] 5.3 Full suite green, lint clean, build succeeds
+- [x] 5.1 Both-sources test passes: `npm test`
+- [x] 5.2 `preview()` / `applyGrade()` parity test passes: `npm test`
+- [x] 5.3 Full suite green, lint clean, build succeeds
 
 #### Manual
 

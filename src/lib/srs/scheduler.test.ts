@@ -63,4 +63,24 @@ describe("scheduler", () => {
 
     expect(scheduler.applyGrade(card, now, Rating.Good)).toEqual(scheduler.applyGrade(card, now, Rating.Good));
   });
+
+  it("previews the exact state that grading later applies, for every grade (S-05 label parity)", () => {
+    // GET etykietuje przycisk oceny przez `preview(row, now)[grade]` (repeat()), a zapis
+    // wykonuje `applyGrade(row, now, grade)` (next()). Etykieta nie może kłamać o skutku oceny.
+    const scheduler = createScheduler();
+    const learningCard = scheduler.applyGrade(scheduler.createNewCard(now), now, Rating.Good);
+    const reviewCard = scheduler.applyGrade(
+      scheduler.applyGrade(scheduler.createNewCard(now), now, Rating.Easy),
+      now,
+      Rating.Easy,
+    );
+    const later = new Date("2026-09-10T10:00:00.000Z");
+
+    for (const card of [learningCard, reviewCard]) {
+      const preview = scheduler.preview(card, later);
+      for (const grade of [Rating.Again, Rating.Hard, Rating.Good, Rating.Easy] as const) {
+        expect(preview[grade]).toEqual(scheduler.applyGrade(card, later, grade));
+      }
+    }
+  });
 });

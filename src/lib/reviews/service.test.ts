@@ -157,4 +157,30 @@ describe("applyReviewGrade", () => {
       }),
     ).rejects.toMatchObject({ code: "persist_failed" });
   });
+
+  // Regresja, nie różnica w zachowaniu (dług F-01 przypisany S-05): serwis nigdy nie selectuje
+  // ani nie czyta `source`, więc fiszka ręczna i fiszka AI przechodzą identyczną ścieżką oceny.
+  it("grades a manual card and an AI card through an identical guarded update", async () => {
+    async function gradedUpdateFor(source: "manual" | "ai") {
+      const supabase = new SupabaseStub([
+        { data: { id: FLASHCARD_ID, source, ...REVIEW_ROW }, error: null },
+        { data: { id: FLASHCARD_ID }, error: null },
+      ]);
+      await applyReviewGrade({
+        supabase: supabase.asClient(),
+        userId: USER_ID,
+        flashcardId: FLASHCARD_ID,
+        grade: Rating.Good,
+        now: NOW,
+      });
+      return supabase.queries[1];
+    }
+
+    const manual = await gradedUpdateFor("manual");
+    const ai = await gradedUpdateFor("ai");
+
+    expect(manual.payload).toEqual(ai.payload);
+    expect(manual.filters).toEqual(ai.filters);
+    expect(manual.payload).not.toHaveProperty("source");
+  });
 });
