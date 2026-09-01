@@ -1,7 +1,7 @@
 ---
 change_id: srs-review-session
 title: SRS review session
-status: new
+status: preparing
 created: 2026-09-01
 updated: 2026-09-01
 archived_at: null
