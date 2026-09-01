@@ -425,34 +425,34 @@ None. No schema change. Existing rows are already valid schedule state.
 
 #### Automated
 
-- [x] 3.1 Island tests pass: `npm test`
-- [x] 3.2 Type checking passes: `npm run astro check`
-- [x] 3.3 Linting passes: `npm run lint` (including `jsx-a11y`)
-- [x] 3.4 Build succeeds: `npm run build`
+- [x] 3.1 Island tests pass: `npm test` — f7e1731
+- [x] 3.2 Type checking passes: `npm run astro check` — f7e1731
+- [x] 3.3 Linting passes: `npm run lint` (including `jsx-a11y`) — f7e1731
+- [x] 3.4 Build succeeds: `npm run build` — f7e1731
 
 #### Manual
 
-- [x] 3.5 Full browser session: reveal, grade, next card, progress increments
-- [x] 3.6 Grading the last card shows the "to na dziś wszystko" screen
-- [x] 3.7 No due cards → empty state shown
-- [x] 3.8 Keyboard-only run start to finish; screen reader announces card position and reveal
-- [x] 3.9 Double-click / racing grade does not double-count (button disables; race gets 409, absorbed)
+- [x] 3.5 Full browser session: reveal, grade, next card, progress increments — f7e1731
+- [x] 3.6 Grading the last card shows the "to na dziś wszystko" screen — f7e1731
+- [x] 3.7 No due cards → empty state shown — f7e1731
+- [x] 3.8 Keyboard-only run start to finish; screen reader announces card position and reveal — f7e1731
+- [x] 3.9 Double-click / racing grade does not double-count (button disables; race gets 409, absorbed) — f7e1731
 
 ### Phase 4: Shell wiring + contract registry
 
 #### Automated
 
-- [ ] 4.1 Navigation test passes with the new entry: `npm test`
-- [ ] 4.2 Full suite green: `npm test`
-- [ ] 4.3 Type checking passes: `npm run astro check`
-- [ ] 4.4 Linting passes: `npm run lint`
-- [ ] 4.5 Build succeeds: `npm run build`
+- [x] 4.1 Navigation test passes with the new entry: `npm test`
+- [x] 4.2 Full suite green: `npm test`
+- [x] 4.3 Type checking passes: `npm run astro check`
+- [x] 4.4 Linting passes: `npm run lint`
+- [x] 4.5 Build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 4.6 "Powtórki" in the nav on every screen, marked current on `/review`
-- [ ] 4.7 `/review` logged out redirects to `/auth/signin`
-- [ ] 4.8 `contract-surfaces.md` matches `PROTECTED_ROUTES`
+- [x] 4.6 "Powtórki" in the nav on every screen, marked current on `/review`
+- [x] 4.7 `/review` logged out redirects to `/auth/signin`
+- [x] 4.8 `contract-surfaces.md` matches `PROTECTED_ROUTES`
 
 ### Phase 5: Guardrail verification
 

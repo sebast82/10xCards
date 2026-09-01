@@ -22,7 +22,7 @@ Rejestr **nazw nośnych** — tych, które muszą pozostać spójne między zmia
 | `/dashboard`          | chroniona | Ekran po zalogowaniu                              | istnieje    | —                               |
 | `/generate`           | chroniona | Wklejenie tekstu, przegląd propozycji, akceptacja | istnieje    | S-02                            |
 | `/deck`               | chroniona | Kolekcja fiszek użytkownika                       | istnieje    | S-02, rozszerzana w S-03 i S-04 |
-| `/review`             | chroniona | Sesja powtórkowa                                  | proponowane | S-05                            |
+| `/review`             | chroniona | Sesja powtórkowa                                  | istnieje    | S-05                            |
 
 **Decyzja (2026-08-22):** ekran po zalogowaniu zostaje pod `/dashboard`. Rozważano `/home` — odrzucone, bo `/dashboard` działa, jest chroniony przez middleware i zweryfikowany na produkcji, a zmiana nazwy niosłaby ryzyko regresji w przepływie auth bez zysku dla użytkownika.
 
@@ -41,7 +41,7 @@ S-06 nie wprowadza nowych tras — zmienia zachowanie `/generate`.
 | `/api/flashcards`     | POST          | Zapis zaakceptowanej propozycji AI, w S-04 też ręcznej   | `locals.user`, 401 bez sesji | istnieje    | S-02, S-04 |
 | `/api/flashcards`     | GET           | Odczyt kolekcji                                          | `locals.user`, 401 bez sesji | proponowane | S-03       |
 | `/api/flashcards/:id` | PATCH, DELETE | Edycja i usunięcie zapisanej fiszki                      | `locals.user`, 401 bez sesji | proponowane | S-03       |
-| `/api/reviews`        | GET, POST     | Pobranie fiszek na sesję, zapis oceny                    | `locals.user`, 401 bez sesji | proponowane | S-05       |
+| `/api/reviews`        | GET, POST     | Pobranie fiszek na sesję, zapis oceny                    | `locals.user`, 401 bez sesji | istnieje    | S-05       |
 
 **Wzorzec odpowiedzi.** Istniejące endpointy auth zwracają przekierowanie z komunikatem błędu w parametrze zapytania (`src/pages/api/auth/`). Endpointy domenowe będą wołane z wysp React, więc zwracają JSON — to świadomy rozjazd, nie niespójność.
 
