@@ -8,7 +8,7 @@ target_scale:
   data_volume: small
 timeline_budget:
   mvp_weeks: 3
-  hard_deadline: 2026-08-31
+  hard_deadline: 2026-09-07
   after_hours_only: true
 created: 2026-07-10
 updated: 2026-07-10
@@ -31,7 +31,7 @@ checkpoint:
     - topic: "target scale"
       decision: "small (up to 10 users)"
     - topic: "hard deadline"
-      decision: "2026-08-31"
+      decision: "2026-09-07"
     - topic: "after hours"
       decision: "yes — hobby / side project"
   frs_drafted: 9

@@ -98,7 +98,7 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 - **Parallel with:** S-01
 - **Blockers:** —
 - **Unknowns:** —
-- **Risk:** Sonda raportuje warstwę danych jako nieistniejącą, a wszystkie dziewięć wymagań koniecznych na niej stoi — zły kształt tabeli odkryty w połowie pętli to jedyna przeróbka, której termin 2026-08-31 nie wchłonie. Stąd zależność od F-01: pola harmonogramu wchodzą do schematu od razu, zanim użytkownik cokolwiek zapisze. Z tego samego powodu znacznik pochodzenia fiszki (decyzja z 2026-08-21) wchodzi tą samą migracją — dopisany później wymagałby przerobienia już zapisanych rekordów, a wstecz i tak nie da się odtworzyć pochodzenia. Zakres celowo wąski: tabela fiszek, polityka izolacji, typy — bez budowania „całej warstwy danych" z góry. Każdy kolejny element pętli i tak przechodzi przez tę warstwę pionowo.
+- **Risk:** Sonda raportuje warstwę danych jako nieistniejącą, a wszystkie dziewięć wymagań koniecznych na niej stoi — zły kształt tabeli odkryty w połowie pętli to jedyna przeróbka, której termin 2026-09-07 nie wchłonie. Stąd zależność od F-01: pola harmonogramu wchodzą do schematu od razu, zanim użytkownik cokolwiek zapisze. Z tego samego powodu znacznik pochodzenia fiszki (decyzja z 2026-08-21) wchodzi tą samą migracją — dopisany później wymagałby przerobienia już zapisanych rekordów, a wstecz i tak nie da się odtworzyć pochodzenia. Zakres celowo wąski: tabela fiszek, polityka izolacji, typy — bez budowania „całej warstwy danych" z góry. Każdy kolejny element pętli i tak przechodzi przez tę warstwę pionowo.
 - **Status:** done
 
 ## Slices
@@ -188,7 +188,7 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 - **Blockers:** —
 - **Unknowns:**
   - Czy limity środowiska (czas CPU, liczba podzapytań, równoległe połączenia wychodzące — opisane w `infrastructure.md`) pozwalają na przyrostowe dostarczanie bez zmiany planu hostingu? — Owner: user. Block: no.
-- **Risk:** Świadomie oddzielone od S-02, żeby pomiar jakości propozycji nie czekał na strojenie strumieniowania. Jedyny element poza pętlą — przy celu `speed` i głównym ryzyku `time` to pierwszy kandydat do odłożenia, jeśli termin zacznie napierać: generowanie zbiorcze spełnia FR-003, tylko gorzej się go używa. **2026-08-26:** ten warunek się ziścił — wygląd aplikacji stał się bramką publicznego debiutu, więc S-06 ustępuje miejsca w kamieniu milowym `MVP — pętla` elementowi S-08 i zostaje w `Bufor — do przycięcia`. To odłożenie jest **warunkowe, nie ostateczne**: jeśli pętla MVP (S-07, S-03, S-04, S-05, S-08) domknie się przed 2026-08-31, S-06 wraca do kolejki i zostaje dokończony przed debiutem — wymaganie niefunkcjonalne PRD o pierwszych fiszkach w 30 sekund pozostaje w mocy i nie zostało uchylone.
+- **Risk:** Świadomie oddzielone od S-02, żeby pomiar jakości propozycji nie czekał na strojenie strumieniowania. Jedyny element poza pętlą — przy celu `speed` i głównym ryzyku `time` to pierwszy kandydat do odłożenia, jeśli termin zacznie napierać: generowanie zbiorcze spełnia FR-003, tylko gorzej się go używa. **2026-08-26:** ten warunek się ziścił — wygląd aplikacji stał się bramką publicznego debiutu, więc S-06 ustępuje miejsca w kamieniu milowym `MVP — pętla` elementowi S-08 i zostaje w `Bufor — do przycięcia`. To odłożenie jest **warunkowe, nie ostateczne**: jeśli pętla MVP (S-07, S-03, S-04, S-05, S-08) domknie się przed 2026-09-07, S-06 wraca do kolejki i zostaje dokończony przed debiutem — wymaganie niefunkcjonalne PRD o pierwszych fiszkach w 30 sekund pozostaje w mocy i nie zostało uchylone.
 - **Status:** proposed
 
 ### S-08: Przegląd wizualny przed debiutem
@@ -201,7 +201,7 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 - **Parallel with:** —
 - **Blockers:** —
 - **Unknowns:** —
-- **Risk:** Jedyny element roadmapy, który nie daje użytkownikowi nowej możliwości, więc formalnie nie jest przekrojem — stąd znacznik `(wykończenie)` i pozycja na samym końcu. Polerowanie ekranu, zanim on istnieje, to praca do wyrzucenia: każdy element Stream C i D dokłada widoki, więc przebieg uruchomiony wcześniej trzeba by powtórzyć. Mimo to stoi w roadmapie, a nie obok niej — wygląd jest warunkiem debiutu, a rzecz niesekwencjonowana zawsze przegrywa o wieczór z elementem, który ma swój wiersz w tabeli. Zakres domknięty listą ekranów istniejących w chwili startu i spójnością tego, co już jest; przeprojektowanie interfejsu od nowa nie mieści się w terminie 2026-08-31. Jako ostatni element przed debiutem jest też ostatnim buforem — jeśli czas się skończy, przycina się jego głębokość, nie elementy pętli przed nim.
+- **Risk:** Jedyny element roadmapy, który nie daje użytkownikowi nowej możliwości, więc formalnie nie jest przekrojem — stąd znacznik `(wykończenie)` i pozycja na samym końcu. Polerowanie ekranu, zanim on istnieje, to praca do wyrzucenia: każdy element Stream C i D dokłada widoki, więc przebieg uruchomiony wcześniej trzeba by powtórzyć. Mimo to stoi w roadmapie, a nie obok niej — wygląd jest warunkiem debiutu, a rzecz niesekwencjonowana zawsze przegrywa o wieczór z elementem, który ma swój wiersz w tabeli. Zakres domknięty listą ekranów istniejących w chwili startu i spójnością tego, co już jest; przeprojektowanie interfejsu od nowa nie mieści się w terminie 2026-09-07. Jako ostatni element przed debiutem jest też ostatnim buforem — jeśli czas się skończy, przycina się jego głębokość, nie elementy pętli przed nim.
 - **Status:** proposed
 
 ## Backlog Handoff
@@ -219,7 +219,7 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 | S-08       | `visual-polish-pass`            | #12   | Przegląd wizualny przed debiutem                         | no                    | Czeka na S-03, S-04, S-05 i S-07; ostatni przed debiutem i ostatni bufor |
 | S-06       | `streaming-generation-progress` | #8    | Przyrostowe generowanie i widoczny postęp                | no                    | Czeka na S-02; odłożone 2026-08-26 na rzecz S-08 — odłożenie warunkowe, wraca do kolejki, jeśli pętla MVP domknie się przed terminem |
 
-Kamienie milowe: F-01–S-05, S-07 i S-08 w `MVP — pętla` (termin 2026-08-31), S-06 w `Bufor — do przycięcia`.
+Kamienie milowe: F-01–S-05, S-07 i S-08 w `MVP — pętla` (termin 2026-09-07), S-06 w `Bufor — do przycięcia`.
 
 ## Open Roadmap Questions
 
