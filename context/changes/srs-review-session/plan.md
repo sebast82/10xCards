@@ -458,9 +458,9 @@ None. No schema change. Existing rows are already valid schedule state.
 
 #### Automated
 
-- [x] 5.1 Both-sources test passes: `npm test`
-- [x] 5.2 `preview()` / `applyGrade()` parity test passes: `npm test`
-- [x] 5.3 Full suite green, lint clean, build succeeds
+- [x] 5.1 Both-sources test passes: `npm test` — 7eb0e97
+- [x] 5.2 `preview()` / `applyGrade()` parity test passes: `npm test` — 7eb0e97
+- [x] 5.3 Full suite green, lint clean, build succeeds — 7eb0e97
 
 #### Manual
 
