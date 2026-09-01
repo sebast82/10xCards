@@ -1,5 +1,5 @@
 ---
-import Layout from "@/layouts/Layout.astro";
+import AppLayout from "@/layouts/AppLayout.astro";
 
 const { supabase } = Astro.locals;
 
@@ -26,7 +26,7 @@ const SOURCE_LABELS: Record<string, string> = {
 const dateFormatter = new Intl.DateTimeFormat("pl-PL", { dateStyle: "medium", timeStyle: "short" });
 ---
 
-<Layout title="Moja kolekcja">
+<AppLayout title="Moja kolekcja">
   <div class="mx-auto flex w-full max-w-3xl flex-col gap-8 p-4 py-10">
     <header class="flex flex-col gap-2">
       <h1 class="text-2xl font-bold">Moja kolekcja</h1>
@@ -77,4 +77,4 @@ const dateFormatter = new Intl.DateTimeFormat("pl-PL", { dateStyle: "medium", ti
       )
     }
   </div>
-</Layout>
+</AppLayout>

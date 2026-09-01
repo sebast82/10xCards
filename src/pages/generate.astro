@@ -1,8 +1,8 @@
 ---
-import Layout from "@/layouts/Layout.astro";
 import GenerateView from "@/components/generate/GenerateView";
+import AppLayout from "@/layouts/AppLayout.astro";
 ---
 
-<Layout title="Generuj fiszki">
+<AppLayout title="Generuj fiszki">
   <GenerateView client:load />
-</Layout>
+</AppLayout>

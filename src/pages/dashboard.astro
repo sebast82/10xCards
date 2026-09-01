@@ -1,10 +1,10 @@
 ---
-import Layout from "@/layouts/Layout.astro";
+import AppLayout from "@/layouts/AppLayout.astro";
 
 const { user } = Astro.locals;
 ---
 
-<Layout title="Dashboard">
+<AppLayout title="Dashboard">
   <div class="flex min-h-screen items-center justify-center p-4">
     <div class="bg-card text-card-foreground rounded-xl border p-8 text-center shadow-sm">
       <h1 class="mb-4 text-3xl font-bold">Dashboard</h1>
@@ -12,19 +12,6 @@ const { user } = Astro.locals;
         Welcome, <span class="text-foreground font-semibold">{user?.email}</span>
       </p>
       <p class="text-muted-foreground mt-2 text-sm">This page is only for authenticated users.</p>
-      <nav class="mt-6 flex flex-wrap justify-center gap-3">
-        <a href="/generate" class="hover:bg-accent hover:text-accent-foreground rounded-md border px-4 py-2 text-sm">
-          Generuj fiszki
-        </a>
-        <a href="/deck" class="hover:bg-accent hover:text-accent-foreground rounded-md border px-4 py-2 text-sm">
-          Moja kolekcja
-        </a>
-      </nav>
-      <form method="POST" action="/api/auth/signout" class="mt-6">
-        <button type="submit" class="hover:bg-accent hover:text-accent-foreground rounded-md border px-4 py-2 text-sm">
-          Sign out
-        </button>
-      </form>
     </div>
   </div>
-</Layout>
+</AppLayout>
