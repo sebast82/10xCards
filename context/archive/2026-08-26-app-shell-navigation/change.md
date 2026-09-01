@@ -1,10 +1,10 @@
 ---
 change_id: app-shell-navigation
 title: App shell navigation
-status: impl_reviewed
+status: archived
 created: 2026-08-26
 updated: 2026-09-01
-archived_at: null
+archived_at: 2026-09-01T09:11:08Z
 ---
 
 ## Notes

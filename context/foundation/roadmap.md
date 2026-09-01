@@ -41,7 +41,7 @@ Deklaracja właściciela produktu brzmiała: gwiazdą jest **cała pętla** (rej
 | F-02 | `flashcards-schema-isolation`   | (fundament) fiszki mają trwały schemat ze znacznikiem pochodzenia, a każdy użytkownik widzi wyłącznie swoje | F-01          | Access Control, FR-008                          | done     |
 | S-01 | `deployed-auth-baseline`        | zarejestrować się, zalogować i wylogować na wdrożonej instancji                                             | —             | FR-001, FR-002, Access Control                  | done     |
 | S-02 | `first-gated-generation`        | wkleić tekst, przejrzeć propozycje AI i zapisać zaakceptowane do swojej kolekcji                            | F-02, S-01    | US-01, FR-003, FR-004, FR-008                   | done     |
-| S-07 | `app-shell-navigation`          | przechodzić między wszystkimi funkcjami z jednej, stałej nawigacji — bez cofania w przeglądarce             | S-02          | Non-Functional Requirements, FR-008             | in-progress |
+| S-07 | `app-shell-navigation`          | przechodzić między wszystkimi funkcjami z jednej, stałej nawigacji — bez cofania w przeglądarce             | S-02          | Non-Functional Requirements, FR-008             | done     |
 | S-03 | `manual-card-edit-delete`       | poprawić treść zapisanej fiszki i usunąć zbędną                                                             | S-02          | FR-006, FR-007                                  | proposed |
 | S-04 | `manual-card-create`            | dodać własną fiszkę ręcznie, bez udziału AI                                                                 | S-02          | FR-005                                          | proposed |
 | S-05 | `srs-review-session`            | uruchomić sesję powtórkową i ocenić fiszki według algorytmu spaced repetition                               | F-02, S-02    | FR-009, Success Criteria §Guardrails            | proposed |
@@ -140,7 +140,7 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Wbrew pierwszemu wrażeniu to nie kosmetyka, tylko luka funkcjonalna: bez tego elementu użytkownik nie ma jak przejść z kolekcji do generowania inaczej niż cofając historię przeglądarki, a po S-05 dojdzie trzecia funkcja bez wejścia. Stąd pozycja przed Stream C i D, choć formalnie nic go tam nie blokuje: S-03, S-04 i S-05 każdy dodaje ekran, więc powłoka zbudowana po nich to retrofit trzech ekranów naraz zamiast trzech dopisanych wpisów. Wymaganie niefunkcjonalne PRD dopisane 2026-08-26 (dostępność każdej funkcji z trwałej nawigacji) jest kotwicą tego elementu — wcześniej roadmapa milczała na ten temat, bo milczał PRD. Zakres celowo wąski: struktura nawigacji i wskazanie bieżącego miejsca, bez przebudowy wyglądu — ten idzie osobno w S-08, po powstaniu ostatniego ekranu.
-- **Status:** in-progress
+- **Status:** done
 
 ### S-03: Poprawianie i usuwanie zapisanych fiszek
 
@@ -247,5 +247,6 @@ Brak otwartych pytań — wszystkie rozstrzygnięte.
 - **F-01: (fundament) wybrany jest gotowy algorytm powtórek i spisany kontrakt stanu — jakie dane musi nieść każda fiszka, żeby sesja nauki umiała wyznaczyć termin jej kolejnego pokazania i zaktualizować go po ocenie.** — Archived 2026-08-24 → `context/archive/2026-08-23-srs-algorithm-contract/`. Lesson: —.
 - **F-02: (fundament) fiszki mają trwały schemat ze znacznikiem pochodzenia, a każdy użytkownik widzi wyłącznie swoje** — wdrożone lokalnie i zdalnie 2026-08-24; RLS i komplet polityk potwierdzone w Dashboardzie Supabase. Przegląd implementacji 2026-08-25: 8 ustaleń, wszystkie naprawione, migracja `20260825120802_revoke_anon_table_privileges.sql` wypchnięta na chmurę. Archived 2026-08-25 → `context/archive/2026-08-24-flashcards-schema-isolation/`. Issue #2. Lesson: —.
 - **S-02: użytkownik może wkleić tekst źródłowy, zobaczyć listę propozycji fiszek w formacie pytanie+odpowiedź, każdą zaakceptować, poprawić przed zapisem albo odrzucić, a zaakceptowane zobaczyć na liście swojej kolekcji.** — Archived 2026-08-26 → `context/archive/2026-08-25-first-gated-generation/`. Issue #4. Lesson: —.
+- **S-07: użytkownik może przejść do dowolnej funkcji aplikacji — generowania, własnej kolekcji, sesji nauki, wylogowania — z jednej nawigacji obecnej na każdym ekranie, i w każdej chwili widzi, w której funkcji się znajduje. Przycisk „wstecz" przeglądarki przestaje być narzędziem poruszania się po aplikacji.** — Archived 2026-09-01 → `context/archive/2026-08-26-app-shell-navigation/`. Lesson: —.
 
 (Kolejne wpisy dopisuje `/10x-archive` — i przestawia status elementu na `done` — gdy archiwizowana zmiana ma pasujący Change ID.)
