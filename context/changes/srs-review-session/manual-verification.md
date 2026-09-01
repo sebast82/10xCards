@@ -4,11 +4,18 @@
 - **Environment**: _pending_ (local: Windows, Chromium, local Supabase — deployed: `https://10x-cards.sebger82.workers.dev`)
 - **Evidence type**: DB-state observations from the Supabase dashboard + one full session on the deployed Worker. This closes the F-01 inherited question ("does ts-fsrs behave the same on the deployed instance?").
 
-> **Status at Phase 5 commit (2026-09-02):** automated checks 5.1–5.3 pass. Manual checks 5.4–5.6
-> are **open debt** — the change was marked `implemented` before they ran (deliberate: option A).
-> As of this commit, `GET https://10x-cards.sebger82.workers.dev/review` returns **404** — S-05 is
-> not yet deployed. `git push` `master` (p1–p5) → Cloudflare auto-deploy, then complete (c) and (d)
-> below and flip 5.4–5.6 in `plan.md`.
+> **Status:** automated checks 5.1–5.3 pass. `origin/master` @ `b3e9554` (p1–p5 + epilogue + F1
+> fix) is deployed to the Worker — verified 2026-09-02 by curl:
+>
+> | Deployed check | Result |
+> |---|---|
+> | `GET /review` (logged out) | `302` → `/auth/signin` — route + `PROTECTED_ROUTES` live |
+> | `GET /api/reviews` (logged out) | `401` `{"error":"Zaloguj się, aby powtarzać fiszki."}` — S-05 endpoint live, frozen message |
+> | `POST /api/reviews` grade:5 (logged out) | `401` (auth gate fires before body validation — expected order) |
+>
+> Remaining: (a)/(b) local DB-state observations, (c) one full logged-in session on the Worker,
+> (d) the label-parity spot-check. These need a browser session + Supabase dashboard — pending the
+> product-owner run. Flip 5.4–5.6 in `plan.md` once recorded.
 
 ## Guardrail
 
@@ -49,8 +56,9 @@ PRD guardrail for S-05: **the review mechanism must not fail, regardless of card
 
 ### (d) Deployed commit
 
-- **Deployed commit SHA**: _pending_
-- **Deploy date**: _pending_
+- **Deployed commit SHA**: `b3e9554` (`origin/master` HEAD; `fix(srs-review-session): suppress Space/Enter grade activation in answer state (F1)`)
+- **Deploy date**: 2026-09-02
+- **Deploy verified**: 2026-09-02 via curl — `/review` 302→signin, `/api/reviews` 401 with the frozen Polish message. Full logged-in session (c) still pending.
 
 ## Plan items
 
