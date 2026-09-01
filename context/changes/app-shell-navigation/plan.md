@@ -215,14 +215,14 @@ Brak migracji danych, zmian API i nowych tras. Wdrożenie można cofnąć przez 
 
 #### Automated
 
-- [x] 2.1 Pełny zestaw testów, w tym kontrakt tras, przechodzi
-- [x] 2.2 Astro i TypeScript nie raportują błędów
-- [x] 2.3 Lint przechodzi
-- [x] 2.4 Produkcyjny build Cloudflare kończy się poprawnie
+- [x] 2.1 Pełny zestaw testów, w tym kontrakt tras, przechodzi — 89c5a83
+- [x] 2.2 Astro i TypeScript nie raportują błędów — 89c5a83
+- [x] 2.3 Lint przechodzi — 89c5a83
+- [x] 2.4 Produkcyjny build Cloudflare kończy się poprawnie — 89c5a83
 
 #### Manual
 
-- [x] 2.5 Nawigacja łączy wszystkie chronione ekrany i wskazuje aktywną sekcję
-- [x] 2.6 Układ przy 320 px obsługuje długi email bez przepełnienia i nakładania treści
-- [x] 2.7 Wylogowanie i przekierowania bez sesji zachowują istniejący kontrakt
-- [x] 2.8 Publiczne i auth ekrany pozostają poza aplikacyjnym shellem
+- [x] 2.5 Nawigacja łączy wszystkie chronione ekrany i wskazuje aktywną sekcję — 89c5a83
+- [x] 2.6 Układ przy 320 px obsługuje długi email bez przepełnienia i nakładania treści — 89c5a83
+- [x] 2.7 Wylogowanie i przekierowania bez sesji zachowują istniejący kontrakt — 89c5a83
+- [x] 2.8 Publiczne i auth ekrany pozostają poza aplikacyjnym shellem — 89c5a83
