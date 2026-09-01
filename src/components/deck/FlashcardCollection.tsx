@@ -142,7 +142,9 @@ export default function FlashcardCollection({ flashcards: initialFlashcards, pag
         return;
       }
 
-      setFlashcards((previous) => [{ ...created, front, back, source: "manual" }, ...previous].slice(0, pageSize));
+      setFlashcards((previous) =>
+        [{ ...created, front, back, source: "manual" as const }, ...previous].slice(0, pageSize),
+      );
       setCreateDraft({ front: "", back: "" });
       setCreateOpen(false);
     } catch {

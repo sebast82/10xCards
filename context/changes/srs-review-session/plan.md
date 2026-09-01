@@ -399,13 +399,13 @@ None. No schema change. Existing rows are already valid schedule state.
 
 #### Automated
 
-- [ ] 1.1 Unit tests pass: `npm test`
-- [ ] 1.2 Type checking passes: `npm run astro check`
-- [ ] 1.3 Linting passes: `npm run lint`
+- [x] 1.1 Unit tests pass: `npm test`
+- [x] 1.2 Type checking passes: `npm run astro check`
+- [x] 1.3 Linting passes: `npm run lint`
 
 #### Manual
 
-- [ ] 1.4 `service.ts` reviewed: no `as ScheduleStateRow` cast, no schedule columns returned to callers
+- [x] 1.4 `service.ts` reviewed: no `as ScheduleStateRow` cast, no schedule columns returned to callers
 
 ### Phase 2: `/api/reviews` endpoint (GET + POST)
 

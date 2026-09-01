@@ -75,6 +75,7 @@ const noConsoleOnServerPathsConfig = tseslint.config({
     "src/lib/openrouter/**/*.ts",
     "src/lib/generations/**/*.ts",
     "src/lib/flashcards/**/*.ts",
+    "src/lib/reviews/**/*.ts",
   ],
   rules: {
     "no-console": "error",

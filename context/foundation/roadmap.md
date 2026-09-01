@@ -44,7 +44,7 @@ Deklaracja właściciela produktu brzmiała: gwiazdą jest **cała pętla** (rej
 | S-07 | `app-shell-navigation`          | przechodzić między wszystkimi funkcjami z jednej, stałej nawigacji — bez cofania w przeglądarce             | S-02          | Non-Functional Requirements, FR-008             | done     |
 | S-03 | `manual-card-edit-delete`       | poprawić treść zapisanej fiszki i usunąć zbędną                                                             | S-02          | FR-006, FR-007                                  | done |
 | S-04 | `manual-card-create`            | dodać własną fiszkę ręcznie, bez udziału AI                                                                 | S-02          | FR-005                                          | done |
-| S-05 | `srs-review-session`            | uruchomić sesję powtórkową i ocenić fiszki według algorytmu spaced repetition                               | F-02, S-02    | FR-009, Success Criteria §Guardrails            | planning |
+| S-05 | `srs-review-session`            | uruchomić sesję powtórkową i ocenić fiszki według algorytmu spaced repetition                               | F-02, S-02    | FR-009, Success Criteria §Guardrails            | in-progress |
 | S-08 | `visual-polish-pass`            | (wykończenie) korzystać z aplikacji o spójnym wyglądzie, z czytelnymi stanami pustej listy, ładowania i błędu | S-03, S-04, S-05, S-07 | US-01, FR-004, FR-008                | proposed |
 | S-06 | `streaming-generation-progress` | widzieć pierwsze fiszki i postęp już w trakcie generowania, bez czekania na całość                          | S-02          | US-01, FR-003, Non-Functional Requirements      | proposed |
 
@@ -176,7 +176,7 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Kontrakt algorytmu i pola stanu przychodzą gotowe z F-01, więc ryzyko tego elementu nie leży już w wyborze rozwiązania, tylko w jego wpięciu. PRD stawia tu jedyny twardy warunek brzegowy: sesja nauki musi działać poprawnie niezależnie od źródła fiszek — po S-04 w kolekcji są zarówno fiszki z AI, jak i ręczne, i obie muszą wchodzić do harmonogramu tak samo. Domyka pętlę zadeklarowaną przez właściciela produktu, więc przy celu `speed` nie schodzi poniżej S-06 w kolejce.
-- **Status:** planning
+- **Status:** in-progress
 
 ### S-06: Przyrostowe pojawianie się fiszek i widoczny postęp generowania
 

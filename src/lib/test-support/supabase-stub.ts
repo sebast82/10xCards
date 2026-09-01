@@ -13,6 +13,9 @@ export interface RecordedQuery {
   operation: "select" | "insert" | "update" | "delete";
   payload?: Record<string, unknown>;
   filters: [string, unknown][];
+  order?: { column: string; ascending: boolean };
+  limit?: number;
+  range?: [number, number];
 }
 
 export interface RecordedRpc {
@@ -54,6 +57,26 @@ class StubQuery {
 
   gte(column: string, value: unknown): this {
     this.recorded.filters.push([column, value]);
+    return this;
+  }
+
+  lte(column: string, value: unknown): this {
+    this.recorded.filters.push([column, value]);
+    return this;
+  }
+
+  order(column: string, options?: { ascending?: boolean }): this {
+    this.recorded.order = { column, ascending: options?.ascending ?? true };
+    return this;
+  }
+
+  limit(count: number): this {
+    this.recorded.limit = count;
+    return this;
+  }
+
+  range(from: number, to: number): this {
+    this.recorded.range = [from, to];
     return this;
   }
 
