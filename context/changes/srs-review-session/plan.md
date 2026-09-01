@@ -411,32 +411,32 @@ None. No schema change. Existing rows are already valid schedule state.
 
 #### Automated
 
-- [x] 2.1 Route + service tests pass: `npm test`
-- [x] 2.2 Type checking passes: `npm run astro check`
-- [x] 2.3 Linting passes: `npm run lint`
-- [x] 2.4 Existing `flashcards`/`generations` route tests still green (Phase 1 stub change is additive)
+- [x] 2.1 Route + service tests pass: `npm test` — be0257b
+- [x] 2.2 Type checking passes: `npm run astro check` — be0257b
+- [x] 2.3 Linting passes: `npm run lint` — be0257b
+- [x] 2.4 Existing `flashcards`/`generations` route tests still green (Phase 1 stub change is additive) — be0257b
 
 #### Manual
 
-- [x] 2.5 GET `/api/reviews` logged out returns 401 with the Polish message
-- [x] 2.6 POST with `grade: 5` returns 400, not 500
+- [x] 2.5 GET `/api/reviews` logged out returns 401 with the Polish message — be0257b
+- [x] 2.6 POST with `grade: 5` returns 400, not 500 — be0257b
 
 ### Phase 3: Review island + `review.astro`
 
 #### Automated
 
-- [ ] 3.1 Island tests pass: `npm test`
-- [ ] 3.2 Type checking passes: `npm run astro check`
-- [ ] 3.3 Linting passes: `npm run lint` (including `jsx-a11y`)
-- [ ] 3.4 Build succeeds: `npm run build`
+- [x] 3.1 Island tests pass: `npm test`
+- [x] 3.2 Type checking passes: `npm run astro check`
+- [x] 3.3 Linting passes: `npm run lint` (including `jsx-a11y`)
+- [x] 3.4 Build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 3.5 Full browser session: reveal, grade, next card, progress increments
-- [ ] 3.6 Grading the last card shows the "to na dziś wszystko" screen
-- [ ] 3.7 No due cards → empty state shown
-- [ ] 3.8 Keyboard-only run start to finish; screen reader announces card position and reveal
-- [ ] 3.9 Double-click / racing grade does not double-count (button disables; race gets 409, absorbed)
+- [x] 3.5 Full browser session: reveal, grade, next card, progress increments
+- [x] 3.6 Grading the last card shows the "to na dziś wszystko" screen
+- [x] 3.7 No due cards → empty state shown
+- [x] 3.8 Keyboard-only run start to finish; screen reader announces card position and reveal
+- [x] 3.9 Double-click / racing grade does not double-count (button disables; race gets 409, absorbed)
 
 ### Phase 4: Shell wiring + contract registry
 
