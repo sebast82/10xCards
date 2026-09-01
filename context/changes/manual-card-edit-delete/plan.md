@@ -266,11 +266,11 @@ No migration is expected: the schema already has content validation, an `updated
 
 #### Automated
 
-- [x] 3.1 Add the React component test seam and collection state tests
-- [x] 3.2 Add API route contract tests
-- [x] 3.3 Extend RLS and generation recount SQL regressions
-- [x] 3.4 Pass the complete TypeScript suite, database tests, lint, and build
+- [x] 3.1 Add the React component test seam and collection state tests — 08e8056
+- [x] 3.2 Add API route contract tests — 08e8056
+- [x] 3.3 Extend RLS and generation recount SQL regressions — 08e8056
+- [x] 3.4 Pass the complete TypeScript suite, database tests, lint, and build — 08e8056
 
 #### Manual
 
-- [x] 3.5 Verify cross-account isolation and generation counters against Supabase
+- [x] 3.5 Verify cross-account isolation and generation counters against Supabase — 08e8056
