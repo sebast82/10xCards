@@ -212,11 +212,11 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 | F-02       | `flashcards-schema-isolation`   | #2    | Schemat fiszek i izolacja danych per użytkownik          | done                  | Wdrożone lokalnie i zdalnie 2026-08-25; issue zamknięte |
 | S-01       | `deployed-auth-baseline`        | #3    | Rejestracja i logowanie na wdrożonej instancji           | done                  | Zweryfikowane na produkcji 2026-08-21; issue zamknięte |
 | S-02       | `first-gated-generation`        | #4    | Generowanie fiszek z tekstu: przegląd, akceptacja, zapis | done                  | Zarchiwizowane 2026-08-26; przegląd implementacji: 10 findings, 9 naprawionych; issue zamknięte |
-| S-07       | `app-shell-navigation`          | #11   | Stała nawigacja obejmująca wszystkie funkcje              | yes                   | Odblokowane przez S-02; następny w kolejce — idzie przed S-03/S-04/S-05, żeby ich ekrany podpinały się do gotowej powłoki |
-| S-03       | `manual-card-edit-delete`       | #5    | Poprawianie i usuwanie zapisanych fiszek                 | yes                   | Odblokowane przez S-02                                 |
-| S-04       | `manual-card-create`            | #6    | Ręczne tworzenie fiszki                                  | yes                   | Odblokowane przez S-02                                 |
+| S-07       | `app-shell-navigation`          | #11   | Stała nawigacja obejmująca wszystkie funkcje              | done                  | Zarchiwizowane 2026-09-01; przegląd implementacji: 0 ustaleń, werdykt APPROVED; issue zamknięte |
+| S-03       | `manual-card-edit-delete`       | #5    | Poprawianie i usuwanie zapisanych fiszek                 | yes                   | Odblokowane przez S-02; następny w kolejce — powłoka z S-07 gotowa |
+| S-04       | `manual-card-create`            | #6    | Ręczne tworzenie fiszki                                  | yes                   | Odblokowane przez S-02; można prowadzić równolegle z S-03 |
 | S-05       | `srs-review-session`            | #7    | Sesja powtórkowa z algorytmem spaced repetition          | yes                   | Odblokowane przez F-02 i S-02; domyka pętlę            |
-| S-08       | `visual-polish-pass`            | #12   | Przegląd wizualny przed debiutem                         | no                    | Czeka na S-03, S-04, S-05 i S-07; ostatni przed debiutem i ostatni bufor |
+| S-08       | `visual-polish-pass`            | #12   | Przegląd wizualny przed debiutem                         | no                    | Czeka na S-03, S-04 i S-05 (S-07 domknięte); ostatni przed debiutem i ostatni bufor |
 | S-06       | `streaming-generation-progress` | #8    | Przyrostowe generowanie i widoczny postęp                | no                    | Czeka na S-02; odłożone 2026-08-26 na rzecz S-08 — odłożenie warunkowe, wraca do kolejki, jeśli pętla MVP domknie się przed terminem |
 
 Kamienie milowe: F-01–S-05, S-07 i S-08 w `MVP — pętla` (termin 2026-09-07), S-06 w `Bufor — do przycięcia`.
