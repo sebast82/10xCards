@@ -253,24 +253,24 @@ No migration is expected: the schema already has content validation, an `updated
 
 #### Automated
 
-- [x] 2.1 Add the deck collection island and accessible alert dialog
-- [x] 2.2 Integrate the client island into the RLS-backed deck page
-- [x] 2.3 Pass lint and production build
+- [x] 2.1 Add the deck collection island and accessible alert dialog — 6223e61
+- [x] 2.2 Integrate the client island into the RLS-backed deck page — 6223e61
+- [x] 2.3 Pass lint and production build — 6223e61
 
 #### Manual
 
-- [x] 2.4 Verify inline edit, cancel, save, dialog cancellation, and confirmed deletion in Chromium
-- [x] 2.5 Verify empty state and card-specific failed-mutation feedback
+- [x] 2.4 Verify inline edit, cancel, save, dialog cancellation, and confirmed deletion in Chromium — 6223e61
+- [x] 2.5 Verify empty state and card-specific failed-mutation feedback — 6223e61
 
 ### Phase 3: Mutation Regression Coverage
 
 #### Automated
 
-- [ ] 3.1 Add the React component test seam and collection state tests
-- [ ] 3.2 Add API route contract tests
-- [ ] 3.3 Extend RLS and generation recount SQL regressions
-- [ ] 3.4 Pass the complete TypeScript suite, database tests, lint, and build
+- [x] 3.1 Add the React component test seam and collection state tests
+- [x] 3.2 Add API route contract tests
+- [x] 3.3 Extend RLS and generation recount SQL regressions
+- [x] 3.4 Pass the complete TypeScript suite, database tests, lint, and build
 
 #### Manual
 
-- [ ] 3.5 Verify cross-account isolation and generation counters against Supabase
+- [x] 3.5 Verify cross-account isolation and generation counters against Supabase

@@ -1,7 +1,7 @@
 create extension if not exists pgtap;
 
 begin;
-select plan(7);
+select plan(9);
 
 insert into auth.users (id, email)
 values
@@ -94,7 +94,30 @@ select results_eq(
   'liczniki na granicy generated_count maja wlasciwe wartosci'
 );
 
--- Liczniki gen1 stają się nieaktualne: 3 x ai zamiast zapisanych 2.
+delete from public.flashcards
+where id = '20000000-0000-4000-8000-000000000001';
+select public.recount_generation_acceptance('10000000-0000-4000-8000-000000000001');
+
+select results_eq(
+  $$
+    select accepted_unedited_count, accepted_edited_count
+    from public.generations
+    where id = '10000000-0000-4000-8000-000000000001'
+  $$,
+  $$ values (1, 1) $$,
+  'usuniecie fiszki AI obniza licznik akceptacji generacji'
+);
+
+select ok(
+  (
+    select accepted_unedited_count + accepted_edited_count <= generated_count
+    from public.generations
+    where id = '10000000-0000-4000-8000-000000000001'
+  ),
+  'przeliczenie po usunieciu nadal spelnia ograniczenie generacji'
+);
+
+-- Liczniki gen1 stają się nieaktualne: 2 x ai zamiast zapisanej 1.
 -- Bez tego kroku wywołanie przez użytkownika B dałoby ten sam wynik również
 -- dla wersji `security definer` — czyli asercja izolacji nie testowałaby niczego.
 insert into public.flashcards (
@@ -116,7 +139,7 @@ select results_eq(
     from public.generations
     where id = '10000000-0000-4000-8000-000000000001'
   $$,
-  $$ values (2, 1) $$,
+  $$ values (1, 1) $$,
   'wywolanie przez innego uzytkownika nie aktualizuje cudzych licznikow'
 );
 

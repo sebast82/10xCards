@@ -13,7 +13,7 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
     optimizeDeps: {
-      exclude: ["lucide-react"],
+      exclude: ["lucide-react", "zod"],
     },
   },
   adapter: cloudflare(),
