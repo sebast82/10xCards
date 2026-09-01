@@ -209,6 +209,13 @@ export default function ReviewSession() {
         return;
       }
 
+      // status === "answer": ocena tylko klawiszami 1–4. Space/Enter tłumimy —
+      // fokus stoi na przycisku oceny, więc natywna aktywacja oceniłaby "Znowu" po cichu.
+      if (event.key === " " || event.key === "Enter") {
+        event.preventDefault();
+        return;
+      }
+
       if (event.key === "1" || event.key === "2" || event.key === "3" || event.key === "4") {
         event.preventDefault();
         void handleGrade(Number(event.key) as GradeValue);

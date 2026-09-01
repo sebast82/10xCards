@@ -86,6 +86,19 @@ describe("ReviewSession", () => {
     expect(screen.getByText("Pytanie b")).toBeTruthy();
   });
 
+  it("does not grade the card when Space is pressed again after the reveal", async () => {
+    const user = userEvent.setup();
+    const fetchMock = stubFetch(jsonResponse({ cards: [card("a"), card("b")] }), jsonResponse({ id: "a" }));
+    render(<ReviewSession />);
+
+    await user.click(await screen.findByRole("button", { name: "Pokaż odpowiedź" }));
+    await screen.findByRole("button", { name: "Znowu · za 1 min" });
+    await user.keyboard(" ");
+
+    expect(fetchMock.mock.calls.some(([, init]) => (init as RequestInit | undefined)?.method === "POST")).toBe(false);
+    expect(screen.getByText("Pytanie a")).toBeTruthy();
+  });
+
   it("absorbs a 409 conflict without surfacing an error", async () => {
     const user = userEvent.setup();
     stubFetch(
