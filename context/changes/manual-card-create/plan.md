@@ -196,12 +196,12 @@ No database migration or data backfill is expected. The existing nullable `gener
 
 #### Automated
 
-- [x] 2.1 Pass component tests for the inline form, local prepend, errors, empty state, and mode exclusion
-- [x] 2.2 Pass the complete TypeScript test suite, including AI creation and edit/delete regressions
-- [x] 2.3 Pass lint and production build
+- [x] 2.1 Pass component tests for the inline form, local prepend, errors, empty state, and mode exclusion — d309dd8
+- [x] 2.2 Pass the complete TypeScript test suite, including AI creation and edit/delete regressions — d309dd8
+- [x] 2.3 Pass lint and production build — d309dd8
 
 #### Manual
 
-- [x] 2.4 Verify create, reload persistence, edit/delete reuse, and empty-state behavior in Chromium
-- [x] 2.5 Verify cancel and forced failure preserve draft state without phantom cards
-- [x] 2.6 Verify accessible loading states and mutual exclusion between create and edit modes
+- [x] 2.4 Verify create, reload persistence, edit/delete reuse, and empty-state behavior in Chromium — d309dd8
+- [x] 2.5 Verify cancel and forced failure preserve draft state without phantom cards — d309dd8
+- [x] 2.6 Verify accessible loading states and mutual exclusion between create and edit modes — d309dd8
