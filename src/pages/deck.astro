@@ -1,5 +1,6 @@
 ---
 import AppLayout from "@/layouts/AppLayout.astro";
+import FlashcardCollection from "@/components/deck/FlashcardCollection";
 
 const { supabase } = Astro.locals;
 
@@ -16,14 +17,6 @@ const { data, error } = supabase
   : { data: null, error: null };
 
 const flashcards = data ?? [];
-
-const SOURCE_LABELS: Record<string, string> = {
-  ai: "AI",
-  ai_edited: "AI (edytowana)",
-  manual: "Ręczna",
-};
-
-const dateFormatter = new Intl.DateTimeFormat("pl-PL", { dateStyle: "medium", timeStyle: "short" });
 ---
 
 <AppLayout title="Moja kolekcja">
@@ -39,42 +32,6 @@ const dateFormatter = new Intl.DateTimeFormat("pl-PL", { dateStyle: "medium", ti
       )
     }
 
-    {
-      !error && flashcards.length === 0 && (
-        <div class="text-muted-foreground flex flex-col items-start gap-3 rounded-xl border p-6">
-          <p class="text-sm">Nie masz jeszcze żadnych fiszek.</p>
-          <a
-            href="/generate"
-            class="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-4 py-2 text-sm font-medium"
-          >
-            Generuj fiszki
-          </a>
-        </div>
-      )
-    }
-
-    {
-      flashcards.length > 0 && (
-        <section class="flex flex-col gap-4">
-          <span class="text-muted-foreground text-sm">
-            {flashcards.length} fiszek{flashcards.length === PAGE_SIZE && " (najnowsze)"}
-          </span>
-          {flashcards.map((flashcard) => (
-            <article class="bg-card text-card-foreground flex flex-col gap-3 rounded-xl border p-6 shadow-sm">
-              <div class="flex flex-wrap items-center justify-between gap-2">
-                <span class="text-muted-foreground rounded-full border px-2 py-0.5 text-xs">
-                  {SOURCE_LABELS[flashcard.source] ?? flashcard.source}
-                </span>
-                <span class="text-muted-foreground text-xs">
-                  {dateFormatter.format(new Date(flashcard.created_at))}
-                </span>
-              </div>
-              <p class="font-medium">{flashcard.front}</p>
-              <p class="text-muted-foreground text-sm">{flashcard.back}</p>
-            </article>
-          ))}
-        </section>
-      )
-    }
+    {!error && <FlashcardCollection flashcards={flashcards} pageSize={PAGE_SIZE} client:load />}
   </div>
 </AppLayout>

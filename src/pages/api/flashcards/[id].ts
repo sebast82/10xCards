@@ -30,9 +30,10 @@ function error(message: string, status: number): Response {
   return json({ error: message }, status);
 }
 
-function getRequestContext(locals: App.Locals, id: string | undefined):
-  | { userId: string; supabase: NonNullable<App.Locals["supabase"]>; flashcardId: string }
-  | Response {
+function getRequestContext(
+  locals: App.Locals,
+  id: string | undefined,
+): { userId: string; supabase: NonNullable<App.Locals["supabase"]>; flashcardId: string } | Response {
   if (!locals.user) {
     return error(MESSAGES.unauthorized, 401);
   }
@@ -76,10 +77,7 @@ export const PATCH: APIRoute = async ({ locals, params, request }) => {
   }
 
   try {
-    return json(
-      await updateFlashcard({ ...context, front: parsedBody.data.front, back: parsedBody.data.back }),
-      200,
-    );
+    return json(await updateFlashcard({ ...context, front: parsedBody.data.front, back: parsedBody.data.back }), 200);
   } catch (caught) {
     return serviceError(caught);
   }

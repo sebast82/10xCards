@@ -239,28 +239,28 @@ No migration is expected: the schema already has content validation, an `updated
 
 #### Automated
 
-- [x] 1.1 Extend the Supabase test double and add owner-scoped service tests for update, delete, errors, and generation recount
-- [x] 1.2 Add PATCH and DELETE API handlers with validation and static error mapping
-- [x] 1.3 Pass focused service and API tests
-- [x] 1.4 Pass production build for the dynamic API route
+- [x] 1.1 Extend the Supabase test double and add owner-scoped service tests for update, delete, errors, and generation recount — 24ccdca
+- [x] 1.2 Add PATCH and DELETE API handlers with validation and static error mapping — 24ccdca
+- [x] 1.3 Pass focused service and API tests — 24ccdca
+- [x] 1.4 Pass production build for the dynamic API route — 24ccdca
 
 #### Manual
 
-- [x] 1.5 Verify an owner edit preserves source and SRS state
-- [x] 1.6 Verify an AI-card deletion reconciles its generation acceptance counters
+- [x] 1.5 Verify an owner edit preserves source and SRS state — 24ccdca
+- [x] 1.6 Verify an AI-card deletion reconciles its generation acceptance counters — 24ccdca
 
 ### Phase 2: Interactive Deck Management
 
 #### Automated
 
-- [ ] 2.1 Add the deck collection island and accessible alert dialog
-- [ ] 2.2 Integrate the client island into the RLS-backed deck page
-- [ ] 2.3 Pass lint and production build
+- [x] 2.1 Add the deck collection island and accessible alert dialog
+- [x] 2.2 Integrate the client island into the RLS-backed deck page
+- [x] 2.3 Pass lint and production build
 
 #### Manual
 
-- [ ] 2.4 Verify inline edit, cancel, save, dialog cancellation, and confirmed deletion in Chromium
-- [ ] 2.5 Verify empty state and card-specific failed-mutation feedback
+- [x] 2.4 Verify inline edit, cancel, save, dialog cancellation, and confirmed deletion in Chromium
+- [x] 2.5 Verify empty state and card-specific failed-mutation feedback
 
 ### Phase 3: Mutation Regression Coverage
 
