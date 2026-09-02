@@ -240,7 +240,7 @@ export default function FlashcardCollection({ flashcards: initialFlashcards, pag
       {createOpen && (
         <Card>
           <CardContent className="flex flex-col gap-3">
-            <h2 className="text-base font-semibold">Nowa fiszka</h2>
+            <h2 className="text-lg font-semibold">Nowa fiszka</h2>
             <Textarea
               aria-label="Przód nowej fiszki"
               value={createDraft.front}

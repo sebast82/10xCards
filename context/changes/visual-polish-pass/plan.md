@@ -697,25 +697,25 @@ zamknięciem S-08.
 
 #### Automated
 
-- [x] 1.1 Lint przechodzi: `npm run lint`
-- [x] 1.2 Typecheck przechodzi: `npx astro check`
-- [x] 1.3 Testy przechodzą: `npm test`
-- [x] 1.4 Build przechodzi: `npm run build`
+- [x] 1.1 Lint przechodzi: `npm run lint` — 7d9b05e
+- [x] 1.2 Typecheck przechodzi: `npx astro check` — 7d9b05e
+- [x] 1.3 Testy przechodzą: `npm test` — 7d9b05e
+- [x] 1.4 Build przechodzi: `npm run build` — 7d9b05e
 
 #### Manual
 
-- [ ] 1.5 Krawędzie treści 4 ekranów w jednej osi z nav
-- [ ] 1.6 Wszystkie 4 ekrany wyrównane do góry (brak pełnoekranowego centrowania)
-- [ ] 1.7 Nav 320px: brak poziomego scrolla, „Wyloguj" jak `outline`, klawiatura, `aria-current` na jednej pozycji
-- [ ] 1.8 Nav na szerokim ekranie: krawędzie w jednej osi z treścią przy `max-w-3xl`, email `truncate`, brak zawijania na desktopie
+- [x] 1.5 Krawędzie treści 4 ekranów w jednej osi z nav — 7d9b05e
+- [x] 1.6 Wszystkie 4 ekrany wyrównane do góry (brak pełnoekranowego centrowania) — 7d9b05e
+- [x] 1.7 Nav 320px: brak poziomego scrolla, „Wyloguj" jak `outline`, klawiatura, `aria-current` na jednej pozycji — 7d9b05e
+- [x] 1.8 Nav na szerokim ekranie: krawędzie w jednej osi z treścią przy `max-w-3xl`, email `truncate`, brak zawijania na desktopie — 7d9b05e
 
 ### Phase 2: Skala typografii i nagłówki
 
 #### Automated
 
-- [ ] 2.1 Lint przechodzi: `npm run lint`
-- [ ] 2.2 Typecheck przechodzi: `npx astro check`
-- [ ] 2.3 Testy przechodzą: `npm test`
+- [x] 2.1 Lint przechodzi: `npm run lint`
+- [x] 2.2 Typecheck przechodzi: `npx astro check`
+- [x] 2.3 Testy przechodzą: `npm test`
 
 #### Manual
 

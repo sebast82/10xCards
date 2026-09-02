@@ -245,6 +245,7 @@ export default function ReviewSession() {
 
   return (
     <div className="flex flex-col gap-8">
+      <h1 className="text-2xl font-bold">Sesja powtórkowa</h1>
       <span className="sr-only" role="status" aria-live="polite">
         {announcement}
       </span>
