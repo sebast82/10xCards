@@ -5,15 +5,13 @@ import SignUpForm from "@/components/auth/SignUpForm";
 const error = Astro.url.searchParams.get("error");
 ---
 
-<Layout title="Sign up">
+<Layout title="Załóż konto">
   <div class="flex min-h-screen items-center justify-center p-4">
     <div class="bg-card text-card-foreground w-full max-w-sm rounded-xl border p-8 shadow-sm">
-      <h1 class="mb-6 text-center text-2xl font-bold">Sign up</h1>
+      <h1 class="mb-6 text-center text-2xl font-bold">Załóż konto</h1>
       <SignUpForm serverError={error} client:load />
       <p class="text-muted-foreground mt-4 text-center text-sm">
-        Already have an account? <a href="/auth/signin" class="text-primary underline-offset-4 hover:underline"
-          >Sign in</a
-        >
+        Masz już konto? <a href="/auth/signin" class="text-primary underline-offset-4 hover:underline">Zaloguj się</a>
       </p>
     </div>
   </div>

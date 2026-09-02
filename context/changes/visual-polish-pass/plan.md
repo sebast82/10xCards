@@ -745,9 +745,9 @@ zamknięciem S-08.
 
 #### Automated
 
-- [x] 4.1 Build przechodzi z pobraniem fontów: `npm run build`
-- [x] 4.2 Lint / typecheck / testy przechodzą
-- [x] 4.3 Pliki fontów obecne w output buildu
+- [x] 4.1 Build przechodzi z pobraniem fontów: `npm run build` — 9792c26
+- [x] 4.2 Lint / typecheck / testy przechodzą — 9792c26
+- [x] 4.3 Pliki fontów obecne w output buildu — 9792c26
 
 #### Manual
 
@@ -760,8 +760,8 @@ zamknięciem S-08.
 
 #### Automated
 
-- [ ] 5.1 Lint / typecheck / testy przechodzą
-- [ ] 5.2 Testy formularzy auth zaktualizowane o polskie komunikaty
+- [x] 5.1 Lint / typecheck / testy przechodzą
+- [x] 5.2 Testy formularzy auth zaktualizowane o polskie komunikaty
 
 #### Manual
 

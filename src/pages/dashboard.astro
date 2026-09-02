@@ -5,14 +5,14 @@ import { Card, CardContent } from "@/components/ui/card";
 const { user } = Astro.locals;
 ---
 
-<AppLayout title="Dashboard">
+<AppLayout title="Start">
   <Card className="mx-auto w-full max-w-sm">
     <CardContent className="flex flex-col gap-2 text-center">
-      <h1 class="mb-2 text-2xl font-bold">Dashboard</h1>
+      <h1 class="mb-2 text-2xl font-bold">Start</h1>
       <p class="text-muted-foreground">
-        Welcome, <span class="text-foreground font-semibold">{user?.email}</span>
+        Witaj, <span class="text-foreground font-semibold">{user?.email}</span>
       </p>
-      <p class="text-muted-foreground text-sm">This page is only for authenticated users.</p>
+      <p class="text-muted-foreground text-sm">Ta strona jest dostępna tylko dla zalogowanych.</p>
     </CardContent>
   </Card>
 </AppLayout>
