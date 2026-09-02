@@ -775,10 +775,10 @@ zamknięciem S-08.
 
 #### Automated
 
-- [x] 6.1 Lint / typecheck / testy / build przechodzą
-- [x] 6.2 `grep -rn "dark:" src/components/ui/` zwraca zero wyników
+- [x] 6.1 Lint / typecheck / testy / build przechodzą — 478bc62
+- [x] 6.2 `grep -rn "dark:" src/components/ui/` zwraca zero wyników — 478bc62
 
 #### Manual
 
-- [x] 6.3 Wygląd przycisków / textarea / alertów / formularzy bez zmian w trybie jasnym
-- [x] 6.4 Brak wizualnej regresji na `/generate`, `/deck`, `/review`, `/auth/*`
+- [x] 6.3 Wygląd przycisków / textarea / alertów / formularzy bez zmian w trybie jasnym — 478bc62
+- [x] 6.4 Brak wizualnej regresji na `/generate`, `/deck`, `/review`, `/auth/*` — 478bc62
