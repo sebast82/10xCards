@@ -25,22 +25,28 @@ PRD guardrail for S-05: **the review mechanism must not fail, regardless of card
 
 ## Checklist
 
-### (a) Manual card — local
+### (a) Manual card
 
-- [ ] Create a manual card in `/deck`.
-- [ ] Open `/review`, reveal, grade it (any grade 1–4).
-- [ ] In the Supabase dashboard, confirm the row's `due`, `state`, and `reps` moved.
-- **Result**: _pending_
-- **Recorded with**: _commit SHA_
+- [x] Manual card created (`front: "testowa teraz"`), reviewed and graded once.
+- [x] Row `flashcards/2a61a68a-1113-4712-a920-a9efc3b0023d` observed post-grade:
+  `source: manual`, `reps: 0 → 1`, `state: 0 (New) → 1 (Learning)`,
+  `last_review: null → 2026-09-02T00:03:41Z`, `due` → `+10 min` (learning step),
+  `stability 0 → 2.3065`, `difficulty 0 → 2.118`, `updated_at > created_at` (DB trigger fired).
+- **Result**: PASS — schedule state advanced through `applyReviewGrade`.
+- **Recorded with**: `a106813` (DB row pasted by product owner 2026-09-02)
 
-### (b) AI-accepted card — local
+### (b) AI-accepted card
 
-- [ ] Generate + accept one AI card in `/generate`.
-- [ ] Open `/review`, reveal, grade it.
-- [ ] Confirm `due` / `state` / `reps` moved in the dashboard.
-- [ ] Grading path is identical to (a) — no source-dependent behaviour observed.
-- **Result**: _pending_
-- **Recorded with**: _commit SHA_
+- [x] AI card accepted (`generation_id: ced75f6b-…`), reviewed and graded once.
+- [x] Row `flashcards/1a578168-b40e-4f09-a33e-c1044a5d7d94` observed post-grade:
+  `source: ai`, `reps: 0 → 1`, `state: 0 (New) → 2 (Review)`,
+  `last_review: null → 2026-09-02T00:03:44Z`, `due` → `+8 days` (`scheduled_days: 8`),
+  `stability 0 → 8.2956`, `difficulty 0 → 1`, `updated_at > created_at` (DB trigger fired).
+- [x] Grading path identical to (a): same nine schedule columns touched, `reps`-guarded
+  update, no branch on `source`. The `+10 min` vs `+8 days` difference is the chosen grade
+  × FSRS math, not a source-dependent code path.
+- **Result**: PASS — the PRD guardrail ("must work regardless of card source") holds behaviourally.
+- **Recorded with**: `a106813` (DB row pasted by product owner 2026-09-02)
 
 ### (c) Full session on the deployed Worker
 
@@ -64,6 +70,6 @@ PRD guardrail for S-05: **the review mechanism must not fail, regardless of card
 
 | Plan item | Result | Recorded with |
 |-----------|--------|---------------|
-| 5.4 `manual-verification.md` complete with DB-state observation for a manual and an AI card | _pending_ | |
+| 5.4 `manual-verification.md` complete with DB-state observation for a manual and an AI card | PASS | `a106813` |
 | 5.5 One full review session on the deployed instance; grade persisted; commit SHA recorded | _pending_ | |
 | 5.6 Deployed ts-fsrs interval labels match a local run for the same card state | _pending_ | |
