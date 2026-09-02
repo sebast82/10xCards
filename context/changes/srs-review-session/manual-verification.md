@@ -50,15 +50,17 @@ PRD guardrail for S-05: **the review mechanism must not fail, regardless of card
 
 ### (c) Full session on the deployed Worker
 
-- [ ] `git push` to `master` → Cloudflare auto-deploy completes.
-- [ ] Run one full review session on `https://10x-cards.sebger82.workers.dev`:
-      question shows, Space reveals, `1`–`4` grades, next card appears, progress increments,
-      final card → "to na dziś wszystko" screen.
-- [ ] A grade persists (re-open `/review` or check the dashboard).
-- [ ] Interval labels ("za 3 dni" etc.) are sane and match a local run for the same card state
-      (F-01 ts-fsrs parity question — **closed**).
-- **Result**: _pending_
-- **Recorded with**: _commit SHA_
+- [x] Deployed to the Worker (runtime commit `b3e9554`); `/review` + `/api/reviews` curl-verified live.
+- [x] One full review session run on `https://10x-cards.sebger82.workers.dev/review`:
+      question → Space reveals → `1`–`4` grades → next card → progress increments →
+      final card produced the "To na dziś wszystko — powtórzono 6 fiszek." screen.
+- [x] A grade persisted — row `flashcards/b2b4520a-1883-4e1b-9205-39ebefcde7cf` observed
+      post-session: `reps: 1 → 2`, `last_review → 2026-09-02T00:08:46.533Z`,
+      `due → 2026-09-02T00:14:46.533Z` (`last_review + 6 min`), `stability → 0.212`,
+      `difficulty → 7.604` (Again on a learning card), `updated_at` bumped by trigger.
+- [ ] Interval-label parity spot-check — see (below) / plan item 5.6.
+- **Result**: PASS (session + persistence). Label parity tracked separately as 5.6.
+- **Recorded with**: `878977c` (deployed row pasted by product owner 2026-09-02)
 
 ### (d) Deployed commit
 
@@ -71,5 +73,5 @@ PRD guardrail for S-05: **the review mechanism must not fail, regardless of card
 | Plan item | Result | Recorded with |
 |-----------|--------|---------------|
 | 5.4 `manual-verification.md` complete with DB-state observation for a manual and an AI card | PASS | `a106813` |
-| 5.5 One full review session on the deployed instance; grade persisted; commit SHA recorded | _pending_ | |
+| 5.5 One full review session on the deployed instance; grade persisted; commit SHA recorded | PASS | `878977c` |
 | 5.6 Deployed ts-fsrs interval labels match a local run for the same card state | _pending_ | |
