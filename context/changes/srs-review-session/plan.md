@@ -466,4 +466,4 @@ None. No schema change. Existing rows are already valid schedule state.
 
 - [x] 5.4 `manual-verification.md` complete with DB-state observation for a manual and an AI card — a106813
 - [x] 5.5 One full review session on the deployed instance; grade persisted; commit SHA recorded — 878977c
-- [x] 5.6 Deployed ts-fsrs interval labels match a local run for the same card state (F-01 parity question closed) — <this commit>
+- [x] 5.6 Deployed ts-fsrs interval labels match a local run for the same card state (F-01 parity question closed) — 80a59b3

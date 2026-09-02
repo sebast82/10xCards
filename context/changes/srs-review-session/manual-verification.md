@@ -89,4 +89,4 @@ Card `flashcards/5afe6263-4422-4242-b964-c10e4aabcc13`, state Learning, `reps: 1
 |-----------|--------|---------------|
 | 5.4 `manual-verification.md` complete with DB-state observation for a manual and an AI card | PASS | `a106813` |
 | 5.5 One full review session on the deployed instance; grade persisted; commit SHA recorded | PASS | `878977c` |
-| 5.6 Deployed ts-fsrs interval labels match a local run for the same card state | PASS | `<this commit>` |
+| 5.6 Deployed ts-fsrs interval labels match a local run for the same card state | PASS | `80a59b3` |
