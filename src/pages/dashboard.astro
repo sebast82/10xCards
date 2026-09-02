@@ -1,15 +1,18 @@
 ---
 import AppLayout from "@/layouts/AppLayout.astro";
+import { Card, CardContent } from "@/components/ui/card";
 
 const { user } = Astro.locals;
 ---
 
 <AppLayout title="Dashboard">
-  <div class="bg-card text-card-foreground mx-auto w-full max-w-sm rounded-xl border p-8 text-center shadow-sm">
-    <h1 class="mb-4 text-2xl font-bold">Dashboard</h1>
-    <p class="text-muted-foreground">
-      Welcome, <span class="text-foreground font-semibold">{user?.email}</span>
-    </p>
-    <p class="text-muted-foreground mt-2 text-sm">This page is only for authenticated users.</p>
-  </div>
+  <Card className="mx-auto w-full max-w-sm">
+    <CardContent className="flex flex-col gap-2 text-center">
+      <h1 class="mb-2 text-2xl font-bold">Dashboard</h1>
+      <p class="text-muted-foreground">
+        Welcome, <span class="text-foreground font-semibold">{user?.email}</span>
+      </p>
+      <p class="text-muted-foreground text-sm">This page is only for authenticated users.</p>
+    </CardContent>
+  </Card>
 </AppLayout>

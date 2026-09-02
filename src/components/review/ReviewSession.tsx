@@ -4,6 +4,7 @@ import { Loader2, ShieldAlert } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 
 type Status = "loading" | "question" | "answer" | "grading" | "finished" | "empty" | "error";
 
@@ -251,27 +252,31 @@ export default function ReviewSession() {
       </span>
 
       {status === "loading" && (
-        <div className="text-muted-foreground flex justify-center py-10">
+        <Card className="text-muted-foreground flex items-center justify-center py-10">
           <Loader2 className="animate-spin" />
-        </div>
+        </Card>
       )}
 
       {status === "empty" && (
-        <div className="text-muted-foreground flex flex-col items-start gap-3 rounded-xl border p-6">
-          <p className="text-sm">Nie masz dziś nic do powtórki.</p>
-          <Button asChild>
-            <a href="/deck">Wróć do talii</a>
-          </Button>
-        </div>
+        <EmptyState
+          title="Nie masz dziś nic do powtórki."
+          action={
+            <Button asChild>
+              <a href="/deck">Wróć do talii</a>
+            </Button>
+          }
+        />
       )}
 
       {status === "finished" && (
-        <div className="text-muted-foreground flex flex-col items-start gap-3 rounded-xl border p-6">
-          <p className="text-sm">To na dziś wszystko — powtórzono {reviewedCount} fiszek.</p>
-          <Button asChild>
-            <a href="/deck">Wróć do talii</a>
-          </Button>
-        </div>
+        <EmptyState
+          title={`To na dziś wszystko — powtórzono ${reviewedCount} fiszek.`}
+          action={
+            <Button asChild>
+              <a href="/deck">Wróć do talii</a>
+            </Button>
+          }
+        />
       )}
 
       {status === "error" && (

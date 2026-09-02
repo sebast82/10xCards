@@ -713,24 +713,24 @@ zamknięciem S-08.
 
 #### Automated
 
-- [x] 2.1 Lint przechodzi: `npm run lint`
-- [x] 2.2 Typecheck przechodzi: `npx astro check`
-- [x] 2.3 Testy przechodzą: `npm test`
+- [x] 2.1 Lint przechodzi: `npm run lint` — b273140
+- [x] 2.2 Typecheck przechodzi: `npx astro check` — b273140
+- [x] 2.3 Testy przechodzą: `npm test` — b273140
 
 #### Manual
 
-- [ ] 2.4 Żaden ekran nie ma nagłówka większego niż `text-2xl`
-- [ ] 2.5 `/review` ma widoczny `<h1>` w każdym stanie
-- [ ] 2.6 Nagłówki sekcji mają ten sam rozmiar
+- [x] 2.4 Żaden ekran nie ma nagłówka większego niż `text-2xl` — b273140
+- [x] 2.5 `/review` ma widoczny `<h1>` w każdym stanie — b273140
+- [x] 2.6 Nagłówki sekcji mają ten sam rozmiar — b273140
 
 ### Phase 3: Karty i panele stanów
 
 #### Automated
 
-- [ ] 3.1 Lint przechodzi: `npm run lint`
-- [ ] 3.2 Typecheck przechodzi: `npx astro check`
-- [ ] 3.3 Testy przechodzą: `npm test` (zaktualizowane selektory tekstu paneli pustych)
-- [ ] 3.4 Build przechodzi: `npm run build`
+- [x] 3.1 Lint przechodzi: `npm run lint`
+- [x] 3.2 Typecheck przechodzi: `npx astro check`
+- [x] 3.3 Testy przechodzą: `npm test` (zaktualizowane selektory tekstu paneli pustych)
+- [x] 3.4 Build przechodzi: `npm run build`
 
 #### Manual
 

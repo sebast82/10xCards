@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Textarea } from "@/components/ui/textarea";
 import { BACK_MAX_LENGTH, FRONT_MAX_LENGTH } from "@/lib/limits";
 
@@ -281,12 +282,14 @@ export default function FlashcardCollection({ flashcards: initialFlashcards, pag
       )}
 
       {flashcards.length === 0 && (
-        <div className="text-muted-foreground flex flex-col items-start gap-3 rounded-xl border p-6">
-          <p className="text-sm">Nie masz jeszcze żadnych fiszek.</p>
-          <Button asChild>
-            <a href="/generate">Generuj fiszki</a>
-          </Button>
-        </div>
+        <EmptyState
+          title="Nie masz jeszcze żadnych fiszek."
+          action={
+            <Button asChild>
+              <a href="/generate">Generuj fiszki</a>
+            </Button>
+          }
+        />
       )}
 
       {flashcards.map((card) => {
