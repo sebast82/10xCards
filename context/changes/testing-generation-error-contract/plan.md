@@ -629,17 +629,17 @@ Brak migracji. P4 dodaje wyłącznie plik testowy `supabase/tests/`. Stryker (P5
 
 #### Automated
 
-- [ ] 1.1 Typecheck przechodzi: `npx astro check`
-- [ ] 1.2 Lint przechodzi: `npm run lint`
-- [ ] 1.3 `npx vitest run src/lib/openrouter/client.test.ts` — wszystkie przypadki zielone
-- [ ] 1.4 Pełny `npm test` bez regresji
-- [ ] 1.5 `it.each` po klasach awarii dowodzi braku sentinela w `JSON.stringify(error)` dla każdej klasy
+- [x] 1.1 Typecheck przechodzi: `npx astro check`
+- [x] 1.2 Lint przechodzi: `npm run lint`
+- [x] 1.3 `npx vitest run src/lib/openrouter/client.test.ts` — wszystkie przypadki zielone
+- [x] 1.4 Pełny `npm test` bez regresji
+- [x] 1.5 `it.each` po klasach awarii dowodzi braku sentinela w `JSON.stringify(error)` dla każdej klasy
 
 #### Manual
 
-- [ ] 1.6 Przegląd: asercje pierwszorzędne są behawioralne (wzajemna różność + nie-pustość, porównanie między sobą), nie równość do importu z `client.ts`
-- [ ] 1.7 Przegląd: asercja współdzielonego sygnału testuje tożsamość referencji
-- [ ] 1.8 Fixture 404 ZDR używa dokładnego zdania z docs router-metadata
+- [x] 1.6 Przegląd: asercje pierwszorzędne są behawioralne (wzajemna różność + nie-pustość, porównanie między sobą), nie równość do importu z `client.ts`
+- [x] 1.7 Przegląd: asercja współdzielonego sygnału testuje tożsamość referencji
+- [x] 1.8 Fixture 404 ZDR używa dokładnego zdania z docs router-metadata
 
 ### Phase 2: P2 — generations.test.ts (integracja trasy, hermetyczna)
 
