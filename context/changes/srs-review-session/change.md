@@ -11,4 +11,5 @@ archived_at: null
 
 <!-- Free-form notes for this change: links, ad-hoc context, decisions that don't belong in research/frame/plan. -->
 
-- 2026-09-02: marked `implemented` with Phase 5 manual checks 5.4–5.6 still open (deliberate — option A). S-05 not yet deployed (`/review` 404s in production); `manual-verification.md` carries the open debt. `/10x-archive` will surface these as warnings until they land.
+- 2026-09-02: marked `implemented` with Phase 5 manual checks 5.4–5.6 initially open (option A), then **closed the same day** — S-05 deployed to the Worker (runtime commit `b3e9554`), and 5.4/5.5/5.6 verified from deployed DB rows + a deployed-vs-local ts-fsrs parity re-computation (bit-identical). The F-01 workerd-parity question is closed. `manual-verification.md` carries the full evidence. Ready for `/10x-archive`.
+- Impl-review (`reviews/impl-review.md`): F1 fixed (Space/Enter grade suppression), F2 resolved (5.4–5.6 now done), F3/F4 accepted.

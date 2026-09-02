@@ -1,21 +1,13 @@
 # Manual Verification: SRS Review Session (S-05)
 
-- **Date**: _pending_
-- **Environment**: _pending_ (local: Windows, Chromium, local Supabase — deployed: `https://10x-cards.sebger82.workers.dev`)
-- **Evidence type**: DB-state observations from the Supabase dashboard + one full session on the deployed Worker. This closes the F-01 inherited question ("does ts-fsrs behave the same on the deployed instance?").
+- **Date**: 2026-09-02
+- **Environment**: deployed Worker `https://10x-cards.sebger82.workers.dev` + its cloud Supabase; DB rows pasted by the product owner. Local parity re-computation: Node + ts-fsrs 5.4.1.
+- **Evidence type**: DB-state observations (before/after grade) for a manual and an AI card + one full session on the deployed Worker + a deployed-vs-local FSRS parity re-computation. Closes the F-01 inherited question ("does ts-fsrs behave the same on the deployed instance?").
 
-> **Status:** automated checks 5.1–5.3 pass. `origin/master` @ `b3e9554` (p1–p5 + epilogue + F1
-> fix) is deployed to the Worker — verified 2026-09-02 by curl:
->
-> | Deployed check | Result |
-> |---|---|
-> | `GET /review` (logged out) | `302` → `/auth/signin` — route + `PROTECTED_ROUTES` live |
-> | `GET /api/reviews` (logged out) | `401` `{"error":"Zaloguj się, aby powtarzać fiszki."}` — S-05 endpoint live, frozen message |
-> | `POST /api/reviews` grade:5 (logged out) | `401` (auth gate fires before body validation — expected order) |
->
-> Remaining: (a)/(b) local DB-state observations, (c) one full logged-in session on the Worker,
-> (d) the label-parity spot-check. These need a browser session + Supabase dashboard — pending the
-> product-owner run. Flip 5.4–5.6 in `plan.md` once recorded.
+> **Status: COMPLETE.** 5.1–5.3 automated. 5.4–5.6 verified from deployed DB rows on 2026-09-02.
+> Runtime commit `b3e9554` deployed to the Worker; `/review` + `/api/reviews` curl-verified live
+> (`GET /review` → 302 `/auth/signin`; `GET /api/reviews` → 401 with the frozen Polish message).
+> ts-fsrs on workerd computes bit-identically to Node (see (d²)).
 
 ## Guardrail
 
@@ -58,9 +50,32 @@ PRD guardrail for S-05: **the review mechanism must not fail, regardless of card
       post-session: `reps: 1 → 2`, `last_review → 2026-09-02T00:08:46.533Z`,
       `due → 2026-09-02T00:14:46.533Z` (`last_review + 6 min`), `stability → 0.212`,
       `difficulty → 7.604` (Again on a learning card), `updated_at` bumped by trigger.
-- [ ] Interval-label parity spot-check — see (below) / plan item 5.6.
-- **Result**: PASS (session + persistence). Label parity tracked separately as 5.6.
+- [x] Interval-label parity spot-check — closed under 5.6 below.
+- **Result**: PASS.
 - **Recorded with**: `878977c` (deployed row pasted by product owner 2026-09-02)
+
+### (d²) Interval-label / FSRS parity — deployed vs local (F-01 question)
+
+Card `flashcards/5afe6263-4422-4242-b964-c10e4aabcc13`, state Learning, `reps: 1`.
+
+- **Deployed grade buttons** (from the Worker): Znowu `za 1 min`, Trudno `za 6 min`,
+  Dobrze `za 10 min`, Łatwo `za 2 dni`.
+- **Local `preview(preRow, now)`** (Node, ts-fsrs 5.4.1, any plausible GET `now`): identical
+  buckets — `za 1 min` / `za 6 min` / `za 10 min` / `za 2 dni`.
+- **Chosen grade: Łatwo (Easy).** Deployed post-grade row vs local
+  `applyGrade(preRow, 2026-09-02T00:16:24.254Z, Easy)`:
+
+  | field | local (Node) | deployed (workerd) |
+  |---|---|---|
+  | `due` | `2026-09-04T00:16:24.254Z` | `2026-09-04 00:16:24.254+00` |
+  | `stability` | `2.29815136` | `2.29815136` |
+  | `difficulty` | `3.4641143` | `3.4641143` |
+  | `scheduled_days` | `2` | `2` |
+  | `state` | `2` | `2` |
+  | `reps` | `2` | `2` |
+
+  Bit-identical including the floats to 8 dp. `preview()` deep-equals `applyGrade()` for this
+  real row. **ts-fsrs on workerd computes identically to Node — the F-01 parity question is closed.**
 
 ### (d) Deployed commit
 
@@ -74,4 +89,4 @@ PRD guardrail for S-05: **the review mechanism must not fail, regardless of card
 |-----------|--------|---------------|
 | 5.4 `manual-verification.md` complete with DB-state observation for a manual and an AI card | PASS | `a106813` |
 | 5.5 One full review session on the deployed instance; grade persisted; commit SHA recorded | PASS | `878977c` |
-| 5.6 Deployed ts-fsrs interval labels match a local run for the same card state | _pending_ | |
+| 5.6 Deployed ts-fsrs interval labels match a local run for the same card state | PASS | `<this commit>` |

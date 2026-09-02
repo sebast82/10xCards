@@ -4,19 +4,19 @@
 - **Plan**: context/changes/srs-review-session/plan.md
 - **Scope**: Phases 1–5 of 5 (full plan)
 - **Date**: 2026-09-02
-- **Verdict**: NEEDS ATTENTION
+- **Verdict**: NEEDS ATTENTION → **APPROVED after triage** (F1 fixed, F2 resolved, F3/F4 accepted) — 2026-09-02
 - **Findings**: 0 critical, 2 warnings, 2 observations
 
 ## Verdicts
 
-| Dimension | Verdict |
-|-----------|---------|
-| Plan Adherence | PASS |
-| Scope Discipline | WARNING |
-| Safety & Quality | WARNING |
-| Architecture | PASS |
-| Pattern Consistency | PASS |
-| Success Criteria | WARNING |
+| Dimension | Verdict | Post-triage |
+|-----------|---------|-------------|
+| Plan Adherence | PASS | PASS |
+| Scope Discipline | WARNING | WARNING (F4 accepted — benign) |
+| Safety & Quality | WARNING | PASS (F1 fixed) |
+| Architecture | PASS | PASS |
+| Pattern Consistency | PASS | PASS |
+| Success Criteria | WARNING | PASS (5.4–5.6 verified 2026-09-02) |
 
 ## Findings
 
@@ -46,7 +46,7 @@
   - Tradeoff: None — this is required work, only deferred.
   - Confidence: HIGH — the checklist is already scaffolded.
   - Blind spot: Whether ts-fsrs behaves identically on `workerd` is exactly what 5.6 exists to confirm; until it runs the parity is assumed, not shown.
-- **Decision**: SKIPPED — accepted as tracked debt. `manual-verification.md` and `change.md` notes carry it; `/10x-archive` will warn on 5.4–5.6. Deploy + manual session to be run before archiving.
+- **Decision**: RESOLVED (2026-09-02) — S-05 deployed (`b3e9554`); 5.4/5.5/5.6 verified from deployed DB rows + a deployed-vs-local ts-fsrs parity re-computation (bit-identical, floats to 8 dp). F-01 workerd-parity question closed. Evidence in `manual-verification.md`.
 
 ### F3 — Island `sessionTotal` state replaced with a derived value
 
