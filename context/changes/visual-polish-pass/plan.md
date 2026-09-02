@@ -727,27 +727,27 @@ zamknięciem S-08.
 
 #### Automated
 
-- [x] 3.1 Lint przechodzi: `npm run lint`
-- [x] 3.2 Typecheck przechodzi: `npx astro check`
-- [x] 3.3 Testy przechodzą: `npm test` (zaktualizowane selektory tekstu paneli pustych)
-- [x] 3.4 Build przechodzi: `npm run build`
+- [x] 3.1 Lint przechodzi: `npm run lint` — 7992e31
+- [x] 3.2 Typecheck przechodzi: `npx astro check` — 7992e31
+- [x] 3.3 Testy przechodzą: `npm test` (zaktualizowane selektory tekstu paneli pustych) — 7992e31
+- [x] 3.4 Build przechodzi: `npm run build` — 7992e31
 
 #### Manual
 
-- [ ] 3.5 Panel pustej kolekcji (deck) ma tło karty i cień
-- [ ] 3.6 Panele „pusto" / „koniec sesji" w review identyczne z panelem deck
-- [ ] 3.7 Stan ładowania review to wizualnie pudełko
-- [ ] 3.8 Dashboard to karta powitalna `max-w-sm` wyśrodkowana w poziomie, wyrównana do góry, `text-2xl` h1
-- [ ] 3.9 Brak regresji w kartach propozycji / fiszek / sesji
-- [ ] 3.10 Formularze auth + generate + deck wyglądają jak jedna rodzina (Outcome „jednolite formularze")
+- [x] 3.5 Panel pustej kolekcji (deck) ma tło karty i cień — 7992e31
+- [x] 3.6 Panele „pusto" / „koniec sesji" w review identyczne z panelem deck — 7992e31
+- [x] 3.7 Stan ładowania review to wizualnie pudełko — 7992e31
+- [x] 3.8 Dashboard to karta powitalna `max-w-sm` wyśrodkowana w poziomie, wyrównana do góry, `text-2xl` h1 — 7992e31
+- [x] 3.9 Brak regresji w kartach propozycji / fiszek / sesji — 7992e31
+- [x] 3.10 Formularze auth + generate + deck wyglądają jak jedna rodzina (Outcome „jednolite formularze") — 7992e31
 
 ### Phase 4: Webfont Inter przez Astro Fonts API (BUFOR)
 
 #### Automated
 
-- [ ] 4.1 Build przechodzi z pobraniem fontów: `npm run build`
-- [ ] 4.2 Lint / typecheck / testy przechodzą
-- [ ] 4.3 Pliki fontów obecne w output buildu
+- [x] 4.1 Build przechodzi z pobraniem fontów: `npm run build`
+- [x] 4.2 Lint / typecheck / testy przechodzą
+- [x] 4.3 Pliki fontów obecne w output buildu
 
 #### Manual
 

@@ -1,5 +1,5 @@
 // @ts-check
-import { defineConfig, envField } from "astro/config";
+import { defineConfig, envField, fontProviders } from "astro/config";
 
 import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
@@ -10,6 +10,16 @@ import cloudflare from "@astrojs/cloudflare";
 export default defineConfig({
   output: "server",
   integrations: [react(), sitemap()],
+  fonts: [
+    {
+      name: "Inter",
+      cssVariable: "--font-inter",
+      provider: fontProviders.fontsource(),
+      weights: [400, 500, 600, 700],
+      styles: ["normal"],
+      subsets: ["latin", "latin-ext"],
+    },
+  ],
   vite: {
     plugins: [tailwindcss()],
     optimizeDeps: {
