@@ -751,34 +751,34 @@ zamknięciem S-08.
 
 #### Manual
 
-- [ ] 4.4 Aplikacja renderuje się krojem Inter na wszystkich ekranach
-- [ ] 4.5 Polskie diakrytyki renderują się poprawnie
-- [ ] 4.6 Brak widocznego FOUC / przeskoku layoutu
-- [ ] 4.7 `npm run preview` — brak żądań do zewnętrznych domen fontów
+- [x] 4.4 Aplikacja renderuje się krojem Inter na wszystkich ekranach — 9792c26
+- [x] 4.5 Polskie diakrytyki renderują się poprawnie — 9792c26
+- [x] 4.6 Brak widocznego FOUC / przeskoku layoutu — 9792c26
+- [x] 4.7 `npm run preview` — brak żądań do zewnętrznych domen fontów — 9792c26
 
 ### Phase 5: Lokalizacja PL — auth + dashboard (BUFOR)
 
 #### Automated
 
-- [x] 5.1 Lint / typecheck / testy przechodzą
-- [x] 5.2 Testy formularzy auth zaktualizowane o polskie komunikaty
+- [x] 5.1 Lint / typecheck / testy przechodzą — f35bd84
+- [x] 5.2 Testy formularzy auth zaktualizowane o polskie komunikaty — f35bd84
 
 #### Manual
 
-- [ ] 5.3 `/auth/*` — zero widocznego tekstu angielskiego
-- [ ] 5.4 Wymuszona walidacja pokazuje polskie komunikaty
-- [ ] 5.5 Dashboard: „Start", „Witaj, …", polskie zdanie o dostępie
-- [ ] 5.6 `<html lang="pl">` w wyrenderowanym dokumencie na każdym ekranie aplikacji
-- [ ] 5.7 `Welcome.astro` niezmieniony
+- [x] 5.3 `/auth/*` — zero widocznego tekstu angielskiego — f35bd84
+- [x] 5.4 Wymuszona walidacja pokazuje polskie komunikaty — f35bd84
+- [x] 5.5 Dashboard: „Start", „Witaj, …", polskie zdanie o dostępie — f35bd84
+- [x] 5.6 `<html lang="pl">` w wyrenderowanym dokumencie na każdym ekranie aplikacji — f35bd84
+- [x] 5.7 `Welcome.astro` niezmieniony — f35bd84
 
 ### Phase 6: Wyciszenie szumu `dark:` w dotkniętych prymitywach (BUFOR)
 
 #### Automated
 
-- [ ] 6.1 Lint / typecheck / testy / build przechodzą
-- [ ] 6.2 `grep -rn "dark:" src/components/ui/` zwraca zero wyników
+- [x] 6.1 Lint / typecheck / testy / build przechodzą
+- [x] 6.2 `grep -rn "dark:" src/components/ui/` zwraca zero wyników
 
 #### Manual
 
-- [ ] 6.3 Wygląd przycisków / textarea / alertów / formularzy bez zmian w trybie jasnym
-- [ ] 6.4 Brak wizualnej regresji na `/generate`, `/deck`, `/review`, `/auth/*`
+- [x] 6.3 Wygląd przycisków / textarea / alertów / formularzy bez zmian w trybie jasnym
+- [x] 6.4 Brak wizualnej regresji na `/generate`, `/deck`, `/review`, `/auth/*`
