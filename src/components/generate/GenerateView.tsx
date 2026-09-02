@@ -175,7 +175,7 @@ export default function GenerateView() {
   const visibleProposals = proposals.filter((proposal) => proposal.status !== "rejected");
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 p-4 py-10">
+    <div className="flex flex-col gap-8">
       <header className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold">Generuj fiszki</h1>
         <p className="text-muted-foreground text-sm">

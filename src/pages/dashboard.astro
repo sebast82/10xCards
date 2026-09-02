@@ -5,13 +5,11 @@ const { user } = Astro.locals;
 ---
 
 <AppLayout title="Dashboard">
-  <div class="flex min-h-screen items-center justify-center p-4">
-    <div class="bg-card text-card-foreground rounded-xl border p-8 text-center shadow-sm">
-      <h1 class="mb-4 text-3xl font-bold">Dashboard</h1>
-      <p class="text-muted-foreground">
-        Welcome, <span class="text-foreground font-semibold">{user?.email}</span>
-      </p>
-      <p class="text-muted-foreground mt-2 text-sm">This page is only for authenticated users.</p>
-    </div>
+  <div class="bg-card text-card-foreground mx-auto w-full max-w-sm rounded-xl border p-8 text-center shadow-sm">
+    <h1 class="mb-4 text-3xl font-bold">Dashboard</h1>
+    <p class="text-muted-foreground">
+      Welcome, <span class="text-foreground font-semibold">{user?.email}</span>
+    </p>
+    <p class="text-muted-foreground mt-2 text-sm">This page is only for authenticated users.</p>
   </div>
 </AppLayout>

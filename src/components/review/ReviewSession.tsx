@@ -244,7 +244,7 @@ export default function ReviewSession() {
   const inSession = status === "question" || status === "answer" || status === "grading";
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-4 py-10">
+    <div className="flex flex-col gap-8">
       <span className="sr-only" role="status" aria-live="polite">
         {announcement}
       </span>

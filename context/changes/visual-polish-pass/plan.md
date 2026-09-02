@@ -697,10 +697,10 @@ zamknięciem S-08.
 
 #### Automated
 
-- [ ] 1.1 Lint przechodzi: `npm run lint`
-- [ ] 1.2 Typecheck przechodzi: `npx astro check`
-- [ ] 1.3 Testy przechodzą: `npm test`
-- [ ] 1.4 Build przechodzi: `npm run build`
+- [x] 1.1 Lint przechodzi: `npm run lint`
+- [x] 1.2 Typecheck przechodzi: `npx astro check`
+- [x] 1.3 Testy przechodzą: `npm test`
+- [x] 1.4 Build przechodzi: `npm run build`
 
 #### Manual
 
