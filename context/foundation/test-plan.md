@@ -74,7 +74,7 @@ na dysku.
 
 | # | Phase name | Goal (one line) | Risks covered | Test types | Status | Change folder |
 |---|---|---|---|---|---|---|
-| 1 | Kontrakt błędów generowania | Każda klasa awarii dostawcy kończy się rozróżnialnym błędem i zerem zapisów, a tekst źródłowy nie przeżywa żądania | #1, #5 | unit + integration | change opened | `context/changes/testing-generation-error-contract/` |
+| 1 | Kontrakt błędów generowania | Każda klasa awarii dostawcy kończy się rozróżnialnym błędem i zerem zapisów, a tekst źródłowy nie przeżywa żądania | #1, #5 | unit + integration | researched | `context/changes/testing-generation-error-contract/` |
 | 2 | Bramka dostępu i izolacja danych w CI | Własność rekordu jest egzekwowana i na trasie API, i w polityce bazy — a testy polityk przestają być testami, których nikt nie odpala | #2, #4 | integration + testy polityk bazy + gates | not started | — |
 | 3 | Integralność harmonogramu i liczników | Ocena w sesji zmienia stan deterministycznie i trwale, a liczniki generacji dają się odtworzyć ze stanu kolekcji | #3, #6 | unit + integration + testy procedur bazy | not started | — |
 | 4 | E2E krytycznej pętli | Jedna ścieżka logowanie → generowanie → akceptacja → kolekcja → sesja przechodzi automatycznie na każdym PR | #1, #2, #3, #4 (przekrojowo) | e2e + gates | not started | — |
