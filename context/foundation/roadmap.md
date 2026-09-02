@@ -45,7 +45,7 @@ Deklaracja właściciela produktu brzmiała: gwiazdą jest **cała pętla** (rej
 | S-03 | `manual-card-edit-delete`       | poprawić treść zapisanej fiszki i usunąć zbędną                                                             | S-02          | FR-006, FR-007                                  | done |
 | S-04 | `manual-card-create`            | dodać własną fiszkę ręcznie, bez udziału AI                                                                 | S-02          | FR-005                                          | done |
 | S-05 | `srs-review-session`            | uruchomić sesję powtórkową i ocenić fiszki według algorytmu spaced repetition                               | F-02, S-02    | FR-009, Success Criteria §Guardrails            | done |
-| S-08 | `visual-polish-pass`            | (wykończenie) korzystać z aplikacji o spójnym wyglądzie, z czytelnymi stanami pustej listy, ładowania i błędu | S-03, S-04, S-05, S-07 | US-01, FR-004, FR-008                | proposed |
+| S-08 | `visual-polish-pass`            | (wykończenie) korzystać z aplikacji o spójnym wyglądzie, z czytelnymi stanami pustej listy, ładowania i błędu | S-03, S-04, S-05, S-07 | US-01, FR-004, FR-008                | planning |
 | S-06 | `streaming-generation-progress` | widzieć pierwsze fiszki i postęp już w trakcie generowania, bez czekania na całość                          | S-02          | US-01, FR-003, Non-Functional Requirements      | proposed |
 
 ## Streams
@@ -202,7 +202,7 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Jedyny element roadmapy, który nie daje użytkownikowi nowej możliwości, więc formalnie nie jest przekrojem — stąd znacznik `(wykończenie)` i pozycja na samym końcu. Polerowanie ekranu, zanim on istnieje, to praca do wyrzucenia: każdy element Stream C i D dokłada widoki, więc przebieg uruchomiony wcześniej trzeba by powtórzyć. Mimo to stoi w roadmapie, a nie obok niej — wygląd jest warunkiem debiutu, a rzecz niesekwencjonowana zawsze przegrywa o wieczór z elementem, który ma swój wiersz w tabeli. Zakres domknięty listą ekranów istniejących w chwili startu i spójnością tego, co już jest; przeprojektowanie interfejsu od nowa nie mieści się w terminie 2026-09-07. Jako ostatni element przed debiutem jest też ostatnim buforem — jeśli czas się skończy, przycina się jego głębokość, nie elementy pętli przed nim.
-- **Status:** proposed
+- **Status:** planning
 
 ## Backlog Handoff
 
