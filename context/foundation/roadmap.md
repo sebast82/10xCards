@@ -31,7 +31,7 @@ Wyróżnik produktu — ta jedna cecha, której usunięcie sprawia, że produkt 
 
 > „Gwiazda przewodnia" oznacza tu najmniejszy przepływ od końca do końca, którego udane dowiezienie udowadnia, że produkt ma sens — umieszczony możliwie wcześnie, bo wszystko inne ma znaczenie tylko wtedy, gdy on działa.
 
-Deklaracja właściciela produktu brzmiała: gwiazdą jest **cała pętla** (rejestracja → generowanie → akceptacja i zapis → sesja powtórkowa). Pole „gwiazda przewodnia" opisuje pojedynczy przepływ, więc zapisano w nim S-02, a deklarację odwzorowano w sekwencji: wszystkie ogniwa pętli (S-01, S-02, S-03, S-04, S-05) poprzedzają jakąkolwiek pracę spoza niej. Poza pętlę wychodzi wyłącznie S-06, i to jako dociągnięcie wymagania niefunkcjonalnego do już działającego generowania.
+Deklaracja właściciela produktu brzmiała: gwiazdą jest **cała pętla** (rejestracja → generowanie → akceptacja i zapis → sesja powtórkowa). Pole „gwiazda przewodnia" opisuje pojedynczy przepływ, więc zapisano w nim S-02, a deklarację odwzorowano w sekwencji: wszystkie ogniwa pętli (S-01, S-02, S-03, S-04, S-05) poprzedzają jakąkolwiek pracę spoza niej. Poza pętlą stało wyłącznie S-06 (przyrostowe generowanie) — wycofane 2026-09-02 do `## Parked`: zbyt duża zmiana, generowanie zbiorcze spełnia FR-003.
 
 ## At a glance
 
@@ -46,7 +46,6 @@ Deklaracja właściciela produktu brzmiała: gwiazdą jest **cała pętla** (rej
 | S-04 | `manual-card-create`            | dodać własną fiszkę ręcznie, bez udziału AI                                                                 | S-02          | FR-005                                          | done |
 | S-05 | `srs-review-session`            | uruchomić sesję powtórkową i ocenić fiszki według algorytmu spaced repetition                               | F-02, S-02    | FR-009, Success Criteria §Guardrails            | done |
 | S-08 | `visual-polish-pass`            | (wykończenie) korzystać z aplikacji o spójnym wyglądzie, z czytelnymi stanami pustej listy, ładowania i błędu | S-03, S-04, S-05, S-07 | US-01, FR-004, FR-008                | done |
-| S-06 | `streaming-generation-progress` | widzieć pierwsze fiszki i postęp już w trakcie generowania, bez czekania na całość                          | S-02          | US-01, FR-003, Non-Functional Requirements      | proposed |
 
 ## Streams
 
@@ -55,7 +54,7 @@ Pomoc nawigacyjna — grupuje elementy dzielące ten sam łańcuch zależności.
 | Stream | Theme                | Chain                             | Note                                                                                                             |
 | ------ | -------------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | A      | Dostęp i wdrożenie   | `S-01`                            | Domknięty — dostarcza reszcie roadmapy działającą instancję z sesją użytkownika.                                 |
-| B      | Pętla generowania    | `F-01` → `F-02` → `S-02` → `S-06` | Ścieżka gwiazdy przewodniej; przy celu `speed` ma pierwszeństwo w każdym remisie.                                |
+| B      | Pętla generowania    | `F-01` → `F-02` → `S-02`          | Ścieżka gwiazdy przewodniej; przy celu `speed` ma pierwszeństwo w każdym remisie. `S-06` był przedłużeniem tego toru — wycofany do `## Parked` 2026-09-02. |
 | C      | Zarządzanie kolekcją | `S-03` / `S-04` (równolegle)      | Dołącza do Stream B w `S-02`; oba elementy niezależne od siebie.                                                 |
 | D      | Pętla nauki          | `S-05`                            | Dołącza do Stream B w `S-02`, a kontrakt bierze z `F-01`; domyka pętlę zadeklarowaną przez właściciela produktu. |
 | E      | Powłoka i wykończenie | `S-07` → `S-08`                   | Dołącza do Stream B w `S-02`. `S-07` idzie przed Stream C i D, bo każdy ich ekran podpina się do powłoki; `S-08` zbiera je wszystkie, więc czeka na ostatni. |
@@ -136,7 +135,7 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 - **PRD refs:** Non-Functional Requirements, FR-008, Access Control
 - **Unlocks:** S-03, S-04, S-05 (każdy dokłada ekran, który podpina się do gotowej powłoki zamiast wymuszać przeróbkę wstecz), S-08 (jednolity punkt odniesienia dla wyglądu)
 - **Prerequisites:** S-02
-- **Parallel with:** S-06
+- **Parallel with:** —
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Wbrew pierwszemu wrażeniu to nie kosmetyka, tylko luka funkcjonalna: bez tego elementu użytkownik nie ma jak przejść z kolekcji do generowania inaczej niż cofając historię przeglądarki, a po S-05 dojdzie trzecia funkcja bez wejścia. Stąd pozycja przed Stream C i D, choć formalnie nic go tam nie blokuje: S-03, S-04 i S-05 każdy dodaje ekran, więc powłoka zbudowana po nich to retrofit trzech ekranów naraz zamiast trzech dopisanych wpisów. Wymaganie niefunkcjonalne PRD dopisane 2026-08-26 (dostępność każdej funkcji z trwałej nawigacji) jest kotwicą tego elementu — wcześniej roadmapa milczała na ten temat, bo milczał PRD. Zakres celowo wąski: struktura nawigacji i wskazanie bieżącego miejsca, bez przebudowy wyglądu — ten idzie osobno w S-08, po powstaniu ostatniego ekranu.
@@ -148,7 +147,7 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 - **Change ID:** `manual-card-edit-delete`
 - **PRD refs:** FR-006, FR-007
 - **Prerequisites:** S-02
-- **Parallel with:** S-04, S-05, S-06, S-07
+- **Parallel with:** S-04, S-05, S-07
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Edycja po zapisie to inna operacja niż poprawka propozycji przed akceptacją z S-02 — jeśli obie trafią do jednego przebiegu, formularz zacznie obsługiwać dwa różne stany. Usuwanie jest nieodwracalne (PRD świadomie odrzucił soft delete), więc potwierdzenie akcji jest częścią zakresu, a nie ozdobnikiem.
@@ -160,7 +159,7 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 - **Change ID:** `manual-card-create`
 - **PRD refs:** FR-005
 - **Prerequisites:** S-02
-- **Parallel with:** S-03, S-05, S-06, S-07
+- **Parallel with:** S-03, S-05, S-07
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Najmniejszy element pętli, świadomie po S-02: ręczne dodawanie korzysta z tego samego zapisu i tej samej listy, więc zbudowane po generowaniu nie tworzy drugiej ścieżki zapisu. Odwrotna kolejność oznaczałaby przerabianie formularza pod przepływ AI.
@@ -172,24 +171,11 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 - **Change ID:** `srs-review-session`
 - **PRD refs:** FR-009, Success Criteria §Guardrails
 - **Prerequisites:** F-02, S-02
-- **Parallel with:** S-03, S-04, S-06, S-07
+- **Parallel with:** S-03, S-04, S-07
 - **Blockers:** —
 - **Unknowns:** —
-- **Risk:** Kontrakt algorytmu i pola stanu przychodzą gotowe z F-01, więc ryzyko tego elementu nie leży już w wyborze rozwiązania, tylko w jego wpięciu. PRD stawia tu jedyny twardy warunek brzegowy: sesja nauki musi działać poprawnie niezależnie od źródła fiszek — po S-04 w kolekcji są zarówno fiszki z AI, jak i ręczne, i obie muszą wchodzić do harmonogramu tak samo. Domyka pętlę zadeklarowaną przez właściciela produktu, więc przy celu `speed` nie schodzi poniżej S-06 w kolejce.
+- **Risk:** Kontrakt algorytmu i pola stanu przychodzą gotowe z F-01, więc ryzyko tego elementu nie leży już w wyborze rozwiązania, tylko w jego wpięciu. PRD stawia tu jedyny twardy warunek brzegowy: sesja nauki musi działać poprawnie niezależnie od źródła fiszek — po S-04 w kolekcji są zarówno fiszki z AI, jak i ręczne, i obie muszą wchodzić do harmonogramu tak samo. Domyka pętlę zadeklarowaną przez właściciela produktu, więc przy celu `speed` miała pierwszeństwo przed pracą spoza pętli.
 - **Status:** done
-
-### S-06: Przyrostowe pojawianie się fiszek i widoczny postęp generowania
-
-- **Outcome:** użytkownik widzi pierwsze propozycje w ciągu 30 sekund od zlecenia i ciągły postęp generowania, a kolejne fiszki dochodzą przyrostowo — może zacząć przegląd, zanim generowanie się skończy.
-- **Change ID:** `streaming-generation-progress`
-- **PRD refs:** US-01, FR-003, Non-Functional Requirements
-- **Prerequisites:** S-02
-- **Parallel with:** S-03, S-04, S-05, S-07
-- **Blockers:** —
-- **Unknowns:**
-  - Czy limity środowiska (czas CPU, liczba podzapytań, równoległe połączenia wychodzące — opisane w `infrastructure.md`) pozwalają na przyrostowe dostarczanie bez zmiany planu hostingu? — Owner: user. Block: no.
-- **Risk:** Świadomie oddzielone od S-02, żeby pomiar jakości propozycji nie czekał na strojenie strumieniowania. Jedyny element poza pętlą — przy celu `speed` i głównym ryzyku `time` to pierwszy kandydat do odłożenia, jeśli termin zacznie napierać: generowanie zbiorcze spełnia FR-003, tylko gorzej się go używa. **2026-08-26:** ten warunek się ziścił — wygląd aplikacji stał się bramką publicznego debiutu, więc S-06 ustępuje miejsca w kamieniu milowym `MVP — pętla` elementowi S-08 i zostaje w `Bufor — do przycięcia`. To odłożenie jest **warunkowe, nie ostateczne**: jeśli pętla MVP (S-07, S-03, S-04, S-05, S-08) domknie się przed 2026-09-07, S-06 wraca do kolejki i zostaje dokończony przed debiutem — wymaganie niefunkcjonalne PRD o pierwszych fiszkach w 30 sekund pozostaje w mocy i nie zostało uchylone.
-- **Status:** proposed
 
 ### S-08: Przegląd wizualny przed debiutem
 
@@ -216,10 +202,10 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 | S-03       | `manual-card-edit-delete`       | #5    | Poprawianie i usuwanie zapisanych fiszek                 | yes                   | Odblokowane przez S-02; następny w kolejce — powłoka z S-07 gotowa |
 | S-04       | `manual-card-create`            | #6    | Ręczne tworzenie fiszki                                  | yes                   | Odblokowane przez S-02; można prowadzić równolegle z S-03 |
 | S-05       | `srs-review-session`            | #7    | Sesja powtórkowa z algorytmem spaced repetition          | yes                   | Odblokowane przez F-02 i S-02; domyka pętlę            |
-| S-08       | `visual-polish-pass`            | #12   | Przegląd wizualny przed debiutem                         | no                    | Czeka na S-03, S-04 i S-05 (S-07 domknięte); ostatni przed debiutem i ostatni bufor |
-| S-06       | `streaming-generation-progress` | #8    | Przyrostowe generowanie i widoczny postęp                | no                    | Czeka na S-02; odłożone 2026-08-26 na rzecz S-08 — odłożenie warunkowe, wraca do kolejki, jeśli pętla MVP domknie się przed terminem |
+| S-08       | `visual-polish-pass`            | #12   | Przegląd wizualny przed debiutem                         | done                  | Zarchiwizowane 2026-09-02; przegląd implementacji: `reviews/impl-review.md`; issue #12 do zamknięcia |
 
-Kamienie milowe: F-01–S-05, S-07 i S-08 w `MVP — pętla` (termin 2026-09-07), S-06 w `Bufor — do przycięcia`.
+Kamień milowy `MVP — pętla` (termin 2026-09-07): wszystkie elementy (F-01–F-02, S-01–S-05, S-07, S-08) domknięte.
+`S-06` (`streaming-generation-progress`, issue #8) — **wycofane 2026-09-02** do `## Parked`: zbyt duża zmiana, niepotrzebna w MVP; generowanie zbiorcze spełnia FR-003. Issue #8 do zamknięcia jako `not planned`.
 
 ## Open Roadmap Questions
 
@@ -240,6 +226,7 @@ Brak otwartych pytań — wszystkie rozstrzygnięte.
 - **Aplikacja mobilna** — Why parked: PRD §Non-Goals; na start tylko aplikacja webowa.
 - **OAuth i logowanie bez hasła** — Why parked: decyzja z 2026-08-21 — MVP wdraża wyłącznie email+hasło, które jest już zaimplementowane. PRD dopuszcza dowolną z trzech metod, więc to zawężenie zakresu, nie odstępstwo od wymagań.
 - **Śledzenie błędów i logowanie ponad to, co daje platforma** — Why parked: cel `speed`; wbudowana obserwowalność Workers jest już włączona i wystarcza przy skali `users: small`.
+- **Przyrostowe generowanie i widoczny postęp (dawne S-06, `streaming-generation-progress`, issue #8)** — Why parked: decyzja właściciela produktu z 2026-09-02 — zbyt duża zmiana jak na potrzeby MVP. Generowanie zbiorcze spełnia FR-003; pętla MVP (F-01–S-05, S-07, S-08) domknięta bez niej. Skutek: wymaganie niefunkcjonalne PRD „pierwsze fiszki w 30 sekund od zlecenia" nie jest realizowane w tym wydaniu — do rewizji PRD, jeśli wróci jako priorytet.
 
 ## Done
 
