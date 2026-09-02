@@ -81,7 +81,8 @@ Card `flashcards/5afe6263-4422-4242-b964-c10e4aabcc13`, state Learning, `reps: 1
 
 - **Deployed commit SHA**: `b3e9554` (`origin/master` HEAD; `fix(srs-review-session): suppress Space/Enter grade activation in answer state (F1)`)
 - **Deploy date**: 2026-09-02
-- **Deploy verified**: 2026-09-02 via curl — `/review` 302→signin, `/api/reviews` 401 with the frozen Polish message. Full logged-in session (c) still pending.
+- **Deploy verified**: 2026-09-02 via curl — `/review` 302→signin, `/api/reviews` 401 with the frozen Polish message. Full logged-in session (c) and parity check (d²) completed the same day.
+- Note: doc-only commits after `b3e9554` (`878977c`, `80a59b3`, …) do not change Worker runtime.
 
 ## Plan items
 
