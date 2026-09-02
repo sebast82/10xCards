@@ -629,35 +629,35 @@ Brak migracji. P4 dodaje wyłącznie plik testowy `supabase/tests/`. Stryker (P5
 
 #### Automated
 
-- [x] 1.1 Typecheck przechodzi: `npx astro check`
-- [x] 1.2 Lint przechodzi: `npm run lint`
-- [x] 1.3 `npx vitest run src/lib/openrouter/client.test.ts` — wszystkie przypadki zielone
-- [x] 1.4 Pełny `npm test` bez regresji
-- [x] 1.5 `it.each` po klasach awarii dowodzi braku sentinela w `JSON.stringify(error)` dla każdej klasy
+- [x] 1.1 Typecheck przechodzi: `npx astro check` — 99585e1
+- [x] 1.2 Lint przechodzi: `npm run lint` — 99585e1
+- [x] 1.3 `npx vitest run src/lib/openrouter/client.test.ts` — wszystkie przypadki zielone — 99585e1
+- [x] 1.4 Pełny `npm test` bez regresji — 99585e1
+- [x] 1.5 `it.each` po klasach awarii dowodzi braku sentinela w `JSON.stringify(error)` dla każdej klasy — 99585e1
 
 #### Manual
 
-- [x] 1.6 Przegląd: asercje pierwszorzędne są behawioralne (wzajemna różność + nie-pustość, porównanie między sobą), nie równość do importu z `client.ts`
-- [x] 1.7 Przegląd: asercja współdzielonego sygnału testuje tożsamość referencji
-- [x] 1.8 Fixture 404 ZDR używa dokładnego zdania z docs router-metadata
+- [x] 1.6 Przegląd: asercje pierwszorzędne są behawioralne (wzajemna różność + nie-pustość, porównanie między sobą), nie równość do importu z `client.ts` — 99585e1
+- [x] 1.7 Przegląd: asercja współdzielonego sygnału testuje tożsamość referencji — 99585e1
+- [x] 1.8 Fixture 404 ZDR używa dokładnego zdania z docs router-metadata — 99585e1
 
 ### Phase 2: P2 — generations.test.ts (integracja trasy, hermetyczna)
 
 #### Automated
 
-- [ ] 2.1 Typecheck: `npx astro check`
-- [ ] 2.2 Lint: `npm run lint`
-- [ ] 2.3 `npx vitest run src/pages/api/generations.test.ts` — zielone
-- [ ] 2.4 Pełny `npm test` bez regresji
-- [ ] 2.5 Asercja „`queries.every(q => q.table !== 'flashcards')`" obecna na ścieżce awarii
-- [ ] 2.6 Asercja wzajemnej różności ciał błędu (porównanie między sobą) + nie-pustości; ≤1 lekki test „stała przekazana bez zmiany"
-- [ ] 2.7 Asercja „odpowiedź 400 ma klucze dokładnie `['error']`" (zakaz `issues`)
+- [x] 2.1 Typecheck: `npx astro check`
+- [x] 2.2 Lint: `npm run lint`
+- [x] 2.3 `npx vitest run src/pages/api/generations.test.ts` — zielone
+- [x] 2.4 Pełny `npm test` bez regresji
+- [x] 2.5 Asercja „`queries.every(q => q.table !== 'flashcards')`" obecna na ścieżce awarii
+- [x] 2.6 Asercja wzajemnej różności ciał błędu (porównanie między sobą) + nie-pustości; ≤1 lekki test „stała przekazana bez zmiany"
+- [x] 2.7 Asercja „odpowiedź 400 ma klucze dokładnie `['error']`" (zakaz `issues`)
 
 #### Manual
 
-- [ ] 2.8 Przegląd: `vi.hoisted` + `vi.mock("astro:env/server")` pozwala zmutować klucz między testami
-- [ ] 2.9 Przegląd: indeksy `supabase.queries[n]` zgadzają się z sekwencją `createGeneration`
-- [ ] 2.10 Przegląd: sentinel `"SEKRET-"` nie występuje w żadnym fixture jako część stałej
+- [x] 2.8 Przegląd: `vi.hoisted` + `vi.mock("astro:env/server")` pozwala zmutować klucz między testami
+- [x] 2.9 Przegląd: indeksy `supabase.queries[n]` zgadzają się z sekwencją `createGeneration`
+- [x] 2.10 Przegląd: sentinel `"SEKRET-"` nie występuje w żadnym fixture jako część stałej
 
 ### Phase 3: P3 — GenerateView.test.tsx (komponent, jsdom)
 
