@@ -202,10 +202,10 @@ Fundamenty poniżej zakładają obecność tych elementów i NIE budują ich pon
 | S-03       | `manual-card-edit-delete`       | #5    | Poprawianie i usuwanie zapisanych fiszek                 | yes                   | Odblokowane przez S-02; następny w kolejce — powłoka z S-07 gotowa |
 | S-04       | `manual-card-create`            | #6    | Ręczne tworzenie fiszki                                  | yes                   | Odblokowane przez S-02; można prowadzić równolegle z S-03 |
 | S-05       | `srs-review-session`            | #7    | Sesja powtórkowa z algorytmem spaced repetition          | yes                   | Odblokowane przez F-02 i S-02; domyka pętlę            |
-| S-08       | `visual-polish-pass`            | #12   | Przegląd wizualny przed debiutem                         | done                  | Zarchiwizowane 2026-09-02; przegląd implementacji: `reviews/impl-review.md`; issue #12 do zamknięcia |
+| S-08       | `visual-polish-pass`            | #12   | Przegląd wizualny przed debiutem                         | done                  | Zarchiwizowane 2026-09-02; przegląd implementacji: `reviews/impl-review.md`; issue #12 zamknięte |
 
 Kamień milowy `MVP — pętla` (termin 2026-09-07): wszystkie elementy (F-01–F-02, S-01–S-05, S-07, S-08) domknięte.
-`S-06` (`streaming-generation-progress`, issue #8) — **wycofane 2026-09-02** do `## Parked`: zbyt duża zmiana, niepotrzebna w MVP; generowanie zbiorcze spełnia FR-003. Issue #8 do zamknięcia jako `not planned`.
+`S-06` (`streaming-generation-progress`, issue #8) — **wycofane 2026-09-02** do `## Parked`: zbyt duża zmiana, niepotrzebna w MVP; generowanie zbiorcze spełnia FR-003. Issue #8 zamknięte jako `not planned`.
 
 ## Open Roadmap Questions
 
