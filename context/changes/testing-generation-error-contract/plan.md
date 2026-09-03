@@ -743,14 +743,14 @@ Brak migracji. P4 dodaje wyłącznie plik testowy `supabase/tests/`. Stryker (P5
 
 #### Automated
 
-- [x] 6.1 `npx astro check` bez regresji
-- [x] 6.2 `git grep "TBD — see §3 Phase 1"` nie zwraca §6.1 ani §6.2
-- [x] 6.3 `npm test` zielony (pełny pakiet)
+- [x] 6.1 `npx astro check` bez regresji — 83a61d2
+- [x] 6.2 `git grep "TBD — see §3 Phase 1"` nie zwraca §6.1 ani §6.2 — 83a61d2
+- [x] 6.3 `npm test` zielony (pełny pakiet) — 83a61d2
 
 #### Manual
 
-- [x] 6.4 §6.1 i §6.2 konkretne (nazwy plików, komendy)
-- [x] 6.5 §3 Phase 1 Status = `complete`; `change.md` zsynchronizowane (`status: implemented` — „complete" w planie to słownik §3 rolloutu, nie change.md)
-- [x] 6.6 `contract-surfaces.md` §Nazwy w danych ma podsekcję `public.generations` (`status`, `error_code`, trzy CHECK-i); reszta dryfu nietknięta
-- [x] 6.7 Roadmap potwierdzony bez elementu o tym Change ID — `roadmap.md` nietknięty
-- [x] 6.8 Przegląd: strategia §1–§5 test-planu bez zmian
+- [x] 6.4 §6.1 i §6.2 konkretne (nazwy plików, komendy) — 83a61d2
+- [x] 6.5 §3 Phase 1 Status = `complete`; `change.md` zsynchronizowane (`status: implemented` — „complete" w planie to słownik §3 rolloutu, nie change.md) — 83a61d2
+- [x] 6.6 `contract-surfaces.md` §Nazwy w danych ma podsekcję `public.generations` (`status`, `error_code`, trzy CHECK-i); reszta dryfu nietknięta — 83a61d2
+- [x] 6.7 Roadmap potwierdzony bez elementu o tym Change ID — `roadmap.md` nietknięty — 83a61d2
+- [x] 6.8 Przegląd: strategia §1–§5 test-planu bez zmian — 83a61d2
