@@ -44,8 +44,12 @@ function context({
 
 describe("reviews GET", () => {
   it("rejects unauthenticated and unavailable requests", async () => {
-    expect((await GET(context({ user: null }))).status).toBe(401);
+    const supabase = new SupabaseStub([]);
+    expect((await GET(context({ user: null, supabase: supabase.asClient() }))).status).toBe(401);
     expect((await GET(context({ supabase: null }))).status).toBe(503);
+    // O4-6: the handler denies before touching data — no query, no rpc on the unauthenticated path.
+    expect(supabase.queries).toHaveLength(0);
+    expect(supabase.rpcCalls).toHaveLength(0);
   });
 
   it("returns the due-card queue wrapped in { cards }", async () => {
@@ -76,8 +80,16 @@ describe("reviews POST", () => {
   const postCtx = (over: Parameters<typeof context>[0] = {}) => context({ method: "POST", ...over });
 
   it("rejects unauthenticated and unavailable requests", async () => {
-    expect((await POST(postCtx({ user: null, body: { flashcardId: FLASHCARD_ID, grade: 3 } }))).status).toBe(401);
-    expect((await POST(postCtx({ supabase: null, body: { flashcardId: FLASHCARD_ID, grade: 3 } }))).status).toBe(503);
+    const supabase = new SupabaseStub([]);
+    const body = { flashcardId: FLASHCARD_ID, grade: 3 };
+    const unauthenticated = await POST(postCtx({ user: null, supabase: supabase.asClient(), body }));
+    const unavailable = await POST(postCtx({ supabase: null, body }));
+
+    expect(unauthenticated.status).toBe(401);
+    expect(unavailable.status).toBe(503);
+    // O4-6: the handler denies before touching data — no query, no rpc on the unauthenticated path.
+    expect(supabase.queries).toHaveLength(0);
+    expect(supabase.rpcCalls).toHaveLength(0);
   });
 
   it("rejects a malformed body and an out-of-range grade", async () => {

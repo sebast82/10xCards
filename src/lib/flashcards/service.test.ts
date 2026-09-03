@@ -57,6 +57,7 @@ describe("createAiFlashcard", () => {
     expect(supabase.queries[0].filters).toEqual([
       ["id", GENERATION_ID],
       ["status", "succeeded"],
+      ["user_id", USER_ID],
     ]);
   });
 

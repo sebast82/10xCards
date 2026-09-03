@@ -132,11 +132,15 @@ afterEach(() => {
 });
 
 describe("POST /api/generations — wejście odrzucone przed wywołaniem serwisu", () => {
-  it("brak sesji → 401 ze stałym ciałem", async () => {
-    const response = await POST(context({ user: null }));
+  it("brak sesji → 401 ze stałym ciałem, bez dotknięcia danych", async () => {
+    const supabase = new SupabaseStub([]);
+    const response = await POST(context({ user: null, supabase: supabase.asClient() }));
 
     expect(response.status).toBe(401);
     await expect(response.json()).resolves.toEqual({ error: "Zaloguj się, aby generować fiszki." });
+    // O4-6: trasa odmawia przed sięgnięciem po dane — żadnego zapytania, żadnego rpc na ścieżce bez sesji.
+    expect(supabase.queries).toHaveLength(0);
+    expect(supabase.rpcCalls).toHaveLength(0);
   });
 
   it("503 z obu przyczyn: brak klienta Supabase oraz pusty OPENROUTER_API_KEY (mutacja klucza)", async () => {

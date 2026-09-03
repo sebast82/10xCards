@@ -79,11 +79,15 @@ describe("flashcards POST API", () => {
   });
 
   it("rejects unauthenticated and unavailable requests", async () => {
-    const unauthenticated = await POST(context({ user: null }));
+    const supabase = new SupabaseStub([]);
+    const unauthenticated = await POST(context({ user: null, supabase: supabase.asClient() }));
     const unavailable = await POST(context({ supabase: null }));
 
     expect(unauthenticated.status).toBe(401);
     expect(unavailable.status).toBe(503);
+    // O4-6: the handler denies before touching data — no query, no rpc on the unauthenticated path.
+    expect(supabase.queries).toHaveLength(0);
+    expect(supabase.rpcCalls).toHaveLength(0);
   });
 
   it("maps manual persistence failures to the static response", async () => {
@@ -111,11 +115,14 @@ describe("flashcards POST API", () => {
 
     expect(response.status).toBe(201);
     await expect(response.json()).resolves.toEqual({ id: FLASHCARD_ID });
+    // Third filter is the AI-create generation lookup's `.eq("user_id")` (service.ts) — regression guard
+    // that owner-scoping did not disappear; cross-account proof is pgTAP (supabase/tests/rls_generations.test.sql).
     expect(supabase.queries[0]).toMatchObject({
       table: "generations",
       filters: [
         ["id", GENERATION_ID],
         ["status", "succeeded"],
+        ["user_id", USER_ID],
       ],
     });
     expect(supabase.queries[1].payload).toMatchObject({

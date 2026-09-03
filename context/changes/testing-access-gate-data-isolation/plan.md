@@ -715,25 +715,25 @@ in prod). `supabase start` in CI and `supabase db reset` locally apply it from s
 
 #### Automated
 
-- [x] 2.1 `npm run db:test` passes: `rls_flashcards`, new `rls_generations`, + 3 pre-existing suites (`Files=4, Tests=49, PASS`; `rls_flashcards` `plan(10)`→`plan(22)`, `rls_generations` new `plan(13)`)
-- [x] 2.2 New revoke migration applies cleanly on `supabase db reset` (`20260904120000_revoke_authenticated_destructive_privileges.sql`)
-- [x] 2.3 `db-tests` CI job green on the PR
+- [x] 2.1 `npm run db:test` passes: `rls_flashcards`, new `rls_generations`, + 3 pre-existing suites (`Files=4, Tests=49, PASS`; `rls_flashcards` `plan(10)`→`plan(22)`, `rls_generations` new `plan(13)`) — ae0432b
+- [x] 2.2 New revoke migration applies cleanly on `supabase db reset` (`20260904120000_revoke_authenticated_destructive_privileges.sql`) — ae0432b
+- [x] 2.3 `db-tests` CI job green on the PR — ae0432b
 
 #### Manual
 
-- [x] 2.4 Dropping `generations_update_own` or weakening its `using` to `true` reddens the write-isolation assertion specifically
-- [x] 2.5 Dropping `flashcards_delete_own` or weakening its `using` to `true` reddens the delete-isolation assertion (F1 conflation gone)
-- [x] 2.6 Re-adding `truncate` grant to `authenticated` reddens the TRUNCATE assertion
-- [x] 2.7 Post-merge `supabase db push` applied; cloud `authenticated` confirmed to have lost `TRUNCATE`
+- [x] 2.4 Dropping `generations_update_own` or weakening its `using` to `true` reddens the write-isolation assertion specifically — ae0432b
+- [x] 2.5 Dropping `flashcards_delete_own` or weakening its `using` to `true` reddens the delete-isolation assertion (F1 conflation gone) — ae0432b
+- [x] 2.6 Re-adding `truncate` grant to `authenticated` reddens the TRUNCATE assertion — ae0432b
+- [x] 2.7 Post-merge `supabase db push` applied; cloud `authenticated` confirmed to have lost `TRUNCATE` — ae0432b
 
 ### Phase 3: Session-gate hermetic tests and route-level authz
 
 #### Automated
 
-- [ ] 3.1 `npm test` passes including new `src/middleware.test.ts`
-- [ ] 3.2 `npx astro check` passes
-- [ ] 3.3 `npm run lint` passes
-- [ ] 3.4 `db-tests` CI job still green
+- [x] 3.1 `npm test` passes including new `src/middleware.test.ts`
+- [x] 3.2 `npx astro check` passes
+- [x] 3.3 `npm run lint` passes
+- [x] 3.4 `db-tests` CI job still green
 
 #### Manual
 

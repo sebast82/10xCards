@@ -60,12 +60,15 @@ export async function createAiFlashcard({
   edited,
 }: CreateAiFlashcardInput): Promise<{ id: string }> {
   // Klucz obcy nie przechodzi przez RLS — bez tego zapytania cudze `generationId` przeszłoby bez przeszkód.
+  // `.eq("user_id")` to defense-in-depth spójne z każdą inną ścieżką mutacji — RLS i tak odcina cudze zlecenie,
+  // ale filtr czyni intencję jawną i ujednolica ścieżkę z lookupami update/delete.
   // `status` zawęża do zleceń zakończonych: wiersz `pending`/`failed` ma `generated_count = 0` i wywaliłby CHECK.
   const { data: generation, error: lookupError } = await supabase
     .from("generations")
     .select("id")
     .eq("id", generationId)
     .eq("status", "succeeded")
+    .eq("user_id", userId)
     .maybeSingle();
 
   if (lookupError) {
