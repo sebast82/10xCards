@@ -683,29 +683,45 @@ rozstrzygają — zatrzymać się i zapytać):
    (`"Nie znaleziono fiszki"`), zgodnie z normą „nie ujawniaj istnienia" i
    `manual-card-edit-delete/plan.md:67`. Potwierdzić, że to zamierzone, nie przypadkowe —
    i czy oracle ma asertować konkretny kod.
+   *Resolved in plan.md (2026-09-04):* 404 + `{ error: "Nie znaleziono fiszki." }` przypięte jako
+   kontraktowa straż powierzchni (Q1), z jawnym komentarzem „nie oracle izolacji".
 2. **Status endpointu bez sesji: 401 vs redirect.** PRD §Access Control mówi tylko
    „przekierowywany na stronę logowania" i nie wspomina API/XHR. test-plan sankcjonuje
    „przekierowanie **albo** odmowę". Oracle może asertować „brak danych + odmowa"; **nie** może
    asertować „musi być redirect" ani „musi być dokładnie 401" z samego PRD.
+   *Resolved in plan.md (2026-09-04):* oracle to „brak danych + odmowa" (O4-2/O4-6); 401 przypięte
+   jako kontraktowa straż (Q2), nie jako wymóg PRD.
 3. **`authenticated` trzyma `TRUNCATE` (O2-8)** — bug do naprawy (dodać `revoke`) czy stan
    zaakceptowany? F2 zostawił to otwarte.
+   *Resolved in plan.md (2026-09-04):* bug do naprawy — Faza 2 change #4 dodaje migrację
+   `revoke truncate,trigger,references … from authenticated`, pinowaną asercją pgTAP.
 4. **Same-user `flashcard ↔ generation` (O2-10)** — gwarancja DB czy egzekwowanie app-layer
    wystarcza? first-gated-generation research mówił „dopisać ręcznie", kod opiera się na RLS.
    Czy oracle wymaga dodania `.eq("user_id", userId)` do lookupu `service.ts:64-69`
    (defense-in-depth, spójne z każdą inną ścieżką mutacji)?
+   *Resolved in plan.md (2026-09-04):* app-layer + RLS wystarcza; Faza 3 change #5 dodaje
+   `.eq("user_id", userId)` do lookupu; predykat same-user na FK → §7 deferral.
 5. **`src/pages/deck.astro` bez filtra własności w app** — jeśli doktryna to ściśle „RLS jedynym
    mechanizmem", jest spójne; jeśli zespół chce jednolitości belt-and-suspenders, to rozjazd
    do zgłoszenia. Który standard trzyma oracle?
+   *Resolved in plan.md (2026-09-04):* doktryna „RLS jedynym mechanizmem" trzyma — `deck.astro`
+   zostaje bez filtra; pgTAP dowodzi, że RLS to pokrywa.
 6. **Czy testy route-level (hermetyczne) mają asertować obecność `.eq("user_id", …)`** w filtrach
    (jak `reviews.test.ts:107-111` dla grade)? To przypina detal implementacji — ale wg O2-13/O2-14
    realny sygnał to pgTAP + integracja na realnej bazie, a asercja hermetyczna to tylko tania
    straż regresyjna. Czy ta straż należy do oracle, czy jest jawnie poza (ryzyko mirror-testu)?
+   *Resolved in plan.md (2026-09-04):* tak, ale wyłącznie jako etykietowana straż regresyjna
+   (komentarz „cross-account proof is pgTAP"), nie jako oracle izolacji (Q6, O2-14).
 7. **Zachowanie wysp klienckich na 401 (mid-session expiry)** — dziś inline error, brak nawigacji
    na `/auth/signin`. Żadne źródło nie mówi, czy „przekierowywany na stronę logowania" obejmuje
    XHR w SPA. Flag, nie asercja.
+   *Resolved in plan.md (2026-09-04):* nie asertowane — §7 deferral (żadne źródło nie rozstrzyga SPA XHR).
 8. **Parytet grantów lokalne ↔ cloud** — brak automatycznego sprawdzenia, że pushnięty projekt
    cloud ma te same granty `anon`/`authenticated` co migracje. Faza 2 może chcieć check albo
    jawną notę „poza zakresem".
+   *Resolved in plan.md (2026-09-04):* poza zakresem — §7 deferral (brak sekretu cloud w CI);
+   migracje przywilejów wypychane ręcznie `supabase db push`.
 9. **Robustność dopasowania ścieżki** — bramka to surowe `pathname.startsWith(prefix)` bez
    normalizacji (case, encoded, `//`). Żadne źródło nie mówi, czy warianty muszą też być
    bramkowane. Kandydat na edge case, nie wywiedziony oracle.
+   *Resolved in plan.md (2026-09-04):* nie testowane ani hardenowane — §7 deferral.

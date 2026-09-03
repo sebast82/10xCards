@@ -730,25 +730,25 @@ in prod). `supabase start` in CI and `supabase db reset` locally apply it from s
 
 #### Automated
 
-- [x] 3.1 `npm test` passes including new `src/middleware.test.ts`
-- [x] 3.2 `npx astro check` passes
-- [x] 3.3 `npm run lint` passes
-- [x] 3.4 `db-tests` CI job still green
+- [x] 3.1 `npm test` passes including new `src/middleware.test.ts` — 91131dd
+- [x] 3.2 `npx astro check` passes — 91131dd
+- [x] 3.3 `npm run lint` passes — 91131dd
+- [x] 3.4 `db-tests` CI job still green — 91131dd
 
 #### Manual
 
-- [ ] 3.5 Removing a `PROTECTED_ROUTES` entry (in `src/lib/auth/protected-routes.ts`) reddens both the redirect test and the explicit route-set guard
-- [ ] 3.6 Swapping `getUser()` → `getSession()` reddens the invalid/expired-session test
-- [ ] 3.7 Removing a service `.eq("user_id")` reddens the matching route-level filter guard
-- [ ] 3.8 App smoke: logged-out `/deck` redirects; `POST /api/flashcards` with no session → 401, no row
+- [x] 3.5 Removing a `PROTECTED_ROUTES` entry (in `src/lib/auth/protected-routes.ts`) reddens both the redirect test and the explicit route-set guard — 91131dd
+- [x] 3.6 Swapping `getUser()` → `getSession()` reddens the invalid/expired-session test — 91131dd
+- [x] 3.7 Removing a service `.eq("user_id")` reddens the matching route-level filter guard — 91131dd
+- [x] 3.8 App smoke: logged-out `/deck` redirects; `POST /api/flashcards` with no session → 401, no row — 91131dd
 
 ### Phase 4: Cookbook, quality-gate sync, and deferred-item register
 
 #### Automated
 
-- [ ] 4.1 `prettier --check` passes on `test-plan.md`
-- [ ] 4.2 No `TBD — see §3 Phase 2` string remains in §6.3 / §6.4
-- [ ] 4.3 `test-plan.md §3` Phase 2 status is a valid parser literal
+- [x] 4.1 `prettier --check` passes on `test-plan.md`
+- [x] 4.2 No `TBD — see §3 Phase 2` string remains in §6.3 / §6.4
+- [x] 4.3 `test-plan.md §3` Phase 2 status is a valid parser literal
 
 #### Manual
 
