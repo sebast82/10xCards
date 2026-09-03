@@ -81,15 +81,22 @@ S-06 nie wprowadza nowych tras — zmienia zachowanie `/generate`.
 | `user_id`                   | `uuid not null`                 | Właściciel zlecenia                               | istnieje | F-02      |
 | `model`                     | `text not null`                 | Model AI użyty do wygenerowania                   | istnieje | F-02      |
 | `source_text_length`        | `integer not null`              | Długość wejściowego tekstu źródłowego            | istnieje | F-02      |
-| `source_text_hash`          | `text not null`                 | SHA-256 w formacie 64 znaków                     | istnieje | F-02      |
+| `source_text_hash`          | `text not null check (~ '^[0-9a-fA-F]{64}$')` | SHA-256 w formacie 64 znaków hex — CHECK `generations_source_text_hash_format` mechanicznie blokuje prozę | istnieje | F-02 |
 | `generated_count`           | `integer not null default 0`    | Łączna liczba wygenerowanych propozycji          | istnieje | F-02      |
 | `accepted_unedited_count`   | `integer not null default 0`    | Liczba zaakceptowanych bez edycji                | istnieje | F-02      |
 | `accepted_edited_count`     | `integer not null default 0`    | Liczba zaakceptowanych po edycji                 | istnieje | F-02      |
 | `generation_duration`       | `integer not null`              | Czas generowania w milisekundach                 | istnieje | F-02      |
+| `status`                    | `generation_status not null default 'pending'` | Stan zlecenia: `pending`, `succeeded` albo `failed` — wiersz rezerwowany przed wywołaniem modelu | istnieje | S-02 |
+| `error_code`                | `text check (~ '^[a-z_]{1,40}$')` | Kanoniczny kod klasy awarii (`timeout`, `network`, `upstream`, `rate_limited`, `truncated`, `malformed_response`, `no_proposals`, `unknown`) — **kod, nie komunikat** | istnieje | S-02 |
 | `created_at`                | `timestamptz not null`          | Czas utworzenia zlecenia                         | istnieje | F-02      |
 | `updated_at`                | `timestamptz not null`          | Ostatnia modyfikacja zlecenia                    | istnieje | F-02      |
 
 `flashcard_source` jest enumem PostgreSQL z wartościami `ai`, `ai_edited`, `manual`. `source` zapisuje się raz przy tworzeniu fiszki; późniejsza edycja nie zmienia tej wartości.
+
+`generation_status` jest enumem PostgreSQL z wartościami `pending`, `succeeded`, `failed`. Dwa CHECK-i strukturalnie chronią kontrakt błędów (S-02, wykonywalna specyfikacja od §3 Fazy 1 test-planu):
+
+- `generations_error_code_shape` — `error_code is null or error_code ~ '^[a-z_]{1,40}$'`. Wzorzec mechanicznie wyklucza komunikat użytkownika z tej kolumny (spacje, wielkie litery, interpunkcja).
+- `generations_error_code_only_when_failed` — `(status = 'failed') = (error_code is not null)`. Biwarunek: `failed` **musi** nieść kod, a każdy inny status **nie może**.
 
 Liczniki w `public.generations` aktualizuje S-02 przy akceptacji propozycji. `generation_id` pozostaje `null` dla fiszek ręcznie utworzonych w S-04.
 

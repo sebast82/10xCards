@@ -698,9 +698,9 @@ Brak migracji. P4 dodaje wyłącznie plik testowy `supabase/tests/`. Stryker (P5
 
 #### Automated
 
-- [x] 5.1 `npx --yes @stryker-mutator/core run …` kończy się bez błędu; `git status` czysty z artefaktów Stryker (brak `stryker.conf.json` w indeksie, brak wpisu w `package.json`)
-- [x] 5.2 Po dołożeniu asercji: `npm test` zielony
-- [x] 5.3 Raport HTML wygenerowany
+- [x] 5.1 `npx --yes @stryker-mutator/core run …` kończy się bez błędu; `git status` czysty z artefaktów Stryker (brak `stryker.conf.json` w indeksie, brak wpisu w `package.json`) — 9332702
+- [x] 5.2 Po dołożeniu asercji: `npm test` zielony — 9332702
+- [x] 5.3 Raport HTML wygenerowany — 9332702
 
 > **Przebieg Stryker (ad hoc, poza CI).** Komenda: `npx --yes -p @stryker-mutator/core -p @stryker-mutator/vitest-runner stryker run`
 > z efemeryczną `stryker.conf.json` (gitignored, usunięta po przebiegu). Środowisko Windows wymagało trzech obejść w konfiguracji:
@@ -735,22 +735,22 @@ Brak migracji. P4 dodaje wyłącznie plik testowy `supabase/tests/`. Stryker (P5
 
 #### Manual
 
-- [x] 5.4 Każdy przeżywający mutant w `client.ts`/`generations.ts` ma zapisany werdykt w `## Progress`
-- [x] 5.5 Żadna dołożona asercja nie przypina kosmetycznego szczegółu
-- [x] 5.6 Mutanty w `upstreamCode` / `isZdrRouteMissing` / drabinie statusów są zabite
+- [x] 5.4 Każdy przeżywający mutant w `client.ts`/`generations.ts` ma zapisany werdykt w `## Progress` — 9332702
+- [x] 5.5 Żadna dołożona asercja nie przypina kosmetycznego szczegółu — 9332702
+- [x] 5.6 Mutanty w `upstreamCode` / `isZdrRouteMissing` / drabinie statusów są zabite — 9332702
 
 ### Phase 6: Cookbook + synchronizacja
 
 #### Automated
 
-- [ ] 6.1 `npx astro check` bez regresji
-- [ ] 6.2 `git grep "TBD — see §3 Phase 1"` nie zwraca §6.1 ani §6.2
-- [ ] 6.3 `npm test` zielony (pełny pakiet)
+- [x] 6.1 `npx astro check` bez regresji
+- [x] 6.2 `git grep "TBD — see §3 Phase 1"` nie zwraca §6.1 ani §6.2
+- [x] 6.3 `npm test` zielony (pełny pakiet)
 
 #### Manual
 
-- [ ] 6.4 §6.1 i §6.2 konkretne (nazwy plików, komendy)
-- [ ] 6.5 §3 Phase 1 Status = `complete`; `change.md` zsynchronizowane
-- [ ] 6.6 `contract-surfaces.md` §Nazwy w danych ma podsekcję `public.generations` (`status`, `error_code`, trzy CHECK-i); reszta dryfu nietknięta
-- [ ] 6.7 Roadmap potwierdzony bez elementu o tym Change ID — `roadmap.md` nietknięty
-- [ ] 6.8 Przegląd: strategia §1–§5 test-planu bez zmian
+- [x] 6.4 §6.1 i §6.2 konkretne (nazwy plików, komendy)
+- [x] 6.5 §3 Phase 1 Status = `complete`; `change.md` zsynchronizowane (`status: implemented` — „complete" w planie to słownik §3 rolloutu, nie change.md)
+- [x] 6.6 `contract-surfaces.md` §Nazwy w danych ma podsekcję `public.generations` (`status`, `error_code`, trzy CHECK-i); reszta dryfu nietknięta
+- [x] 6.7 Roadmap potwierdzony bez elementu o tym Change ID — `roadmap.md` nietknięty
+- [x] 6.8 Przegląd: strategia §1–§5 test-planu bez zmian

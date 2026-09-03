@@ -6,7 +6,7 @@
 >
 > Refresh: re-run `/10x-test-plan --refresh` when stale (see §8).
 >
-> Last updated: 2026-09-02
+> Last updated: 2026-09-03
 
 ## 1. Strategy
 
@@ -74,7 +74,7 @@ na dysku.
 
 | # | Phase name | Goal (one line) | Risks covered | Test types | Status | Change folder |
 |---|---|---|---|---|---|---|
-| 1 | Kontrakt błędów generowania | Każda klasa awarii dostawcy kończy się rozróżnialnym błędem i zerem zapisów, a tekst źródłowy nie przeżywa żądania | #1, #5 | unit + integration | planned | `context/changes/testing-generation-error-contract/` |
+| 1 | Kontrakt błędów generowania | Każda klasa awarii dostawcy kończy się rozróżnialnym błędem i zerem zapisów, a tekst źródłowy nie przeżywa żądania | #1, #5 | unit + integration | complete | `context/changes/testing-generation-error-contract/` |
 | 2 | Bramka dostępu i izolacja danych w CI | Własność rekordu jest egzekwowana i na trasie API, i w polityce bazy — a testy polityk przestają być testami, których nikt nie odpala | #2, #4 | integration + testy polityk bazy + gates | not started | — |
 | 3 | Integralność harmonogramu i liczników | Ocena w sesji zmienia stan deterministycznie i trwale, a liczniki generacji dają się odtworzyć ze stanu kolekcji | #3, #6 | unit + integration + testy procedur bazy | not started | — |
 | 4 | E2E krytycznej pętli | Jedna ścieżka logowanie → generowanie → akceptacja → kolekcja → sesja przechodzi automatycznie na każdym PR | #1, #2, #3, #4 (przekrojowo) | e2e + gates | not started | — |
@@ -129,11 +129,43 @@ odpowiednia faza rolloutu wyląduje; wcześniej brzmi „TBD — see §3 Phase N
 
 ### 6.1 Dodanie testu jednostkowego
 
-- TBD — see §3 Phase 1 (wzorzec dla parsowania odpowiedzi dostawcy i translacji awarii na rozróżnialny błąd).
+Wzorzec dla granicy HTTP dostawcy i translacji awarii — patrz `src/lib/openrouter/client.test.ts`.
+
+- **Stub tylko na granicy sieci:** `vi.stubGlobal("fetch", vi.fn())`, `vi.unstubAllGlobals()` w `afterEach`.
+  Nigdy nie mockuj modułów wewnętrznych (`./parse`, `./prompt`).
+- **Fixture z cytowanego ciała docs, nie z kształtu kodu:** komentarz przy fixture podaje URL docs
+  (OpenRouter errors-and-debugging / router-metadata), z którego wzięty jest kształt odpowiedzi.
+- **Asercje pierwszorzędne są behawioralne:** wzajemna różność i nie-pustość komunikatów klas niosących
+  instrukcję, porównywane **między sobą** (`new Set(messages).size === messages.length`), nie równość do
+  importu z modułu testowanego. Najwyżej **jeden** lekki test „stała przekazana bez zmiany" na warstwę
+  (tu: jeden test kształtu żądania HTTP — URL + metoda + nagłówki w jednej asercji).
+- **`it.each` po klasach awarii** dla własności powtarzalnej (brak sentinela ryzyka #5 w `error.message`
+  i `JSON.stringify(error)`), jeden sentinel `"SEKRET-"` jako jedyny marker w pliku.
+- **Mutanty brzegowe:** po zazielenieniu dodaj przypadki brzegowe wskazane przez Stryker (kotwica regexa,
+  strażnik statusu, `?.` vs `.` — patrz §6.7).
 
 ### 6.2 Dodanie testu integracyjnego trasy API
 
-- TBD — see §3 Phase 1 (wzorzec dla „awaria dostawcy → rozróżnialny błąd, zero zapisów, tekst źródłowy nie przeżywa żądania").
+Wzorzec „awaria dostawcy → rozróżnialny błąd, zero zapisów, tekst źródłowy nie przeżywa żądania" —
+patrz `src/pages/api/generations.test.ts`.
+
+- **Handler wołany jako zwykła funkcja:** `import { POST } from "./generations"`, `context()` kopiowany do
+  pliku wg konwencji `src/pages/api/flashcards.test.ts` (`locals` goły literał, prawdziwy `Request`, rzut
+  `as never`).
+- **Obejście `astro:env/server`** to jedna linia na górze pliku: `vi.mock("astro:env/server", () => …)`
+  z obiektem z `vi.hoisted` — getter zamiast stałej pozwala **zmutować klucz między testami** (gałąź 503
+  „brak konfiguracji serwera"). Bez zmian w `vitest.config.ts`, bez aliasu, bez fixture.
+- **`SupabaseStub` dla efektów ubocznych** (kolejka **pozycyjna**: `select` limit → `insert` rezerwacja →
+  `update`), `vi.stubGlobal("fetch")` dla granicy dostawcy.
+- **Zero dotknięcia `flashcards`:** `supabase.queries.every(q => q.table !== "flashcards")` **oraz**
+  `supabase.rpcCalls` puste — na ścieżce awarii.
+- **Zakaz `error.issues`:** `expect(Object.keys(body)).toEqual(["error"])` dla każdego 400.
+- **Rozróżnialność przez wzajemną różność** ciał błędu klas niosących instrukcję (porównanie między sobą),
+  nie przez równość do importu z modułu trasy.
+- **Brak wycieku:** sentinel `"SEKRET-"` w `sourceText`; po ścieżce 502 `JSON.stringify(supabase.queries)`
+  i treść odpowiedzi HTTP nie zawierają sentinela; rezerwacja niesie `source_text_hash ~ /^[0-9a-f]{64}$/`
+  i `source_text_length`, bez pola z prozą. Osobny test: błąd spoza hierarchii typów → 500 ze stałym
+  ciałem, `caught.message` nie przecieka.
 
 ### 6.3 Dodanie testu bramkowania dostępu i własności rekordu
 
@@ -154,6 +186,21 @@ odpowiednia faza rolloutu wyląduje; wcześniej brzmi „TBD — see §3 Phase N
 ### 6.7 Notatki per faza rolloutu
 
 (Uzupełniane po każdej fazie: 2–3 linie o tym, czego faza nauczyła — np. gdzie wylądowały wspólne dane testowe i co powinno je reużywać.)
+
+**Faza 1 — Kontrakt błędów generowania (2026-09-03).**
+
+- Wzorzec `stubFetch` + `jsonResponse` jest **zduplikowany** w każdym pliku testowym (`client.test.ts`,
+  `generations.test.ts`, `GenerateView.test.tsx`), nie współdzielony — to konwencja projektu (wcześniej
+  `ReviewSession.test.tsx`). Nie wyciągaj go do `test-support/` bez decyzji.
+- Obejście `astro:env/server` pod Vitestem: **jedna linia** `vi.mock` z `vi.hoisted` na górze pliku.
+  Żadnych zmian w `vitest.config.ts`.
+- pgTAP dla `public.generations` (`supabase/tests/generations_error_contract.test.sql`) jest **bramką
+  ad hoc** — `npm run db:test`, wymaga `supabase start`. Wpięcie do CI to §3 Faza 2.
+- Stryker jest **selektywny i ad hoc** — bez devDependency, bez zacommitowanej konfiguracji. Przebieg:
+  `npx --yes -p @stryker-mutator/core -p @stryker-mutator/vitest-runner stryker run` z efemeryczną
+  `stryker.conf.json` (gitignored, usuwana po). Windows wymaga trzech obejść w konfiguracji:
+  `tsconfigFile` na nieistniejący plik, `ignorePatterns` na `.claude`/`context`/`supabase`,
+  `vitest.related=false` + zawężony `include` na dwa pliki. Wynik Fazy 1: 85% → 95%.
 
 ## 7. What We Deliberately Don't Test
 
