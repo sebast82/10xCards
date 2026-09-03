@@ -31,4 +31,4 @@ pnpm-debug.log*
 stryker.conf.json
 stryker-vitest.config.ts
 .stryker-tmp/
-reports/
+reports/mutation/

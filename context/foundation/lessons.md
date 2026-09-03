@@ -16,3 +16,20 @@
   serwerowy dowód (skrót, sygnaturę, stan po stronie serwera). Nie raportuj jej jako pomiaru.
 - **Applies to:** Każde pole zasilające licznik lub KPI, przyjmowane z ciała żądania — w szczególności
   flagi typu `edited`, `source`, `manual` oraz wszystko, co trafia do `public.generations`.
+
+## Osierocony wiersz `pending` po podwójnej awarii generowania
+
+- **Context:** `src/lib/generations/service.ts:112-118` — `createGeneration` rezerwuje wiersz
+  `generations` w stanie `pending`, potem woła `generateFlashcards`; przy awarii dostawcy wywołuje
+  `markFailed`, a błąd samego `markFailed` jest połykany (`await` bez `try`/rzutu). Trasa zwraca wtedy
+  oryginalny 502.
+- **Problem:** Gdy `markFailed` też padnie, wiersz zostaje `pending` na zawsze. `assertWithinDailyLimit`
+  liczy wszystkie wiersze z ostatnich 24h bez filtra po `status`, więc osierocone `pending` zjadają
+  dobowy limit użytkownika i nikt tego nie sprząta. Żadne źródło (PRD, plan S-02) nie mówi, co ma się
+  stać — test w `src/pages/api/generations.test.ts` przypina tylko obserwowalny kontrakt (502
+  z oryginalnym błędem), nie naprawę.
+- **Rule:** [PLACEHOLDER — uzupełnij: np. „Każdy licznik/limit liczony z wierszy rezerwowanych przed
+  operacją zewnętrzną musi albo filtrować po stanie terminalnym, albo mieć ścieżkę sprzątania wierszy
+  utkniętych w stanie nieterminalnym”]
+- **Applies to:** [PLACEHOLDER — np. `public.generations` rezerwacje + `assertWithinDailyLimit`; każdy
+  przyszły wzorzec „rezerwuj wiersz → wywołaj API → oznacz wynik”]
