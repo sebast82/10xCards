@@ -170,6 +170,14 @@ describe("POST /api/generations — wejście odrzucone przed wywołaniem serwisu
       expect(JSON.stringify(body)).not.toContain(SENTINEL);
     }
   });
+
+  it("sourceText krótszy niż minimum dopiero po przycięciu białych znaków → 400 (walidacja na przyciętej wartości)", async () => {
+    const padded = `${" ".repeat(20)}${"x".repeat(190)}${" ".repeat(20)}`;
+
+    const response = await POST(context({ body: { sourceText: padded } }));
+
+    expect(response.status).toBe(400);
+  });
 });
 
 describe("POST /api/generations — klasy awarii dostawcy → 502", () => {
@@ -246,6 +254,23 @@ describe("POST /api/generations — błędy trwałości serwisu → 500", () => 
     const response = await POST(context({ supabase: supabase.asClient() }));
 
     expect(response.status).toBe(500);
+  });
+
+  it("nieoczekiwany, nie-typowany błąd → 500 ze stałym ciałem, bez wycieku komunikatu (ryzyko #5)", async () => {
+    // Błąd spoza hierarchii GenerationServiceError / OpenRouterError / GenerationParseError:
+    // trasa NIE może przełożyć jego `message` do ciała odpowiedzi (to byłby kanał wycieku).
+    const throwingSupabase = {
+      from() {
+        throw new Error(`${SENTINEL}wewnętrzny błąd bazy`);
+      },
+    } as never;
+
+    const response = await POST(context({ supabase: throwingSupabase }));
+
+    expect(response.status).toBe(500);
+    const body = await readBody(response);
+    expect(body).toEqual({ error: "Nie udało się wygenerować fiszek. Spróbuj ponownie." });
+    expect(JSON.stringify(body)).not.toContain(SENTINEL);
   });
 });
 

@@ -237,6 +237,71 @@ describe("generateFlashcards — fallback ZDR", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(error.code).toBe("upstream");
   });
+
+  it("status inny niż 404 z komunikatem 'no allowed providers' NIE ponawia (strażnik statusu)", async () => {
+    const fetchMock = stubFetchResponses(httpResponse(ZDR_404_BODY, 500));
+
+    const error = (await rejection(generateFlashcards("key", SOURCE_TEXT))) as OpenRouterError;
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(error.code).toBe("upstream");
+    expect(error.status).toBe(500);
+  });
+
+  it("404 z komunikatem 'no allowed providers' NIE na początku zdania NIE ponawia (kotwica ^)", async () => {
+    const fetchMock = stubFetchResponses(
+      httpResponse(
+        { error: { message: "Provider error: no allowed providers are available for the selected model." } },
+        404,
+      ),
+    );
+
+    const error = (await rejection(generateFlashcards("key", SOURCE_TEXT))) as OpenRouterError;
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(error.code).toBe("upstream");
+    expect(error.status).toBe(404);
+  });
+
+  it("404 z kopertą błędu bez pola message NIE ponawia i NIE rzuca TypeError", async () => {
+    const fetchMock = stubFetchResponses(httpResponse({ error: {} }, 404));
+
+    const error = (await rejection(generateFlashcards("key", SOURCE_TEXT))) as OpenRouterError;
+
+    expect(error).toBeInstanceOf(OpenRouterError);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(error.code).toBe("upstream");
+    expect(error.status).toBe(404);
+  });
+
+  it("404 z komunikatem 'no allowed providers' otoczonym białymi znakami PONAWIA (trim przed dopasowaniem)", async () => {
+    const fetchMock = stubFetchResponses(
+      httpResponse({ error: { message: `   ${ZDR_404_BODY.error.message}   ` } }, 404),
+      httpResponse(validEnvelope(), 200),
+    );
+
+    const outcome = await generateFlashcards("key", SOURCE_TEXT);
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(outcome.privacyMode).toBe("standard");
+  });
+});
+
+describe("generateFlashcards — kształt żądania HTTP do dostawcy", () => {
+  // Jedyny test „stała przekazana bez zmiany" na tej warstwie: pełny kontrakt granicy HTTP
+  // (endpoint z docs OpenRoutera, uwierzytelniony POST) w jednej asercji, nie pięć osobnych.
+  it("POST na endpoint OpenRoutera z nagłówkami Authorization i Content-Type", async () => {
+    const fetchMock = stubFetchResponses(httpResponse(validEnvelope(), 200));
+
+    await generateFlashcards("klucz-abc", SOURCE_TEXT);
+
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("https://openrouter.ai/api/v1/chat/completions");
+    expect(init.method).toBe("POST");
+    const headers = init.headers as Record<string, string>;
+    expect(headers.Authorization).toBe("Bearer klucz-abc");
+    expect(headers["Content-Type"]).toBe("application/json");
+  });
 });
 
 describe("generateFlashcards — pole model i brak wycieku tekstu źródłowego", () => {

@@ -26,3 +26,9 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# mutation testing (selektywna, ad hoc bramka — nie CI, bez trwałego artefaktu)
+stryker.conf.json
+stryker-vitest.config.ts
+.stryker-tmp/
+reports/

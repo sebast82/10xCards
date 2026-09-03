@@ -680,9 +680,9 @@ Brak migracji. P4 dodaje wyłącznie plik testowy `supabase/tests/`. Stryker (P5
 
 #### Automated
 
-- [x] 4.1 `npm run db:test` przechodzi lokalnie
-- [x] 4.2 `select plan(5)` zgadza się z liczbą asercji w pliku
-- [x] 4.3 Nowy plik nie psuje istniejących dwóch testów pgTAP
+- [x] 4.1 `npm run db:test` przechodzi lokalnie — afb322f
+- [x] 4.2 `select plan(5)` zgadza się z liczbą asercji w pliku — afb322f
+- [x] 4.3 Nowy plik nie psuje istniejących dwóch testów pgTAP — afb322f
 
 > Faza ad hoc: `supabase/tests/generations_error_contract.test.sql` uruchamiany wyłącznie przez
 > `npm run db:test` (wymaga `supabase start`). NIE jest krokiem CI — wpięcie to Rollout Phase 2
@@ -690,23 +690,54 @@ Brak migracji. P4 dodaje wyłącznie plik testowy `supabase/tests/`. Stryker (P5
 
 #### Manual
 
-- [x] 4.4 Przegląd: `error_code='rate_limited'` w kontroli pozytywnej
-- [x] 4.5 Odnotowane w `## Progress`, że to bramka ad hoc
-- [x] 4.6 `rollback` na końcu; test nie zostawia wierszy
+- [x] 4.4 Przegląd: `error_code='rate_limited'` w kontroli pozytywnej — afb322f
+- [x] 4.5 Odnotowane w `## Progress`, że to bramka ad hoc — afb322f
+- [x] 4.6 `rollback` na końcu; test nie zostawia wierszy — afb322f
 
 ### Phase 5: Selektywny przebieg Stryker (client.ts + generations.ts)
 
 #### Automated
 
-- [ ] 5.1 `npx --yes @stryker-mutator/core run …` kończy się bez błędu; `git status` czysty z artefaktów Stryker (brak `stryker.conf.json` w indeksie, brak wpisu w `package.json`)
-- [ ] 5.2 Po dołożeniu asercji: `npm test` zielony
-- [ ] 5.3 Raport HTML wygenerowany
+- [x] 5.1 `npx --yes @stryker-mutator/core run …` kończy się bez błędu; `git status` czysty z artefaktów Stryker (brak `stryker.conf.json` w indeksie, brak wpisu w `package.json`)
+- [x] 5.2 Po dołożeniu asercji: `npm test` zielony
+- [x] 5.3 Raport HTML wygenerowany
+
+> **Przebieg Stryker (ad hoc, poza CI).** Komenda: `npx --yes -p @stryker-mutator/core -p @stryker-mutator/vitest-runner stryker run`
+> z efemeryczną `stryker.conf.json` (gitignored, usunięta po przebiegu). Środowisko Windows wymagało trzech obejść w konfiguracji:
+> `tsconfigFile` wskazujący nieistniejący plik (preprocessor tsconfig szukał `typescript` w cache npx), `ignorePatterns`
+> na `.claude`/`context`/`supabase`/… (EPERM na kopiowaniu symlinków do sandboxa), `vitest.related=false` + zawężony
+> `stryker-vitest.config.ts` z `include` na dwa pliki testowe (runner nie kojarzył testów z mutowanymi plikami; zawężenie
+> omija też `flashcards/[id].test.ts`, który w sandboxie pada na wirtualnych modułach Astro).
+>
+> **Wynik: 85.37% → 95.12%** (client.ts 96.34%, generations.ts 92.68%). 12 mutantów zabitych 7 nowymi asercjami:
+> 4 przypadki brzegowe `isZdrRouteMissing` + 1 test kształtu żądania HTTP w `client.test.ts`; 1 test walidacji po `trim`
+> + 1 test „nie-typowany błąd → 500 bez wycieku" w `generations.test.ts`.
+>
+> **Triage 18 przeżywających mutantów pierwszego przebiegu:**
+>
+> | Mutant | Werdykt | Akcja |
+> |---|---|---|
+> | `client.ts:14` regex — usuwa kotwicę `^` z `/^no allowed providers/i` | **szkodzi** — prefiks w komunikacie fałszywie wyzwala fallback ZDR | ZABITY: test „404 z komunikatem NIE na początku zdania NIE ponawia" |
+> | `client.ts:76:7` + `76:31` — usuwa strażnik `if (status !== 404)` w `isZdrRouteMissing` | **szkodzi** — dowolny status z pasującym komunikatem ponawia | ZABITE: test „status inny niż 404 z komunikatem 'no allowed providers' NIE ponawia" |
+> | `client.ts:80:19` MethodExpression — usuwa `.trim()` przed dopasowaniem | **szkodzi** — komunikat z białymi znakami nie ponawia (użytkownik traci udane ponowienie) | ZABITY: test „komunikat otoczony białymi znakami PONAWIA" |
+> | `client.ts:80:19` OptionalChaining — `.message?.trim()` → `.message.trim()` | **szkodzi** — 404 z kopertą bez `message` rzuca TypeError → 500 zamiast 502 | ZABITY: test „404 z kopertą błędu bez pola message NIE rzuca TypeError" |
+> | `client.ts:6` URL, `client.ts:97` method, `client.ts:98/99/100` nagłówki | **szkodzi** — złe żądanie = totalna awaria u wszystkich użytkowników | ZABITE: 1 test „POST na endpoint OpenRoutera z nagłówkami Authorization i Content-Type" (dozwolony jeden lekki test „stała bez zmiany" na warstwę) |
+> | `generations.ts:70` `instanceof … \|\| instanceof …` → `true` | **szkodzi (ryzyko #5)** — `caught.message` dowolnego błędu przecieka do ciała 502 | ZABITY: test „nie-typowany błąd → 500 ze stałym ciałem, bez wycieku" |
+> | `generations.ts:19` MethodExpression — usuwa `.trim()` z walidacji `sourceText` | **szkodzi** — walidacja `min`/`max` na nieprzyciętej wartości; whitespace-padding omija minimum | ZABITY: test „sourceText krótszy niż minimum dopiero po przycięciu → 400" |
+> | `client.ts:43:17` `this.name = "OpenRouterError"` → `""` | **nie szkodzi** — `.name` etykietuje tylko stack trace; konsumenci rozgałęziają na `instanceof`, nigdy na `.name` | świadomie zignorowany (mutant równoważny behawioralnie) |
+> | `client.ts:69:11` `catch { return null }` → `catch {}` | **nie szkodzi** — jedyny wołający używa `?.`, `undefined` i `null` skracają identycznie | świadomie zignorowany (mutant równoważny) |
+> | `client.ts:80:77` `?? ""` → `?? "Stryker was here!"` | **nie szkodzi** — oba stringi zastępcze nie pasują do zakotwiczonego regexa | świadomie zignorowany (mutant równoważny) |
+> | `generations.ts:25:14/25:32` — usuwa/zeruje nagłówek `Content-Type` odpowiedzi | **nie szkodzi** — klienci wołają `response.json()`, które parsuje bez tego nagłówka | świadomie zignorowany (kosmetyczny) |
+> | `generations.ts:47:11` `catch { return error(invalidBody, 400) }` → `catch {}` | **nie szkodzi** — przelot do `safeParse(undefined)` zwraca identyczne 400 + identyczne ciało | świadomie zignorowany (mutant równoważny) |
+>
+> **Pozostałe 6 przeżywających po drugim przebiegu** to dokładnie mutanty z werdyktem „nie szkodzi" powyżej — żadna
+> dołożona asercja nie przypina kosmetyki tylko dla wyniku.
 
 #### Manual
 
-- [ ] 5.4 Każdy przeżywający mutant w `client.ts`/`generations.ts` ma zapisany werdykt w `## Progress`
-- [ ] 5.5 Żadna dołożona asercja nie przypina kosmetycznego szczegółu
-- [ ] 5.6 Mutanty w `upstreamCode` / `isZdrRouteMissing` / drabinie statusów są zabite
+- [x] 5.4 Każdy przeżywający mutant w `client.ts`/`generations.ts` ma zapisany werdykt w `## Progress`
+- [x] 5.5 Żadna dołożona asercja nie przypina kosmetycznego szczegółu
+- [x] 5.6 Mutanty w `upstreamCode` / `isZdrRouteMissing` / drabinie statusów są zabite
 
 ### Phase 6: Cookbook + synchronizacja
 
