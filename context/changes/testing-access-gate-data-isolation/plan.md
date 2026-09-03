@@ -700,16 +700,16 @@ in prod). `supabase start` in CI and `supabase db reset` locally apply it from s
 
 #### Automated
 
-- [ ] 1.1 Workflow file parses; existing lints pass
-- [ ] 1.2 `npm run db:test` passes locally against `supabase start` (baseline suite)
-- [ ] 1.3 `db-tests` job completes green on a draft PR
+- [x] 1.1 Workflow file parses; existing lints pass
+- [x] 1.2 `npm run db:test` passes locally against `supabase start` (baseline suite)
+- [x] 1.3 `db-tests` job completes green on a draft PR
 
 #### Manual
 
-- [ ] 1.4 Mutating one RLS `USING` clause on a scratch PR turns `db-tests` red; revert → green
-- [ ] 1.5 `db-tests` runs in parallel with `ci`, no `ci` wall-time increase
-- [ ] 1.6 `db-tests` does not run on direct pushes to `master`
-- [ ] 1.7 `db-tests` added to `master` required status checks (or logged as a `§7` deferral + End State #1 softened)
+- [x] 1.4 Mutating one RLS `USING` clause on a scratch PR turns `db-tests` red; revert → green
+- [x] 1.5 `db-tests` runs in parallel with `ci`, no `ci` wall-time increase
+- [x] 1.6 `db-tests` does not run on direct pushes to `master`
+- [x] 1.7 `db-tests` added to `master` required status checks (or logged as a `§7` deferral + End State #1 softened)
 
 ### Phase 2: Close the RLS pgTAP gaps and revoke residual `authenticated` privileges
 
