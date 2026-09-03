@@ -645,36 +645,36 @@ Brak migracji. P4 dodaje wyłącznie plik testowy `supabase/tests/`. Stryker (P5
 
 #### Automated
 
-- [x] 2.1 Typecheck: `npx astro check`
-- [x] 2.2 Lint: `npm run lint`
-- [x] 2.3 `npx vitest run src/pages/api/generations.test.ts` — zielone
-- [x] 2.4 Pełny `npm test` bez regresji
-- [x] 2.5 Asercja „`queries.every(q => q.table !== 'flashcards')`" obecna na ścieżce awarii
-- [x] 2.6 Asercja wzajemnej różności ciał błędu (porównanie między sobą) + nie-pustości; ≤1 lekki test „stała przekazana bez zmiany"
-- [x] 2.7 Asercja „odpowiedź 400 ma klucze dokładnie `['error']`" (zakaz `issues`)
+- [x] 2.1 Typecheck: `npx astro check` — 52ab8c7
+- [x] 2.2 Lint: `npm run lint` — 52ab8c7
+- [x] 2.3 `npx vitest run src/pages/api/generations.test.ts` — zielone — 52ab8c7
+- [x] 2.4 Pełny `npm test` bez regresji — 52ab8c7
+- [x] 2.5 Asercja „`queries.every(q => q.table !== 'flashcards')`" obecna na ścieżce awarii — 52ab8c7
+- [x] 2.6 Asercja wzajemnej różności ciał błędu (porównanie między sobą) + nie-pustości; ≤1 lekki test „stała przekazana bez zmiany" — 52ab8c7
+- [x] 2.7 Asercja „odpowiedź 400 ma klucze dokładnie `['error']`" (zakaz `issues`) — 52ab8c7
 
 #### Manual
 
-- [x] 2.8 Przegląd: `vi.hoisted` + `vi.mock("astro:env/server")` pozwala zmutować klucz między testami
-- [x] 2.9 Przegląd: indeksy `supabase.queries[n]` zgadzają się z sekwencją `createGeneration`
-- [x] 2.10 Przegląd: sentinel `"SEKRET-"` nie występuje w żadnym fixture jako część stałej
+- [x] 2.8 Przegląd: `vi.hoisted` + `vi.mock("astro:env/server")` pozwala zmutować klucz między testami — 52ab8c7
+- [x] 2.9 Przegląd: indeksy `supabase.queries[n]` zgadzają się z sekwencją `createGeneration` — 52ab8c7
+- [x] 2.10 Przegląd: sentinel `"SEKRET-"` nie występuje w żadnym fixture jako część stałej — 52ab8c7
 
 ### Phase 3: P3 — GenerateView.test.tsx (komponent, jsdom)
 
 #### Automated
 
-- [ ] 3.1 Typecheck: `npx astro check`
-- [ ] 3.2 Lint: `npm run lint`
-- [ ] 3.3 `npx vitest run src/components/generate/GenerateView.test.tsx` — zielone
-- [ ] 3.4 Pełny `npm test` bez regresji
-- [ ] 3.5 Asercje komunikatów używają `getByText` na pełnym stringu, nie `queryByRole("alert")`
-- [ ] 3.6 Przypadek `proposals: []` jest obecny i zielony
+- [x] 3.1 Typecheck: `npx astro check`
+- [x] 3.2 Lint: `npm run lint`
+- [x] 3.3 `npx vitest run src/components/generate/GenerateView.test.tsx` — zielone
+- [x] 3.4 Pełny `npm test` bez regresji
+- [x] 3.5 Asercje komunikatów używają `getByText` na pełnym stringu, nie `queryByRole("alert")`
+- [x] 3.6 Przypadek `proposals: []` jest obecny i zielony
 
 #### Manual
 
-- [ ] 3.7 Przegląd: dowód rozróżnialności to dwa różne teksty w DOM dla dwóch różnych odpowiedzi, nie równość do importu
-- [ ] 3.8 Przegląd: komentarze przy tripwire'ach mówią „przypięcie, nie kontrakt docelowy"
-- [ ] 3.9 Test pęka po ręcznej zmianie komunikatu serwera (watch)
+- [x] 3.7 Przegląd: dowód rozróżnialności to dwa różne teksty w DOM dla dwóch różnych odpowiedzi, nie równość do importu
+- [x] 3.8 Przegląd: komentarze przy tripwire'ach mówią „przypięcie, nie kontrakt docelowy"
+- [x] 3.9 Test pęka po ręcznej zmianie komunikatu serwera (watch)
 
 ### Phase 4: P4 — pgTAP: CHECK-i anty-wyciekowe
 
