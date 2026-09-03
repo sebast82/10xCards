@@ -663,32 +663,36 @@ Brak migracji. P4 dodaje wyłącznie plik testowy `supabase/tests/`. Stryker (P5
 
 #### Automated
 
-- [x] 3.1 Typecheck: `npx astro check`
-- [x] 3.2 Lint: `npm run lint`
-- [x] 3.3 `npx vitest run src/components/generate/GenerateView.test.tsx` — zielone
-- [x] 3.4 Pełny `npm test` bez regresji
-- [x] 3.5 Asercje komunikatów używają `getByText` na pełnym stringu, nie `queryByRole("alert")`
-- [x] 3.6 Przypadek `proposals: []` jest obecny i zielony
+- [x] 3.1 Typecheck: `npx astro check` — b6a4d34
+- [x] 3.2 Lint: `npm run lint` — b6a4d34
+- [x] 3.3 `npx vitest run src/components/generate/GenerateView.test.tsx` — zielone — b6a4d34
+- [x] 3.4 Pełny `npm test` bez regresji — b6a4d34
+- [x] 3.5 Asercje komunikatów używają `getByText` na pełnym stringu, nie `queryByRole("alert")` — b6a4d34
+- [x] 3.6 Przypadek `proposals: []` jest obecny i zielony — b6a4d34
 
 #### Manual
 
-- [x] 3.7 Przegląd: dowód rozróżnialności to dwa różne teksty w DOM dla dwóch różnych odpowiedzi, nie równość do importu
-- [x] 3.8 Przegląd: komentarze przy tripwire'ach mówią „przypięcie, nie kontrakt docelowy"
-- [x] 3.9 Test pęka po ręcznej zmianie komunikatu serwera (watch)
+- [x] 3.7 Przegląd: dowód rozróżnialności to dwa różne teksty w DOM dla dwóch różnych odpowiedzi, nie równość do importu — b6a4d34
+- [x] 3.8 Przegląd: komentarze przy tripwire'ach mówią „przypięcie, nie kontrakt docelowy" — b6a4d34
+- [x] 3.9 Test pęka po ręcznej zmianie komunikatu serwera (watch) — b6a4d34
 
 ### Phase 4: P4 — pgTAP: CHECK-i anty-wyciekowe
 
 #### Automated
 
-- [ ] 4.1 `npm run db:test` przechodzi lokalnie
-- [ ] 4.2 `select plan(5)` zgadza się z liczbą asercji w pliku
-- [ ] 4.3 Nowy plik nie psuje istniejących dwóch testów pgTAP
+- [x] 4.1 `npm run db:test` przechodzi lokalnie
+- [x] 4.2 `select plan(5)` zgadza się z liczbą asercji w pliku
+- [x] 4.3 Nowy plik nie psuje istniejących dwóch testów pgTAP
+
+> Faza ad hoc: `supabase/tests/generations_error_contract.test.sql` uruchamiany wyłącznie przez
+> `npm run db:test` (wymaga `supabase start`). NIE jest krokiem CI — wpięcie to Rollout Phase 2
+> (`test-plan.md §5` „required after §3 Phase 2"). Przebieg z tej fazy: `Files=3, Tests=24, Result: PASS`.
 
 #### Manual
 
-- [ ] 4.4 Przegląd: `error_code='rate_limited'` w kontroli pozytywnej
-- [ ] 4.5 Odnotowane w `## Progress`, że to bramka ad hoc
-- [ ] 4.6 `rollback` na końcu; test nie zostawia wierszy
+- [x] 4.4 Przegląd: `error_code='rate_limited'` w kontroli pozytywnej
+- [x] 4.5 Odnotowane w `## Progress`, że to bramka ad hoc
+- [x] 4.6 `rollback` na końcu; test nie zostawia wierszy
 
 ### Phase 5: Selektywny przebieg Stryker (client.ts + generations.ts)
 
