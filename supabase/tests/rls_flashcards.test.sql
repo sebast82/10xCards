@@ -1,7 +1,7 @@
 create extension if not exists pgtap;
 
 begin;
-select plan(10);
+select plan(22);
 
 insert into auth.users (id, email)
 values
@@ -153,6 +153,132 @@ select throws_like(
   $$ update public.flashcards set source = 'manual' where user_id = '11111111-1111-4111-8111-111111111111' $$,
   '%flashcard source is immutable%',
   'changing source is blocked by trigger'
+);
+
+-- Write-isolation block. Neutralise flashcards_select_own so the WRITE policy is the only
+-- thing that can block a cross-account write (F1 de-conflation, O2-13). Assertions 5/6 above
+-- stay green even if flashcards_update_own / _delete_own is weakened, because the SELECT
+-- policy hides B's rows from A's WHERE read; this block removes that cover. The `alter
+-- policy` statements are rolled back with the surrounding transaction.
+set local role postgres;
+alter policy "flashcards_select_own" on public.flashcards using (true);
+
+set local role authenticated;
+set local request.jwt.claims = '{"sub":"22222222-2222-4222-8222-222222222222","role":"authenticated"}';
+
+with attempted_update as (
+  update public.flashcards
+  set front = 'tampered'
+  where user_id = '11111111-1111-4111-8111-111111111111'
+  returning 1
+)
+select is(
+  (select count(*)::int from attempted_update),
+  0,
+  'write policy (not select policy) blocks B updating user A flashcard'
+);
+
+set local role postgres;
+select results_eq(
+  $$ select front from public.flashcards where id = '55555555-5555-4555-8555-555555555555' $$,
+  $$ values ('Question A'::text) $$,
+  'user A flashcard front is unchanged after blocked cross-account update'
+);
+
+set local role authenticated;
+set local request.jwt.claims = '{"sub":"22222222-2222-4222-8222-222222222222","role":"authenticated"}';
+
+with attempted_srs as (
+  update public.flashcards
+  set due = '2030-01-01T00:00:00+00:00', stability = 999, state = 3, reps = 999
+  where user_id = '11111111-1111-4111-8111-111111111111'
+  returning 1
+)
+select is(
+  (select count(*)::int from attempted_srs),
+  0,
+  'write policy blocks B tampering with user A SRS columns (due/stability/state/reps)'
+);
+
+with attempted_delete as (
+  delete from public.flashcards
+  where user_id = '11111111-1111-4111-8111-111111111111'
+  returning 1
+)
+select is(
+  (select count(*)::int from attempted_delete),
+  0,
+  'write policy (not select policy) blocks B deleting user A flashcard'
+);
+
+set local role postgres;
+select results_eq(
+  $$ select count(*)::int from public.flashcards where id = '55555555-5555-4555-8555-555555555555' $$,
+  $$ values (1) $$,
+  'user A flashcard still present after blocked cross-account delete'
+);
+select is(
+  (select stability from public.flashcards where id = '55555555-5555-4555-8555-555555555555'),
+  12.5::double precision,
+  'user A SRS state is unchanged after blocked tampering'
+);
+
+-- Restore the real SELECT policy before the remaining assertions.
+alter policy "flashcards_select_own" on public.flashcards using ((select auth.uid()) = user_id);
+
+set local role authenticated;
+set local request.jwt.claims = '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}';
+
+select throws_like(
+  $$ update public.flashcards set user_id = '22222222-2222-4222-8222-222222222222' where id = '55555555-5555-4555-8555-555555555555' $$,
+  '%row-level security%',
+  'user A cannot reassign own flashcard to user B (WITH CHECK on UPDATE)'
+);
+
+select lives_ok(
+  $$
+    insert into public.flashcards (
+      id, user_id, generation_id, front, back, source,
+      due, stability, difficulty, scheduled_days,
+      learning_steps, reps, lapses, state, last_review
+    )
+    values (
+      '5a5a5a5a-5a5a-4a5a-8a5a-5a5a5a5a5a5a',
+      '11111111-1111-4111-8111-111111111111',
+      null,
+      'Own new card', 'Own new answer', 'manual',
+      '2026-09-01T00:00:00+00:00', 1, 5, 0, 0, 0, 0, 0, null
+    )
+  $$,
+  'user A can insert own flashcard'
+);
+
+with own_update as (
+  update public.flashcards set front = 'edited by owner'
+  where id = '55555555-5555-4555-8555-555555555555'
+  returning 1
+)
+select is((select count(*)::int from own_update), 1, 'user A can update own flashcard');
+
+with own_delete as (
+  delete from public.flashcards where id = '5a5a5a5a-5a5a-4a5a-8a5a-5a5a5a5a5a5a' returning 1
+)
+select is((select count(*)::int from own_delete), 1, 'user A can delete own flashcard');
+
+select throws_like(
+  $$ truncate public.flashcards $$,
+  '%permission denied%',
+  'authenticated cannot truncate flashcards'
+);
+
+-- Empty-claims: an authenticated role with no JWT claims (the DB-level face of an expired
+-- session) sees zero rows — auth.uid() is null, so no policy predicate matches.
+select set_config('request.jwt.claims', '', true);
+set local role authenticated;
+select is(
+  (select count(*)::int from public.flashcards),
+  0,
+  'authenticated with no claims sees zero flashcard rows'
 );
 
 set local role anon;

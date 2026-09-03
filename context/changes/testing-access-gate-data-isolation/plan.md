@@ -700,31 +700,31 @@ in prod). `supabase start` in CI and `supabase db reset` locally apply it from s
 
 #### Automated
 
-- [x] 1.1 Workflow file parses; existing lints pass
-- [x] 1.2 `npm run db:test` passes locally against `supabase start` (baseline suite)
-- [x] 1.3 `db-tests` job completes green on a draft PR
+- [x] 1.1 Workflow file parses; existing lints pass — 8914341
+- [x] 1.2 `npm run db:test` passes locally against `supabase start` (baseline suite) — 8914341
+- [x] 1.3 `db-tests` job completes green on a draft PR — 8914341
 
 #### Manual
 
-- [x] 1.4 Mutating one RLS `USING` clause on a scratch PR turns `db-tests` red; revert → green
-- [x] 1.5 `db-tests` runs in parallel with `ci`, no `ci` wall-time increase
-- [x] 1.6 `db-tests` does not run on direct pushes to `master`
-- [x] 1.7 `db-tests` added to `master` required status checks (or logged as a `§7` deferral + End State #1 softened)
+- [x] 1.4 Mutating one RLS `USING` clause on a scratch PR turns `db-tests` red; revert → green — 8914341
+- [x] 1.5 `db-tests` runs in parallel with `ci`, no `ci` wall-time increase — 8914341
+- [x] 1.6 `db-tests` does not run on direct pushes to `master` — 8914341
+- [x] 1.7 `db-tests` added to `master` required status checks (or logged as a `§7` deferral + End State #1 softened) — 8914341
 
 ### Phase 2: Close the RLS pgTAP gaps and revoke residual `authenticated` privileges
 
 #### Automated
 
-- [ ] 2.1 `npm run db:test` passes: `rls_flashcards`, new `rls_generations`, + 3 pre-existing suites
-- [ ] 2.2 New revoke migration applies cleanly on `supabase db reset`
-- [ ] 2.3 `db-tests` CI job green on the PR
+- [x] 2.1 `npm run db:test` passes: `rls_flashcards`, new `rls_generations`, + 3 pre-existing suites (`Files=4, Tests=49, PASS`; `rls_flashcards` `plan(10)`→`plan(22)`, `rls_generations` new `plan(13)`)
+- [x] 2.2 New revoke migration applies cleanly on `supabase db reset` (`20260904120000_revoke_authenticated_destructive_privileges.sql`)
+- [x] 2.3 `db-tests` CI job green on the PR
 
 #### Manual
 
-- [ ] 2.4 Dropping `generations_update_own` or weakening its `using` to `true` reddens the write-isolation assertion specifically
-- [ ] 2.5 Dropping `flashcards_delete_own` or weakening its `using` to `true` reddens the delete-isolation assertion (F1 conflation gone)
-- [ ] 2.6 Re-adding `truncate` grant to `authenticated` reddens the TRUNCATE assertion
-- [ ] 2.7 Post-merge `supabase db push` applied; cloud `authenticated` confirmed to have lost `TRUNCATE`
+- [x] 2.4 Dropping `generations_update_own` or weakening its `using` to `true` reddens the write-isolation assertion specifically
+- [x] 2.5 Dropping `flashcards_delete_own` or weakening its `using` to `true` reddens the delete-isolation assertion (F1 conflation gone)
+- [x] 2.6 Re-adding `truncate` grant to `authenticated` reddens the TRUNCATE assertion
+- [x] 2.7 Post-merge `supabase db push` applied; cloud `authenticated` confirmed to have lost `TRUNCATE`
 
 ### Phase 3: Session-gate hermetic tests and route-level authz
 
