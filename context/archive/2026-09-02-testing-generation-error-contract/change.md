@@ -1,10 +1,10 @@
 ---
 change_id: testing-generation-error-contract
 title: Kontrakt błędów generowania — rozróżnialne błędy dostawcy i brak wycieku tekstu źródłowego
-status: impl_reviewed
+status: archived
 created: 2026-09-02
 updated: 2026-09-03
-archived_at: null
+archived_at: 2026-09-03T21:41:06Z
 ---
 
 ## Notes
