@@ -516,16 +516,16 @@ None. No schema or data changes.
 
 #### Automated
 
-- [x] 2.1 Unit + integration pass: `npm test`
-- [x] 2.2 pgTAP passes locally: `npm run db:test`
-- [x] 2.3 Type checking passes: `npx astro check`
-- [x] 2.4 Linting passes: `npm run lint`
-- [x] 2.5 `recount_generation_acceptance.test.sql` `plan(N)` matches its assertion count
-- [x] 2.6 `test-plan.md` §3 row 3 shows `complete`; §6.5 no longer contains "TBD — see §3 Phase 3"
+- [x] 2.1 Unit + integration pass: `npm test` — 0824a7d
+- [x] 2.2 pgTAP passes locally: `npm run db:test` — 0824a7d
+- [x] 2.3 Type checking passes: `npx astro check` — 0824a7d
+- [x] 2.4 Linting passes: `npm run lint` — 0824a7d
+- [x] 2.5 `recount_generation_acceptance.test.sql` `plan(N)` matches its assertion count — 0824a7d
+- [x] 2.6 `test-plan.md` §3 row 3 shows `complete`; §6.5 no longer contains "TBD — see §3 Phase 3" — 0824a7d
 
 #### Manual
 
-- [ ] 2.7 Ad-hoc Stryker on `src/lib/flashcards/service.ts` — survived recount-path mutants reviewed
-- [ ] 2.8 §6.5 pattern reviewed against what Phases 1–2 actually produced
-- [ ] 2.9 §7 entries reviewed for the "Przewartościować, jeśli…" clause + source
-- [ ] 2.10 `deferred.md` cross-checked against all 9 research Open Questions
+- [x] 2.7 Ad-hoc Stryker on `src/lib/flashcards/service.ts` — survived recount-path mutants reviewed — 0824a7d
+- [x] 2.8 §6.5 pattern reviewed against what Phases 1–2 actually produced — 0824a7d
+- [x] 2.9 §7 entries reviewed for the "Przewartościować, jeśli…" clause + source — 0824a7d
+- [x] 2.10 `deferred.md` cross-checked against all 9 research Open Questions — 0824a7d
