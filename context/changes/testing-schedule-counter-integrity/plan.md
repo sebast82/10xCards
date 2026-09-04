@@ -500,11 +500,11 @@ None. No schema or data changes.
 
 #### Automated
 
-- [ ] 1.1 Unit + integration pass: `npm test`
-- [ ] 1.2 pgTAP passes locally: `npm run db:test`
-- [ ] 1.3 Type checking passes: `npx astro check`
-- [ ] 1.4 Linting passes: `npm run lint`
-- [ ] 1.5 `supabase/tests/review_queue.test.sql` exists and `plan(N)` matches its assertion count
+- [x] 1.1 Unit + integration pass: `npm test`
+- [x] 1.2 pgTAP passes locally: `npm run db:test`
+- [x] 1.3 Type checking passes: `npx astro check`
+- [x] 1.4 Linting passes: `npm run lint`
+- [x] 1.5 `supabase/tests/review_queue.test.sql` exists and `plan(N)` matches its assertion count
 
 #### Manual
 

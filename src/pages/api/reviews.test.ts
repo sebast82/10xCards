@@ -104,6 +104,25 @@ describe("reviews POST", () => {
     expect(gradeFive.status).toBe(400);
   });
 
+  it("rejects a body carrying an extra clock field before the service runs", async () => {
+    // `postBodySchema` jest `.strict()` (reviews.ts:20) — serwer jest właścicielem zegara,
+    // klient nie może przemycić `now`/`date`.
+    const supabase = new SupabaseStub([]);
+    const response = await POST(
+      postCtx({
+        supabase: supabase.asClient(),
+        body: { flashcardId: FLASHCARD_ID, grade: 3, now: "2020-01-01T00:00:00.000Z" },
+      }),
+    );
+
+    expect(response.status).toBe(400);
+    const body: unknown = await response.json();
+    expect(body).toEqual({ error: "Nieprawidłowe dane oceny." });
+    expect(Object.keys(body as Record<string, unknown>)).toEqual(["error"]);
+    expect(supabase.queries).toHaveLength(0);
+    expect(supabase.rpcCalls).toHaveLength(0);
+  });
+
   it("records a grade and returns the bare { id }", async () => {
     const supabase = new SupabaseStub([
       { data: { id: FLASHCARD_ID, ...REVIEW_ROW }, error: null },

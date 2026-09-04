@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { Rating } from "ts-fsrs";
+import type { Grade } from "ts-fsrs";
 
-import { createScheduler } from "@/lib/srs";
+import { createScheduler, type ScheduleStateRow } from "@/lib/srs";
 import { SupabaseStub } from "@/lib/test-support/supabase-stub";
 import { applyReviewGrade, getReviewQueue, REVIEW_BATCH_SIZE, ReviewServiceError } from "./service";
 
@@ -20,6 +21,39 @@ const REVIEW_ROW = scheduler.applyGrade(
 
 function queueRow(overrides: Record<string, unknown> = {}) {
   return { id: FLASHCARD_ID, front: "Pytanie?", back: "Odpowiedź.", ...REVIEW_ROW, ...overrides };
+}
+
+// Dziewięć kolumn harmonogramu, które `applyReviewGrade` zapisuje — bez `updated_at` (trigger bazy).
+const SCHEDULE_FIELDS = [
+  "due",
+  "stability",
+  "difficulty",
+  "scheduled_days",
+  "learning_steps",
+  "reps",
+  "lapses",
+  "state",
+  "last_review",
+] as const;
+
+function scheduleProjection(row: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(SCHEDULE_FIELDS.map((field) => [field, row[field]]));
+}
+
+// Ocenia fiszkę przez serwis i oddaje zarejestrowany guarded UPDATE (payload + filtry).
+async function gradedUpdate(row: ScheduleStateRow, grade: Grade) {
+  const supabase = new SupabaseStub([
+    { data: { id: FLASHCARD_ID, ...row }, error: null },
+    { data: { id: FLASHCARD_ID }, error: null },
+  ]);
+  await applyReviewGrade({
+    supabase: supabase.asClient(),
+    userId: USER_ID,
+    flashcardId: FLASHCARD_ID,
+    grade,
+    now: NOW,
+  });
+  return supabase.queries[1];
 }
 
 describe("getReviewQueue", () => {
@@ -182,5 +216,57 @@ describe("applyReviewGrade", () => {
     expect(manual.payload).toEqual(ai.payload);
     expect(manual.filters).toEqual(ai.filters);
     expect(manual.payload).not.toHaveProperty("source");
+  });
+
+  // Ryzyko #3, luka [primary]: dziś asertowano tylko `reps: prev+1` i brak `updated_at`.
+  // "Ocena nie zapisuje się" przechodziłoby każdy istniejący test.
+  it("persists every schedule field the scheduler computed, and nothing else", async () => {
+    const update = await gradedUpdate(REVIEW_ROW, Rating.Good);
+
+    // Oracle: jedno wywołanie wrappera na ten sam (wiersz, now, ocena) — nie liczone per pole w asercji.
+    const expected = createScheduler().applyGrade(REVIEW_ROW, NOW, Rating.Good);
+
+    expect(update.payload).toEqual(scheduleProjection(expected));
+    expect(Object.keys(update.payload ?? {})).toHaveLength(SCHEDULE_FIELDS.length);
+    expect(update.payload).not.toHaveProperty("updated_at");
+  });
+
+  it("sets last_review to the review instant", async () => {
+    const update = await gradedUpdate(REVIEW_ROW, Rating.Good);
+
+    // Kontrakt schedulera: `now` jest chwilą powtórki — niezależny inwariant, nie ponowny odczyt `applyGrade`.
+    expect(update.payload?.last_review).toBe(NOW.toISOString());
+  });
+
+  it("advances a Learning-state card through the same payload contract", async () => {
+    // Fixture z realnego modułu: New + Again ⇒ Learning (state 1).
+    const learningRow = scheduler.applyGrade(scheduler.createNewCard(SEED_NOW), SEED_NOW, Rating.Again);
+    expect(learningRow.state).toBe(1);
+
+    const update = await gradedUpdate(learningRow, Rating.Good);
+    const expected = createScheduler().applyGrade(learningRow, NOW, Rating.Good);
+
+    expect(update.payload).toEqual(scheduleProjection(expected));
+  });
+
+  it("advances a Relearning-state card through the same payload contract", async () => {
+    // Fixture z realnego modułu: Review + Again ⇒ Relearning (state 3).
+    const relearningRow = scheduler.applyGrade(REVIEW_ROW, SEED_NOW, Rating.Again);
+    expect(relearningRow.state).toBe(3);
+
+    const update = await gradedUpdate(relearningRow, Rating.Good);
+    const expected = createScheduler().applyGrade(relearningRow, NOW, Rating.Good);
+
+    expect(update.payload).toEqual(scheduleProjection(expected));
+  });
+
+  it("guards a brand-new card on reps 0", async () => {
+    const newRow = scheduler.createNewCard(SEED_NOW);
+    expect(newRow.reps).toBe(0);
+
+    const update = await gradedUpdate(newRow, Rating.Good);
+
+    expect(update.filters).toContainEqual(["reps", 0]);
+    expect(update.payload?.reps).toBe(1);
   });
 });
