@@ -1,7 +1,7 @@
 ---
 change_id: testing-access-gate-data-isolation
 title: Testy bramki dostępu i izolacji danych w CI (rollout Phase 2 test-planu)
-status: implemented
+status: impl_reviewed
 created: 2026-09-03
 updated: 2026-09-04
 archived_at: null

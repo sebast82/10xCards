@@ -93,7 +93,7 @@ sesji.
 | unit + integration                  | Vitest                                       | 4.1         | `environment: node`, alias `@` → `src/`; testy komponentów przełączają się na jsdom dyrektywą per-plik                                                    |
 | komponenty React                    | Testing Library + user-event                 | 16.3 / 14.6 | jsdom 30 obecny w devDependencies                                                                                                                         |
 | walidacja wejścia                   | Zod                                          | 4.4         | schematy są częścią kodu produkcyjnego — testy asertują zachowanie przy złym wejściu, nie definicję schematu                                              |
-| polityki i procedury bazy           | pgTAP przez Supabase CLI (`npm run db:test`) | CLI 2.23    | dwa testy istnieją; **nie jest krokiem CI** — bramkę wpina §3 Faza 2                                                                                      |
+| polityki i procedury bazy           | pgTAP przez Supabase CLI (`npm run db:test`) | CLI 2.23    | 5 suit w `supabase/tests/`; **krok CI** — job `db-tests` (PR-only, w required status checks `master`), patrz §6.4                                         |
 | API mocking (granica HTTP dostawcy) | none yet — see §3 Phase 1                    | —           | wybór narzędzia należy do `/10x-research` Fazy 1; wymóg: mockowanie wyłącznie na granicy sieci, nigdy modułów wewnętrznych                                |
 | e2e                                 | none yet — see §3 Phase 4                    | —           | kandydat: Playwright (projekt `setup` + `storageState` do jednorazowego logowania, `page.route` do symulowania klas awarii dostawcy); checked: 2026-09-02 |
 | accessibility                       | brak dedykowanego runnera                    | —           | poza zakresem tego rolloutu; `eslint-plugin-jsx-a11y` działa jako bramka statyczna                                                                        |
@@ -223,7 +223,10 @@ Wzorzec pgTAP — patrz `supabase/tests/rls_flashcards.test.sql` i `rls_generati
   z polityką SELECT **zneutralizowaną** (`alter policy … using (true)`, cofane przez `rollback`),
   inaczej zostaje zielona po usunięciu _lub osłabieniu_ polityki write (polityka SELECT i tak
   ukrywa cudze wiersze przed odczytem `WHERE`/`RETURNING`). Każdy zablokowany zapis paruj z osobnym
-  sprawdzeniem, że wiersz-cel jest bajt-w-bajt nietknięty (jako właściciel / po `reset role`).
+  sprawdzeniem, że wiersz-cel jest bajt-w-bajt nietknięty (jako właściciel / po `reset role`),
+  **oraz** z pozytywną asercją „właściciel zapisuje własny wiersz". Podział pracy: _osłabienie_
+  polityki write (`using (true)`) czerwieni asercję izolacji; _usunięcie_ polityki write daje
+  default-deny (dalej 0 wierszy), więc czerwieni dopiero asercję pozytywną — para jest strażnikiem.
 - **Znana luka:** brak automatycznego checku parytetu grantów lokalne ↔ cloud — migracje przywilejów
   (`revoke … from authenticated`) wymagają ręcznego `supabase db push` po merge (§7).
 
