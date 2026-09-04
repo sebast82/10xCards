@@ -1,10 +1,10 @@
 ---
 change_id: testing-schedule-counter-integrity
 title: Test rollout Phase 3 — integrity of the review schedule and generation counters
-status: impl_reviewed
+status: archived
 created: 2026-09-04
 updated: 2026-09-04
-archived_at: null
+archived_at: 2026-09-04T11:14:41Z
 ---
 
 ## Notes
