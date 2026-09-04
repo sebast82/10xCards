@@ -746,12 +746,12 @@ in prod). `supabase start` in CI and `supabase db reset` locally apply it from s
 
 #### Automated
 
-- [x] 4.1 `prettier --check` passes on `test-plan.md`
-- [x] 4.2 No `TBD — see §3 Phase 2` string remains in §6.3 / §6.4
-- [x] 4.3 `test-plan.md §3` Phase 2 status is a valid parser literal
+- [x] 4.1 `prettier --check` passes on `test-plan.md` — eb9870e
+- [x] 4.2 No `TBD — see §3 Phase 2` string remains in §6.3 / §6.4 — eb9870e
+- [x] 4.3 `test-plan.md §3` Phase 2 status is a valid parser literal — eb9870e
 
 #### Manual
 
-- [ ] 4.4 A contributor can write a new access test and a new pgTAP test from §6.3 / §6.4 alone
-- [ ] 4.5 §7 lists all four deferrals with "revisit if" triggers
-- [ ] 4.6 research.md Open Questions 1–9 each carry a resolution note
+- [x] 4.4 A contributor can write a new access test and a new pgTAP test from §6.3 / §6.4 alone — eb9870e
+- [x] 4.5 §7 lists all four deferrals with "revisit if" triggers — eb9870e
+- [x] 4.6 research.md Open Questions 1–9 each carry a resolution note — eb9870e
