@@ -76,7 +76,7 @@ na dysku.
 | --- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- | ---------------------------------------- | ----------- | ----------------------------------------------------- |
 | 1   | Kontrakt błędów generowania           | Każda klasa awarii dostawcy kończy się rozróżnialnym błędem i zerem zapisów, a tekst źródłowy nie przeżywa żądania                    | #1, #5                       | unit + integration                       | complete    | `context/changes/testing-generation-error-contract/`  |
 | 2   | Bramka dostępu i izolacja danych w CI | Własność rekordu jest egzekwowana i na trasie API, i w polityce bazy — a testy polityk przestają być testami, których nikt nie odpala | #2, #4                       | integration + testy polityk bazy + gates | complete    | `context/changes/testing-access-gate-data-isolation/` |
-| 3   | Integralność harmonogramu i liczników | Ocena w sesji zmienia stan deterministycznie i trwale, a liczniki generacji dają się odtworzyć ze stanu kolekcji                      | #3, #6                       | unit + integration + testy procedur bazy | researched | `context/changes/testing-schedule-counter-integrity/`                                                     |
+| 3   | Integralność harmonogramu i liczników | Ocena w sesji zmienia stan deterministycznie i trwale, a liczniki generacji dają się odtworzyć ze stanu kolekcji                      | #3, #6                       | unit + integration + testy procedur bazy | complete    | `context/changes/testing-schedule-counter-integrity/`                                                     |
 | 4   | E2E krytycznej pętli                  | Jedna ścieżka logowanie → generowanie → akceptacja → kolekcja → sesja przechodzi automatycznie na każdym PR                           | #1, #2, #3, #4 (przekrojowo) | e2e + gates                              | not started | —                                                     |
 
 **Status vocabulary** (fixed — parser literals): `not started`, `change opened`,
@@ -93,7 +93,7 @@ sesji.
 | unit + integration                  | Vitest                                       | 4.1         | `environment: node`, alias `@` → `src/`; testy komponentów przełączają się na jsdom dyrektywą per-plik                                                    |
 | komponenty React                    | Testing Library + user-event                 | 16.3 / 14.6 | jsdom 30 obecny w devDependencies                                                                                                                         |
 | walidacja wejścia                   | Zod                                          | 4.4         | schematy są częścią kodu produkcyjnego — testy asertują zachowanie przy złym wejściu, nie definicję schematu                                              |
-| polityki i procedury bazy           | pgTAP przez Supabase CLI (`npm run db:test`) | CLI 2.23    | 5 suit w `supabase/tests/`; **krok CI** — job `db-tests` (PR-only, w required status checks `master`), patrz §6.4                                         |
+| polityki i procedury bazy           | pgTAP przez Supabase CLI (`npm run db:test`) | CLI 2.23    | 5 suit w `supabase/tests/` (w tym `review_queue.test.sql` — kolejka powtórek, dodana w Fazie 3); **krok CI** — job `db-tests` (PR-only, w required status checks `master`), patrz §6.4 |
 | API mocking (granica HTTP dostawcy) | none yet — see §3 Phase 1                    | —           | wybór narzędzia należy do `/10x-research` Fazy 1; wymóg: mockowanie wyłącznie na granicy sieci, nigdy modułów wewnętrznych                                |
 | e2e                                 | none yet — see §3 Phase 4                    | —           | kandydat: Playwright (projekt `setup` + `storageState` do jednorazowego logowania, `page.route` do symulowania klas awarii dostawcy); checked: 2026-09-02 |
 | accessibility                       | brak dedykowanego runnera                    | —           | poza zakresem tego rolloutu; `eslint-plugin-jsx-a11y` działa jako bramka statyczna                                                                        |
@@ -232,7 +232,43 @@ Wzorzec pgTAP — patrz `supabase/tests/rls_flashcards.test.sql` i `rls_generati
 
 ### 6.5 Dodanie testu stanu harmonogramu powtórek
 
-- TBD — see §3 Phase 3 (wzorzec dla „ocena zmienia stan deterministycznie i trwale", ze źródłem oczekiwania spoza biblioteki).
+Wzorzec „ocena zmienia stan deterministycznie i trwale, a liczniki dają się odtworzyć ze stanu
+kolekcji" — patrz `src/lib/reviews/service.test.ts`, `supabase/tests/review_queue.test.sql`
+i `supabase/tests/recount_generation_acceptance.test.sql`.
+
+- **Oracle z własnego wrappera, nie z biblioteki i nie z inline-recompute.** Dla write-payloadu
+  `applyReviewGrade` wywołaj `createScheduler().applyGrade(parsedRow, NOW, grade)` **raz** do jednego
+  obiektu `expected`, potem `expect(payload).toEqual(scheduleProjection(expected))` po dziewięciu
+  polach harmonogramu. Nie licz wartości oczekiwanej per pole tą samą logiką co kod testowany
+  (mirror test, §1/§7). Wnętrze arytmetyki `ts-fsrs` zostaje nietknięte — pinujemy plumbing
+  row→card→row i „zapisujemy dokładnie to, co policzyliśmy".
+- **Fixtury SRS wyprowadzone z realnego modułu**, z nadpisaniem `state`/`reps`:
+  `scheduler.applyGrade(scheduler.createNewCard(SEED_NOW), SEED_NOW, Rating.Again)` (Learning,
+  `state:1`), `scheduler.applyGrade(REVIEW_ROW, SEED_NOW, Rating.Again)` (Relearning, `state:3`),
+  `scheduler.createNewCard(SEED_NOW)` (`reps:0`). Nigdy nie klepiemy wiersza harmonogramu ręcznie.
+- **`SupabaseStub` do kształtu**: write-payload (dokładnie 9 kluczy, brak `updated_at`), filtr
+  guarda (`filters` zawiera `["reps", previousReps]`). Stub nie modeluje `WHERE due <= now()`, RLS
+  ani wyścigu — tego nie asertuj na stubie.
+- **pgTAP do semantyki**: `review_queue.test.sql` na realnym wierszu + indeksie `(user_id, due)` +
+  RLS — selekcja `due <= now()`, porządek rosnący `due` (niezależny oracle: porządek po `id` przy
+  odpowiednim seedzie), sufit 50 wierszy + wykluczenie 51., izolacja kolejki między kontami, oraz
+  sekwencja guarda `reps` (świeży guard → 1 wiersz, nieaktualny → 0, legalna druga ocena → 1 wiersz
+  + spójny re-parse). `plan(N)` liczony na końcu, ustawiony zaraz po `begin;`. Kotwica-komentarz do
+  `src/lib/reviews/service.ts:62-96` i `:132-149` — dryf w łańcuchu `.from()/.eq()/.lte()` łapie
+  przegląd, nie automat (§7).
+- **`.strict()` na ciele POST** (`src/pages/api/reviews.test.ts`): ciało z dodatkowym `now` → 400,
+  `Object.keys(body) === ["error"]`, zero `queries` i `rpcCalls` — serwer jest właścicielem zegara.
+- **„Edycja nie rusza licznika" = `rpcCalls` puste** (`src/lib/flashcards/service.test.ts`,
+  `src/pages/api/flashcards/[id].test.ts`): udana edycja robi jeden `update` i **zero** `recount`,
+  bo `source` jest niezmienne, a liczniki keyują po `source`. To połowa „odtwarzalne po edycji"
+  ryzyka #6 (druga połowa — klamra `least()` i krawędzie usuwania — jest w pgTAP `recount`).
+- **Klamra `least()` i krawędzie usuwania w `recount_generation_acceptance.test.sql`**: więcej
+  fiszek AI niż `generated_count` → `lives_ok` + suma zaklamrowana do `generated_count` (cofnięcie
+  do ciała sprzed `20260826141500` czerwieni to); usunięcie ostatniej fiszki AI → `(0,0)`; recount
+  na usuniętym zleceniu → `lives_ok` (no-op). Wstaw je **przed** blokiem izolacji, póki sesja jest
+  `authenticated` jako właściciel — za blokiem sesja to `postgres` i utrata `security invoker`
+  przeszłaby niezauważona. Świeże UUID-y — nie reużywaj generacji, których karty mutują istniejące
+  przypadki.
 
 ### 6.6 Dodanie testu e2e
 
@@ -241,6 +277,23 @@ Wzorzec pgTAP — patrz `supabase/tests/rls_flashcards.test.sql` i `rls_generati
 ### 6.7 Notatki per faza rolloutu
 
 (Uzupełniane po każdej fazie: 2–3 linie o tym, czego faza nauczyła — np. gdzie wylądowały wspólne dane testowe i co powinno je reużywać.)
+
+**Faza 3 — Integralność harmonogramu i liczników (2026-09-04).**
+
+- Fixtury stanu harmonogramu żyją w `src/lib/reviews/service.test.ts` i wyprowadzają się z `@/lib/srs`
+  (`scheduler.createNewCard` + `scheduler.applyGrade`) z nadpisaniem `state`/`reps` — Learning/
+  Relearning/`reps:0` nie są klepane ręcznie. Wspólny helper `scheduleProjection` pinuje dokładnie
+  dziewięć kolumn write-payloadu.
+- `review_queue.test.sql` to **pierwszy pgTAP dla kolejki powtórek**. Porządek `due` weryfikuje przez
+  niezależny oracle (porządek po `id` przy seedzie, w którym `due` rośnie z indeksem), a nie przez
+  porównanie zapytania do samego siebie.
+- Semantyka guarda `reps` wymagała realnego wiersza: `SupabaseStub` „modeluje" przegraną tylko przez
+  ręcznie podane `{ data: null }` jako drugi wynik — nigdy nie sprawdza, że `reps` faktycznie się
+  różni. Sekwencja świeży→nieaktualny→ponowny guard idzie do pgTAP.
+- Przypadki `recount` (klamra `least()`, usunięcie ostatniej karty, usunięte zlecenie) wstawione
+  **przed** blokiem izolacji w `recount_generation_acceptance.test.sql` — tam sesja jest wciąż
+  `authenticated` jako właściciel, więc `security invoker` jest pod testem; za blokiem byłaby
+  `postgres`.
 
 **Faza 2 — Bramka dostępu i izolacja danych w CI (2026-09-04).**
 
@@ -284,6 +337,10 @@ dopóki nie zmieni się założenie leżące u ich podstaw.
 - **Normalizacja ścieżki w bramce sesji** — bramka to surowe `pathname.startsWith(prefix)` bez obsługi wariantów (wielkość liter, `%2e`, `//`, `/deck/../x`). Żadne źródło nie rozstrzyga, czy warianty muszą być bramkowane. Przewartościować, jeśli pojawi się reverse-proxy przepisujący ścieżki albo trasa, której prefiks jest podłańcuchem trasy publicznej. (Źródło: research Open Question 9; rollout Faza 2, 2026-09-04.)
 - **Nawigacja wysp klienckich na 401 w trakcie sesji** — `GenerateView` / `ReviewSession` renderują string błędu inline i nie nawigują na `/auth/signin` przy wygaśnięciu sesji w trakcie XHR. Żadne źródło nie mówi, czy „przekierowywany na stronę logowania" obejmuje XHR w SPA. Przewartościować, jeśli PRD doprecyzuje zachowanie SPA albo użytkownicy zgłoszą utknięcie na chronionym ekranie. (Źródło: research Ambiguity B / Open Question 7; rollout Faza 2, 2026-09-04.)
 - **Predykat same-user na FK `flashcards.generation_id`** — brak triggera/constraintu wiążącego fiszkę i jej generację z tym samym `user_id` na poziomie DB. Broni tego filtr aplikacyjny (`src/lib/flashcards/service.ts` `.eq("user_id")`, dodany w Fazie 2) plus RLS na obu tabelach. Przewartościować, jeśli powstanie ścieżka zapisu fiszki omijająca `createAiFlashcard` albo audyt wykaże realne podpięcie cross-account. (Źródło: research Open Question 4 / Ambiguity #3; rollout Faza 2, 2026-09-04.)
+- **Strefa czasowa w kolejce powtórek** — kolejka porównuje `due <= now()` w UTC po stronie serwera; brak obsługi strefy czasowej klienta. Żadne źródło nie precyzuje zachowania per strefa. Przewartościować, jeśli PRD wprowadzi granicę „dnia nauki" albo użytkownicy zgłoszą karty pojawiające się o złej porze lokalnej. (Źródło: research Open Question 2; rollout Faza 3, 2026-09-04.)
+- **Współbieżność `recount` (`for update`)** — blokada jest obecna i przejrzana; jednosesyjny pgTAP nie odtworzy wyścigu równoległych zapisów, a asercja obecności przez `pg_get_functiondef` jest krucha i niskosygnałowa. Przewartościować, jeśli test obciążeniowy odtworzy zaniżanie licznika albo linia blokady zniknie. (Źródło: research Open Question 7; rollout Faza 3, 2026-09-04.)
+- **Populacja zagregowanego kryterium „75%"** — w kodzie nie istnieje żadne zapytanie agregujące po `generations`; per użytkownik vs per generacja vs lifetime, oraz czy wiersze `pending`/`failed` się liczą, jest niezdefiniowane. Faza 3 pinuje inwariant `recount` per generacja. Przewartościować, gdy zapytanie metryki sukcesu zostanie faktycznie zaimplementowane. (Źródło: research Open Question 8; rollout Faza 3, 2026-09-04.)
+- **Wykonawcza równoważność SQL `applyReviewGrade` ↔ pgTAP** — `review_queue.test.sql` odtwarza ręcznie `select … where due <= now() …` i `update … where id = ? and user_id = ? and reps = ?`, które emituje serwis; wiąże je z `src/lib/reviews/service.ts` tylko komentarz-kotwica, nie wykonanie (pgTAP nie woła TypeScriptu, a nie ma warstwy Vitest przeciw realnemu Postgresowi). Dryf w łańcuchu `.from()/.update()/.eq()`, który nadal buduje poprawny payload (zła tabela, zgubione `.eq("user_id")`, `.lte` → `.eq`), przechodzi obie warstwy — łapie go przegląd, nie automat. Przewartościować, jeśli powstanie harness integracyjny Vitest ↔ Postgres albo `db-tests` zacznie wołać kod serwisu. (Źródło: research Open Question 5; rollout Faza 3, 2026-09-04.)
 
 ## 8. Freshness Ledger
 

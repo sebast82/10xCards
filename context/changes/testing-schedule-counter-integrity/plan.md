@@ -500,28 +500,28 @@ None. No schema or data changes.
 
 #### Automated
 
-- [x] 1.1 Unit + integration pass: `npm test`
-- [x] 1.2 pgTAP passes locally: `npm run db:test`
-- [x] 1.3 Type checking passes: `npx astro check`
-- [x] 1.4 Linting passes: `npm run lint`
-- [x] 1.5 `supabase/tests/review_queue.test.sql` exists and `plan(N)` matches its assertion count
+- [x] 1.1 Unit + integration pass: `npm test` — 537cf55
+- [x] 1.2 pgTAP passes locally: `npm run db:test` — 537cf55
+- [x] 1.3 Type checking passes: `npx astro check` — 537cf55
+- [x] 1.4 Linting passes: `npm run lint` — 537cf55
+- [x] 1.5 `supabase/tests/review_queue.test.sql` exists and `plan(N)` matches its assertion count — 537cf55
 
 #### Manual
 
-- [ ] 1.6 Ad-hoc Stryker on `src/lib/reviews/service.ts` — survived write-payload mutants reviewed
-- [ ] 1.7 `review_queue.test.sql` reviewed for pgTAP conventions + `service.ts` comment-anchor
-- [ ] 1.8 New schedule-field assertion confirmed not to recompute the expected value inline per field
+- [x] 1.6 Ad-hoc Stryker on `src/lib/reviews/service.ts` — survived write-payload mutants reviewed — 537cf55
+- [x] 1.7 `review_queue.test.sql` reviewed for pgTAP conventions + `service.ts` comment-anchor — 537cf55
+- [x] 1.8 New schedule-field assertion confirmed not to recompute the expected value inline per field — 537cf55
 
 ### Phase 2: Risk #6 — Counter Integrity + Rollout Close-Out
 
 #### Automated
 
-- [ ] 2.1 Unit + integration pass: `npm test`
-- [ ] 2.2 pgTAP passes locally: `npm run db:test`
-- [ ] 2.3 Type checking passes: `npx astro check`
-- [ ] 2.4 Linting passes: `npm run lint`
-- [ ] 2.5 `recount_generation_acceptance.test.sql` `plan(N)` matches its assertion count
-- [ ] 2.6 `test-plan.md` §3 row 3 shows `complete`; §6.5 no longer contains "TBD — see §3 Phase 3"
+- [x] 2.1 Unit + integration pass: `npm test`
+- [x] 2.2 pgTAP passes locally: `npm run db:test`
+- [x] 2.3 Type checking passes: `npx astro check`
+- [x] 2.4 Linting passes: `npm run lint`
+- [x] 2.5 `recount_generation_acceptance.test.sql` `plan(N)` matches its assertion count
+- [x] 2.6 `test-plan.md` §3 row 3 shows `complete`; §6.5 no longer contains "TBD — see §3 Phase 3"
 
 #### Manual
 

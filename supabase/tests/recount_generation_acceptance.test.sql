@@ -1,7 +1,7 @@
 create extension if not exists pgtap;
 
 begin;
-select plan(9);
+select plan(15);
 
 insert into auth.users (id, email)
 values
@@ -115,6 +115,154 @@ select ok(
     where id = '10000000-0000-4000-8000-000000000001'
   ),
   'przeliczenie po usunieciu nadal spelnia ograniczenie generacji'
+);
+
+-- --------------------------------------------------------------------------
+-- Przypadki dodane w rollout Fazie 3 (ryzyko #6). Wstawione TU, a nie po bloku
+-- izolacji nizej: sesja jest wciaz `set local role authenticated` jako uzytkownik A
+-- (sub = aaaaaaaa-...-aaaaaaaaaaaa), wiec `recount` (`security invoker`) biegnie pod
+-- RLS tak, jak wola go serwis. Za blokiem izolacji sesja jest `postgres` i utrata
+-- `security invoker` przeszlaby niezauwazona. Swieze UUID-y — gen1/gen2 sa mutowane wyzej.
+-- --------------------------------------------------------------------------
+
+-- Klamra least(): wiecej fiszek AI niz generated_count (powtorzony zapis po zerwanej sieci).
+-- Przed migracja 20260826141500 surowy count naruszal CHECK i funkcja rzucala.
+insert into public.generations (
+  id, user_id, model, source_text_length, source_text_hash,
+  generated_count, accepted_unedited_count, accepted_edited_count,
+  generation_duration
+)
+values
+  (
+    '10000000-0000-4000-8000-000000000003',
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+    'google/gemini-2.5-flash',
+    900,
+    repeat('c', 64),
+    2,
+    0,
+    0,
+    3900
+  );
+
+insert into public.flashcards (
+  id, user_id, generation_id, front, back, source,
+  due, stability, difficulty, scheduled_days,
+  learning_steps, reps, lapses, state, last_review
+)
+values
+  ('20000000-0000-4000-8000-000000000010', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', '10000000-0000-4000-8000-000000000003', 'P10', 'O10', 'ai',        '2026-08-26T12:00:00+00:00', 0, 5, 0, 0, 0, 0, 0, null),
+  ('20000000-0000-4000-8000-000000000011', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', '10000000-0000-4000-8000-000000000003', 'P11', 'O11', 'ai',        '2026-08-26T12:00:00+00:00', 0, 5, 0, 0, 0, 0, 0, null),
+  ('20000000-0000-4000-8000-000000000012', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', '10000000-0000-4000-8000-000000000003', 'P12', 'O12', 'ai',        '2026-08-26T12:00:00+00:00', 0, 5, 0, 0, 0, 0, 0, null),
+  ('20000000-0000-4000-8000-000000000013', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', '10000000-0000-4000-8000-000000000003', 'P13', 'O13', 'ai_edited', '2026-08-26T12:00:00+00:00', 0, 5, 0, 0, 0, 0, 0, null);
+
+select lives_ok(
+  $$ select public.recount_generation_acceptance('10000000-0000-4000-8000-000000000003') $$,
+  'recount z 4 fiszkami AI przy generated_count = 2 nie rzuca (klamra least)'
+);
+
+select results_eq(
+  $$
+    select accepted_unedited_count, accepted_edited_count
+    from public.generations
+    where id = '10000000-0000-4000-8000-000000000003'
+  $$,
+  $$ values (2, 0) $$,
+  'klamra: accepted_unedited = least(3, 2) = 2; accepted_edited = least(1, 2 - 2) = 0'
+);
+
+select ok(
+  (
+    select accepted_unedited_count + accepted_edited_count <= generated_count
+    from public.generations
+    where id = '10000000-0000-4000-8000-000000000003'
+  ),
+  'suma po klamrze nie przekracza generated_count (CHECK spelniony)'
+);
+
+-- Usuniecie ostatniej fiszki AI w zleceniu -> (0, 0).
+insert into public.generations (
+  id, user_id, model, source_text_length, source_text_hash,
+  generated_count, accepted_unedited_count, accepted_edited_count,
+  generation_duration
+)
+values
+  (
+    '10000000-0000-4000-8000-000000000004',
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+    'google/gemini-2.5-flash',
+    400,
+    repeat('d', 64),
+    1,
+    0,
+    0,
+    2500
+  );
+
+insert into public.flashcards (
+  id, user_id, generation_id, front, back, source,
+  due, stability, difficulty, scheduled_days,
+  learning_steps, reps, lapses, state, last_review
+)
+values
+  ('20000000-0000-4000-8000-000000000020', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', '10000000-0000-4000-8000-000000000004', 'P20', 'O20', 'ai', '2026-08-26T12:00:00+00:00', 0, 5, 0, 0, 0, 0, 0, null);
+
+select public.recount_generation_acceptance('10000000-0000-4000-8000-000000000004');
+select results_eq(
+  $$
+    select accepted_unedited_count, accepted_edited_count
+    from public.generations
+    where id = '10000000-0000-4000-8000-000000000004'
+  $$,
+  $$ values (1, 0) $$,
+  'jedna fiszka ai -> (1, 0)'
+);
+
+delete from public.flashcards where id = '20000000-0000-4000-8000-000000000020';
+select public.recount_generation_acceptance('10000000-0000-4000-8000-000000000004');
+select results_eq(
+  $$
+    select accepted_unedited_count, accepted_edited_count
+    from public.generations
+    where id = '10000000-0000-4000-8000-000000000004'
+  $$,
+  $$ values (0, 0) $$,
+  'usuniecie ostatniej fiszki AI w zleceniu zeruje oba liczniki'
+);
+
+-- Usuniete zlecenie: `generation_id` fiszki wyzerowany przez `on delete set null`;
+-- recount musi byc bezpiecznym no-opem (`for update` nic nie zlapie, `update` nic nie ruszy).
+insert into public.generations (
+  id, user_id, model, source_text_length, source_text_hash,
+  generated_count, accepted_unedited_count, accepted_edited_count,
+  generation_duration
+)
+values
+  (
+    '10000000-0000-4000-8000-000000000005',
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+    'google/gemini-2.5-flash',
+    300,
+    repeat('e', 64),
+    1,
+    0,
+    0,
+    1500
+  );
+
+insert into public.flashcards (
+  id, user_id, generation_id, front, back, source,
+  due, stability, difficulty, scheduled_days,
+  learning_steps, reps, lapses, state, last_review
+)
+values
+  ('20000000-0000-4000-8000-000000000030', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', '10000000-0000-4000-8000-000000000005', 'P30', 'O30', 'ai', '2026-08-26T12:00:00+00:00', 0, 5, 0, 0, 0, 0, 0, null);
+
+delete from public.generations where id = '10000000-0000-4000-8000-000000000005';
+
+select lives_ok(
+  $$ select public.recount_generation_acceptance('10000000-0000-4000-8000-000000000005') $$,
+  'recount na usunietym zleceniu jest bezpiecznym no-opem'
 );
 
 -- Liczniki gen1 stają się nieaktualne: 2 x ai zamiast zapisanej 1.

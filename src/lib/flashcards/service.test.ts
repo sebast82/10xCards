@@ -215,6 +215,10 @@ describe("updateFlashcard", () => {
       ],
     });
     expect(Object.keys(supabase.queries[0].payload ?? {})).toEqual(["front", "back"]);
+    // Ryzyko #6, połowa "odtwarzalne po edycji": `source` jest niezmienne, liczniki keyują po `source`,
+    // więc edycja nie może ruszyć licznika — jeden UPDATE, zero `recount`.
+    expect(supabase.queries).toHaveLength(1);
+    expect(supabase.rpcCalls).toEqual([]);
   });
 
   it("maps an inaccessible card to a typed not-found error", async () => {

@@ -33,6 +33,8 @@ describe("flashcard item API", () => {
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({ id: FLASHCARD_ID });
     expect(supabase.queries[0].payload).toEqual({ front: "Pytanie?", back: "Odpowiedź." });
+    // Ryzyko #6: udana edycja nie przelicza liczników generacji (source niezmienne).
+    expect(supabase.rpcCalls).toHaveLength(0);
   });
 
   it("deletes a valid card", async () => {
