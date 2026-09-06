@@ -87,6 +87,10 @@ export default tseslint.config(
     // Pliki generowane: `npm run db:types` i `wrangler types` nadpisują je w całości.
     ignores: ["src/db/database.types.ts", "worker-configuration.d.ts"],
   },
+  {
+    // Skrypty hooków agenta: Node ESM poza projektem TS — `projectService` ich nie widzi.
+    ignores: [".claude/**"],
+  },
   includeIgnoreFile(gitignorePath),
   baseConfig,
   reactConfig,

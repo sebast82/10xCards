@@ -1,1 +1,23 @@
+# `set -e`: bez tego porażka `lint-staged` nie zatrzymuje skryptu, a kodem wyjścia bramki
+# zostaje wynik OSTATNIEJ komendy (typechecku) — commit z czerwonymi testami przechodzi.
+set -e
+
+# Bramka commitowa — dwa kroki, oba na tym, co faktycznie idzie do commita.
+#
+# 1. lint-staged (package.json): `eslint --fix` na staged *.{ts,tsx,astro}, potem
+#    `vitest related` na staged *.{ts,tsx} — sekwencyjnie, więc testy widzą pliki po --fix.
+#    lint-staged odkłada niezacommitowane zmiany na czas przebiegu, więc testy biegną
+#    dokładnie na zawartości commita, a nie na katalogu roboczym.
+# 2. typecheck całego projektu — `astro check` nie ma trybu jednoplikowego.
+#
+# Warstwa per-edit (.claude/hooks/) łapie to samo wcześniej, ale tylko dla edycji agenta.
+# Ta bramka istnieje dla zmian, które ją ominęły: ręcznych, z innego narzędzia, z merge'a.
 npx lint-staged
+
+# Typecheck liczy cały projekt (~20 s na zimno / ~6 s na ciepło, 82 pliki — pomiar 2026-09-06),
+# więc jest bramką commitową, nie per-edit: per-edit blokowałby pętlę agenta przy każdym zapisie.
+# Odpalamy tylko wtedy, gdy w commicie faktycznie są pliki, których typy dotyczą.
+if git diff --cached --name-only --diff-filter=ACMR | grep -qE '\.(ts|tsx|astro)$'; then
+  echo "pre-commit: astro check…"
+  npm run typecheck
+fi

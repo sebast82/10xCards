@@ -7,6 +7,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "test": "vitest run",
+    "typecheck": "astro check",
     "astro": "astro",
     "deploy": "astro build && wrangler deploy",
     "lint": "eslint .",
@@ -70,7 +71,11 @@
   },
   "overrides": {},
   "lint-staged": {
-    "*.{ts,tsx,astro}": [
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "vitest related --run --passWithNoTests"
+    ],
+    "*.astro": [
       "eslint --fix"
     ],
     "*.{json,css,md}": [
