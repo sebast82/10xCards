@@ -7,6 +7,9 @@
     "build": "astro build",
     "preview": "astro preview",
     "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:report": "playwright show-report",
     "typecheck": "astro check",
     "astro": "astro",
     "deploy": "astro build && wrangler deploy",
@@ -46,6 +49,7 @@
   "devDependencies": {
     "@eslint/compat": "^2.0.3",
     "@eslint/js": "^9.29.0",
+    "@playwright/test": "^1.63.0",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.6",
     "esbuild": "^0.28.2",
