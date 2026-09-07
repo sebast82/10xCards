@@ -84,7 +84,7 @@ jobs:
           set -euo pipefail
           status="$(supabase status -o env \
             --override-name api.url=SUPABASE_URL \
-            --override-name auth.anon_key=SUPABASE_KEY)"
+            --override-name auth.anon_key_LITEROWKA=SUPABASE_KEY)"
           eval "$status"
           test -n "${SUPABASE_URL:-}" || { echo "::error::SUPABASE_URL puste — stack Supabase nie wystartował poprawnie."; exit 1; }
           test -n "${SUPABASE_KEY:-}" || { echo "::error::SUPABASE_KEY puste — stack Supabase nie wystartował poprawnie."; exit 1; }
