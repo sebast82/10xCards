@@ -59,6 +59,12 @@ attach to. `/deck` by contrast has `<section aria-label="Kolekcja fiszek">`
 that produces a green-looking but meaningless assertion. And `getReviewQueue` returns *every* due
 card for the user capped at 50 (`src/lib/reviews/service.ts:33`), so leftovers from earlier runs
 make `Karta 1 z 1` and `To na dziś wszystko — powtórzono 1 fiszek.` non-deterministic assertions.
+Worse than non-deterministic: the queue is ordered `due` ascending
+(`src/lib/reviews/service.ts:62-70`) and the island renders only `queue[0]`
+(`ReviewSession.tsx:94,294`), while a freshly created card is due *now* — the latest due date. A
+single leftover therefore hides the card under test entirely, so no assertion about it can hold
+until the queue is known empty. `GET /api/reviews` (`src/pages/api/reviews.ts:55-65`) makes that
+checkable over HTTP.
 
 ## Desired End State
 
@@ -85,6 +91,9 @@ breaking the deck→review navigation link turns it red.
   `POST /api/flashcards` is due the instant it exists. The review leg needs no clock manipulation.
 - `src/components/review/ReviewSession.tsx:167` — the 409 swallow. The grade assertion must read the
   response status, not the UI.
+- `src/pages/api/reviews.ts:55-65` — `GET /api/reviews` returns the whole due queue as `{ cards }`
+  with 200. The due queue *is* enumerable over HTTP (unlike the collection, which has no `GET`), so
+  the spec can assert an empty-queue precondition instead of hoping the new card lands first.
 - `src/components/review/ReviewSession.tsx:250-252` — `role="status" aria-live="polite"` sr-only
   announcer carrying `Karta {n} z {m}` and `Odpowiedź odsłonięta`, added deliberately for
   testability (`context/archive/2026-09-01-srs-review-session/plan.md:211`).
@@ -262,29 +271,46 @@ the `setup` dependency. Named to bind it to the risk, not to the mechanism. Flow
 
 1. Unique data — `front`/`back` carrying a timestamp suffix, so parallel runs and the two configured
    retries never collide.
-2. `page.goto("/deck")`, scope to `getByRole("region", { name: "Kolekcja fiszek" })`.
-3. Create the card **through the UI**, wrapping the first island interaction in the retryable
+2. **Precondition — the review queue must be empty.** `page.request.get("/api/reviews")` (the route
+   exists: `src/pages/api/reviews.ts:55-65`, returns `{ cards }` with 200) and assert `cards` is
+   empty, with a message naming the leftovers. This is load-bearing, not defensive:
+   `getReviewQueue` orders by `due` ascending (`src/lib/reviews/service.ts:62-70`) and
+   `ReviewSession` renders only `queue[0]` (`ReviewSession.tsx:94,294`), while a card created through
+   `/deck` is stamped `due = now` — the *latest* due date in the queue. Any pre-existing due card
+   therefore hides the new one completely and step 6 fails on a missing locator. Failing here
+   instead names the real cause: a dirty account, not a broken app.
+3. `page.goto("/deck")`, scope to `getByRole("region", { name: "Kolekcja fiszek" })`.
+4. Create the card **through the UI**, wrapping the first island interaction in the retryable
    `expect(async () => {…}).toPass()` block from `context/foundation/lessons.md:37-49` — the
    `client:load` hydration race applies here exactly as in `seed.spec.ts:21-24`. Capture the created
    id from the `POST /api/flashcards` 201 body via `page.waitForResponse`; it is the only handle for
-   cleanup, since **no `GET /api/flashcards` exists** and leftovers cannot be enumerated over HTTP.
-4. Navigate to `/review` by clicking the `Powtórki` link inside the `Główna nawigacja` landmark —
+   cleanup, since **no `GET /api/flashcards` exists** — the collection cannot be enumerated over
+   HTTP (the *due queue* can, via `GET /api/reviews`, which is what step 2 uses).
+5. Navigate to `/review` by clicking the `Powtórki` link inside the `Główna nawigacja` landmark —
    the deck has no "start review" affordance, and the nav link is the real user path. Every
    step-to-step move is a full page load, so the review island hydrates from scratch.
-5. Assert the card is the one under review by its **own `front` text**, scoped to the new
+6. Assert the card is the one under review by its **own `front` text**, scoped to the new
    `Sesja powtórkowa` region. Never assert `Karta 1 z 1` or
-   `To na dziś wszystko — powtórzono {n} fiszek.` — leftover due cards make both non-deterministic
-   on any real account.
-6. Reveal via `Pokaż odpowiedź` (also a hydration-race candidate), assert the `back` text.
-7. Grade: await the `POST /api/reviews` response and assert **status 200** *before* asserting any UI
+   `To na dziś wszystko — powtórzono {n} fiszek.` — those read leftover state directly; the own-text
+   assertion is only sound because step 2 has already pinned the queue to exactly this card.
+7. Reveal via `Pokaż odpowiedź` (also a hydration-race candidate), assert the `back` text.
+8. Grade: await the `POST /api/reviews` response and assert **status 200** *before* asserting any UI
    change. `ReviewSession.tsx:167` advances the queue on a 409 as well, so a UI-only assertion is
    satisfiable by a grade the server rejected. Select the grade button by label substring only —
    names are `{label} · {interval}` and the interval half is dynamic FSRS output.
-8. Cleanup: `page.request.delete("/api/flashcards/:id")` with
+9. Cleanup, **unconditional**: `page.request.delete("/api/flashcards/:id")` with
    `headers: { Origin: new URL(page.url()).origin }`. Both details are load-bearing per
    `context/foundation/lessons.md:65-77` — the `request` fixture has its own network context and
    misses the refreshed Supabase cookie, and without `Origin` the Astro gate returns 403. Assert the
    result with a message carrying status and body.
+
+   Run it from a `test.afterEach` (or a `finally`) over the id captured in step 4, **not** as the
+   last statement of the test body the way `seed.spec.ts:48-51` does. Inline cleanup is skipped by
+   any earlier failed assertion, and the card it strands is due immediately — which is precisely the
+   leftover that makes the *next* run fail step 2. One red run would otherwise poison the account
+   for every run after it, and criterion 2.6 ("run twice") only exercises the happy path. Where the
+   id was never captured (a failure before step 4), the hook does nothing. §6.6 records both shapes
+   and when each applies.
 
 Provenance header linking the spec to Phase 4 of `test-plan.md`, to this plan, and to
 `seed.spec.ts` as the pattern source.
@@ -311,6 +337,10 @@ Provenance header linking the spec to Phase 4 of `test-plan.md`, to this plan, a
 - Deliberate break: make `POST /api/reviews` return 409, confirm the spec goes red rather than
   passing on the swallowed advance — this is the assertion the phase most needs to prove
 - After a full run, `/deck` contains no leftover `E2E`-tagged cards
+- With a leftover due card on the account, the spec fails at the **precondition** with a message
+  naming the non-empty queue — not later, on a locator that cannot resolve
+- A **deliberately failed** run (break an assertion after the card is created) still leaves `/deck`
+  clean — the cleanup hook runs on the failure path, so a red run does not poison the next one
 
 **Implementation Note**: Runs through `/10x-e2e`, which owns the plan → generate → review → verify
 loop for this phase. Phase 1 must be merged first.
@@ -360,6 +390,11 @@ carrying a comment documenting its required-status-check requirement exactly as
 - `npx playwright install --with-deps chromium` — only Chromium; `playwright.config.ts` configures
   no other browser.
 - `npm run test:e2e`, with `E2E_USERNAME`/`E2E_PASSWORD` and the captured Supabase URL/key in `env`.
+  Note what this actually gates: the **whole** `tests/e2e/` suite, not just the loop spec —
+  `auth.setup.ts`, `seed.spec.ts` and `protected-routes.guest.spec.ts` all become merge-blocking the
+  moment `e2e` is a required check. That is the intended scope (a red guest-route spec should block
+  a merge too), but it means `seed.spec.ts` — kept as a didactic example — now carries production
+  weight and must be maintained accordingly. Record it in §5 rather than leaving it implicit.
   Playwright's own `webServer` block starts `astro dev`; in dev, `astro:env` secrets resolve through
   `process.env`, so job-level `env:` reaches the app. Keep `ASTRO_DEV_BACKGROUND=0` — a no-op on a
   runner but load-bearing locally and for agent-driven runs.
@@ -371,7 +406,26 @@ carrying a comment documenting its required-status-check requirement exactly as
 Do **not** fold these steps into `db-tests`: a pgTAP failure would then hide the e2e result and a red
 job would no longer name the broken layer.
 
-#### 2. Credentials as repository secrets
+#### 2. An env guard where the running app is observable
+
+**File**: `tests/e2e/auth.setup.ts`
+
+**Intent**: The job's named steps cover provisioning, but not the one failure mode this phase calls
+unprovable locally — whether job-level `env:` actually reaches `astro dev`. `astro.config.mjs:32-33`
+declares `SUPABASE_URL`/`SUPABASE_KEY` **optional**, so a missing value does not crash the app:
+`src/lib/supabase.ts:7-10` returns `null`, `POST /api/auth/signin` answers **503**
+(`src/pages/api/auth/signin.ts:9-12`), and `Layout.astro:5` renders the
+`Supabase nie jest skonfigurowany` banner from `src/lib/config-status.ts:14`. Playwright then
+reports a failed login — the app-vs-environment confusion the Desired End State rules out. No CI
+step can catch this, because the dev server is started by Playwright's `webServer`, not by the job;
+the guard has to live where the running app is observable.
+
+**Contract**: Before filling the sign-in form, `auth.setup.ts` asserts the app is configured — the
+`Supabase nie jest skonfigurowany` banner is absent on `/auth/signin` — and fails with a message
+naming the environment, not the credentials. Shared test infrastructure, so the edit is deliberately
+one assertion with no change to the existing skip/throw logic at `auth.setup.ts:15-22`.
+
+#### 3. Credentials as repository secrets
 
 **File**: repository settings (no file change)
 
@@ -382,7 +436,7 @@ credentials must exist as secrets.
 `.env.example:5-7`. Any values — the user is created fresh per run against a throwaway local stack,
 so these are not real credentials to anything.
 
-#### 3. Required status check
+#### 4. Required status check
 
 **File**: repository settings (no file change)
 
@@ -410,6 +464,8 @@ the gap is recorded as an explicit §7 deferral in Phase 4.
   Playwright step — the gap #9 check
 - `e2e` appears in `master`'s required status checks and the merge button is blocked while it is red
 - Total job wall time is acceptable next to `db-tests` (~1-2 min of that is Docker image pull)
+- Locally, with `SUPABASE_URL` emptied, the `setup` project fails naming the **environment** (the
+  `Supabase nie jest skonfigurowany` banner), not the credentials — the app-side half of gap #9
 
 **Implementation Note**: Pause after this phase for manual confirmation that a real PR ran green
 before proceeding — the `.dev.vars` precedence footgun means CI env plumbing cannot be proven
@@ -456,7 +512,11 @@ is still true (no MCP), but the Playwright **CLI** is present and used, so the b
 response substitution (the honest answer: not done in e2e, and why), and the "e2e instead of
 integration" criterion. Plus the patterns this spec establishes: region scoping, the retryable
 hydration block, own-text-not-counters, asserting the response status where the UI swallows errors,
-and `page.request` + `Origin` for cleanup.
+`page.request` + `Origin` for cleanup, and cleanup in a hook rather than inline (with the
+`seed.spec.ts` inline shape kept as the simpler case and the condition that separates them: whether
+a stranded record poisons the next run). The empty-queue precondition and the reasoning behind it
+(`due` ascending + only `queue[0]` rendered) belongs here too — it is the trap the next
+review-touching spec will otherwise rediscover.
 
 #### 3. §3 rollout status and §5 gate
 
@@ -467,7 +527,9 @@ and `page.request` + `Origin` for cleanup.
 **Contract**: Phase 4's Status cell moves to `complete` (from the fixed vocabulary at
 `context/foundation/test-plan.md:87-88`), and its `Risks covered` cell is narrowed from
 `#1, #2, #3, #4 (przekrojowo)` to what the split loop actually proves, with the attribution stated.
-The §5 `e2e krytycznej pętli` gate row reflects its real enforcement status.
+The §5 `e2e krytycznej pętli` gate row reflects its real enforcement status **and its real scope** —
+the check runs the whole `tests/e2e/` suite, so `seed.spec.ts` and
+`protected-routes.guest.spec.ts` block merges too, not only the loop spec.
 
 #### 4. §6.7 — phase notes
 
@@ -494,6 +556,21 @@ oracle rule; the missing `/generate` anchors; and the workerd-runtime gap covere
 pre-prod smoke gate. If the team declined the required status check in Phase 3, an entry for that
 too.
 
+#### 6. How to run the suite locally
+
+**File**: `README.md`
+
+**Intent**: Phase 2 makes a green local run the gate before any CI work, and Phase 3 makes the suite
+merge-blocking — but the requirements for running it are written down only in a comment in
+`playwright.config.ts:4-8`. `README.md` does not mention e2e at all, and `test-plan.md` is a strategy
+document, not the place a contributor looks for a command.
+
+**Contract**: A short section covering: `npm run test:e2e`; the `.env.test` file with
+`E2E_USERNAME`/`E2E_PASSWORD` (copied from `.env.example:5-7`) and that the account must exist in
+whichever Supabase `.env` points at; the empty-review-queue precondition and what a precondition
+failure means; and `npm run test:e2e:report` for the trace after a failure. Half a screen, not a
+guide — §6.6 keeps the patterns, README keeps the commands.
+
 ### Success Criteria:
 
 #### Automated Verification:
@@ -509,6 +586,8 @@ too.
 - Every §7 entry names what would cause it to be reconsidered
 - No claim in the document asserts coverage the landed spec does not deliver
 - The Freshness Ledger dates are updated
+- A contributor with a clean checkout can get `npm run test:e2e` running from the README section
+  alone, without reading `playwright.config.ts`
 
 ---
 
@@ -613,6 +692,8 @@ Two manual repo-settings actions are required and cannot be committed: adding th
 - [ ] 2.8 Deliberate break: `Powtórki` nav href — spec goes red, revert, green
 - [ ] 2.9 Deliberate break: `POST /api/reviews` returns 409 — spec goes red, not green on the swallowed advance
 - [ ] 2.10 After a full run, `/deck` contains no leftover `E2E`-tagged cards
+- [ ] 2.11 With a leftover due card, the spec fails at the precondition naming the non-empty queue
+- [ ] 2.12 A deliberately failed run still leaves `/deck` clean — cleanup runs on the failure path
 
 ### Phase 3: The CI gate
 
@@ -629,6 +710,7 @@ Two manual repo-settings actions are required and cannot be committed: adding th
 - [ ] 3.6 A forced anon-key capture failure turns that step red with its own name (gap #9 check)
 - [ ] 3.7 `e2e` is in `master`'s required status checks and blocks the merge button while red
 - [ ] 3.8 Total job wall time is acceptable next to `db-tests`
+- [ ] 3.9 With `SUPABASE_URL` emptied, `setup` fails naming the environment, not the credentials
 
 ### Phase 4: Documentation reconciliation
 
@@ -644,3 +726,4 @@ Two manual repo-settings actions are required and cannot be committed: adding th
 - [ ] 4.5 Every §7 entry names what would cause it to be reconsidered
 - [ ] 4.6 No claim in the document asserts coverage the landed spec does not deliver
 - [ ] 4.7 The Freshness Ledger dates are updated
+- [ ] 4.8 A contributor can run `npm run test:e2e` from the README section alone
