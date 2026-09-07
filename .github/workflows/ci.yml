@@ -6,6 +6,20 @@ on:
   pull_request:
     branches: [master]
 
+# The least any job here needs — none of the three writes to the repo. Without this block
+# `GITHUB_TOKEN` inherits the repository default (read/write on `contents` for older repos),
+# and `npm ci` runs lifecycle scripts from the PR's own `package.json`. Harmless while the
+# repo is private; it matters the moment it goes public.
+permissions:
+  contents: read
+
+# A new push to the same PR cancels the previous run. Without it two `e2e` and two `db-tests`
+# jobs hold a Supabase stack each in parallel, and the older result is already stale anyway.
+# `master` falls under this too, but pushes there are rare.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ci:
     runs-on: ubuntu-latest
@@ -28,17 +42,25 @@ jobs:
   db-tests:
     # pgTAP policy suite against a real local Postgres. Separate job: `supabase start`
     # pulls Docker images (~1-2 min) and the Docker-free `ci` job must not pay that cost.
-    # PR-only — a red run here is meant to block the merge button (add `db-tests` to
-    # master's required status checks in repo Settings → Branches).
+    # PR-only. NOT a required status check: branch protection and rulesets return 403 on this
+    # repository (private, on a plan without the feature), so a red run does not block the merge
+    # button. Once the repo goes public or the plan is upgraded, add `db-tests` to master's
+    # required status checks in Settings → Branches. See context/foundation/test-plan.md §7.
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # Pin podniesiony z 2.23.4: ten job jest PR-only, a repo do tej pory nie miało ani
-      # jednego PR-a, więc pin nigdy się nie wykonał. 2.23.4 nie parsuje `supabase/config.toml`
-      # (odrzuca m.in. `db.migrations.enabled`, `storage.analytics`, `auth.web3`,
-      # `auth.oauth_server`) i pada na `supabase start`. Trzymaj tę wersję zgodną z pinem
-      # w jobie `e2e` — oba czytają ten sam config.
+        with:
+          # This job writes nothing to the repo; without this, checkout leaves GITHUB_TOKEN
+          # behind in .git/config.
+          persist-credentials: false
+      # Pin raised from 2.23.4: this job is PR-only and the repo had no pull request until now,
+      # so the pin had never actually executed. 2.23.4 cannot parse the current
+      # `supabase/config.toml` (it rejects `db.migrations.enabled`, `storage.analytics`,
+      # `auth.web3`, `auth.oauth_server` among others) and dies on `supabase start`. Keep this
+      # version in lockstep with the `e2e` job — both read the same config — and keep the
+      # `supabase` devDependency floor in package.json aligned, since `npm run db:test` runs
+      # against that one locally.
       - uses: supabase/setup-cli@v3
         with:
           version: 2.117.0
@@ -48,20 +70,37 @@ jobs:
         run: supabase stop
 
   e2e:
-    # Bramka dymna na głównej ścieżce użytkownika (`login → deka → powtórka`),
-    # `tests/e2e/critical-loop.spec.ts`. Osobny job, nie doklejone kroki w `db-tests`:
-    # awaria pgTAP zasłoniłaby wynik e2e i czerwony job przestałby nazywać zepsutą warstwę.
-    # PR-only — czerwony przebieg ma blokować przycisk merge (dodaj `e2e` do required status
-    # checks gałęzi master w repo Settings → Branches).
+    # Smoke gate on the main user path (`login → deck → review`),
+    # `tests/e2e/critical-loop.spec.ts`. A separate job rather than steps bolted onto
+    # `db-tests`: a pgTAP failure would mask the e2e result and a red job would stop naming
+    # the broken layer.
+    # PR-only. NOT a required status check: branch protection and rulesets return 403 on this
+    # repository, so a red run does not block the merge button — PR review carries the
+    # enforcement until then. Once the repo goes public or the plan is upgraded, add `e2e` to
+    # master's required status checks. See context/foundation/test-plan.md §7.
     #
-    # Uwaga na zakres: `npm run test:e2e` uruchamia CAŁY katalog `tests/e2e/`, nie tylko
-    # spec pętli. `auth.setup.ts`, `seed.spec.ts` i `protected-routes.guest.spec.ts` stają się
-    # więc blokujące merge — świadomie, ale `seed.spec.ts` (przykład dydaktyczny) niesie od
-    # teraz wagę produkcyjną i trzeba go utrzymywać.
-    if: github.event_name == 'pull_request'
+    # Note the scope: `npm run test:e2e` runs the WHOLE `tests/e2e/` directory, not just the
+    # loop spec. `auth.setup.ts`, `seed.spec.ts` and `protected-routes.guest.spec.ts` are part
+    # of the gate — deliberately, but it means `seed.spec.ts` (kept as a teaching example) now
+    # carries production weight and has to be maintained accordingly.
+    #
+    # The second clause of the condition excludes fork PRs. The trigger is `pull_request` (not
+    # `pull_request_target`, which would run fork code with access to secrets), so a fork gets
+    # no secrets — the `E2E_USERNAME`/`E2E_PASSWORD` guards below would then fail and hand an
+    # outside contributor a red gate they cannot fix. Better to skip the job than to fail it
+    # for a reason that has nothing to do with the change.
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
+    # A green run takes ~5 min (see job history). 20 min leaves room for a slow image pull
+    # while still capping a wedged job (Docker + dev server + browser), which would otherwise
+    # burn the runner's 6-hour default.
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          # This job writes nothing to the repo; without this, checkout leaves GITHUB_TOKEN
+          # behind in .git/config.
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -69,42 +108,43 @@ jobs:
       - run: npm ci
       - run: npx astro sync
 
-      # Ta sama wersja co w `db-tests` — oba joby czytają ten sam `supabase/config.toml`,
-      # więc rozjazd pinów oznaczałby, że jeden z nich pada na parsowaniu configu.
+      # Same version as `db-tests` — both jobs read the same `supabase/config.toml`, so a pin
+      # mismatch would mean one of them dies parsing the config.
       - uses: supabase/setup-cli@v3
         with:
           version: 2.117.0
       - run: supabase start
 
-      # Krok, który pada głośno i pod własną nazwą, gdy stack nie wstał — inaczej brak kluczy
-      # wypłynąłby dopiero jako „nie udało się zalogować" w raporcie Playwrighta.
-      # `-o env --override-name` to udokumentowana forma maszynowa (`supabase status --help`).
-      - name: Przechwyć adres i klucz lokalnego Supabase
+      # A step that fails loudly and under its own name when the stack did not come up —
+      # otherwise missing keys would surface much later, as "login failed" in the Playwright
+      # report. `-o env --override-name` is the documented machine-readable form
+      # (`supabase status --help`).
+      - name: Capture local Supabase URL and anon key
         run: |
           set -euo pipefail
           status="$(supabase status -o env \
             --override-name api.url=SUPABASE_URL \
             --override-name auth.anon_key=SUPABASE_KEY)"
           eval "$status"
-          test -n "${SUPABASE_URL:-}" || { echo "::error::SUPABASE_URL puste — stack Supabase nie wystartował poprawnie."; exit 1; }
-          test -n "${SUPABASE_KEY:-}" || { echo "::error::SUPABASE_KEY puste — stack Supabase nie wystartował poprawnie."; exit 1; }
+          test -n "${SUPABASE_URL:-}" || { echo "::error::SUPABASE_URL is empty — the Supabase stack did not start correctly."; exit 1; }
+          test -n "${SUPABASE_KEY:-}" || { echo "::error::SUPABASE_KEY is empty — the Supabase stack did not start correctly."; exit 1; }
           echo "::add-mask::$SUPABASE_KEY"
           echo "SUPABASE_URL=$SUPABASE_URL" >> "$GITHUB_ENV"
           echo "SUPABASE_KEY=$SUPABASE_KEY" >> "$GITHUB_ENV"
 
-      # Konto testowe zakładane wprost w GoTrue — nie wymaga działającej aplikacji.
-      # `supabase/config.toml:209` ma `enable_confirmations = false`, więc konto jest
-      # zdatne do logowania natychmiast, bez ręcznie dopisywanego hasha bcrypt.
-      # `--fail` zamienia non-2xx w czerwony TEN krok, zamiast błędu logowania trzy kroki dalej.
-      - name: Załóż konto testowe w lokalnym GoTrue
+      # The test account is created straight in GoTrue — no running app required.
+      # `supabase/config.toml:209` sets `enable_confirmations = false`, so the account can sign
+      # in immediately without a hand-written bcrypt hash. `--fail` turns a non-2xx into a red
+      # THIS step, rather than a login failure three steps later.
+      - name: Create the test account in local GoTrue
         env:
           E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
           E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
         run: |
           set -euo pipefail
-          test -n "${E2E_USERNAME:-}" || { echo "::error::Brak sekretu E2E_USERNAME w ustawieniach repozytorium."; exit 1; }
-          test -n "${E2E_PASSWORD:-}" || { echo "::error::Brak sekretu E2E_PASSWORD w ustawieniach repozytorium."; exit 1; }
-          # jq buduje JSON, więc znaki specjalne w sekretach nie rozjeżdżają ciała żądania.
+          test -n "${E2E_USERNAME:-}" || { echo "::error::Repository secret E2E_USERNAME is missing."; exit 1; }
+          test -n "${E2E_PASSWORD:-}" || { echo "::error::Repository secret E2E_PASSWORD is missing."; exit 1; }
+          # jq builds the JSON, so special characters in the secrets cannot break the body.
           payload="$(jq -n --arg email "$E2E_USERNAME" --arg password "$E2E_PASSWORD" \
             '{email: $email, password: $password}')"
           curl --fail --silent --show-error --output /dev/null \
@@ -113,27 +153,32 @@ jobs:
             -H "Content-Type: application/json" \
             -d "$payload"
 
-      # Tylko Chromium — `playwright.config.ts` nie konfiguruje innej przeglądarki.
+      # Chromium only — `playwright.config.ts` configures no other browser.
       - run: npx playwright install --with-deps chromium
 
-      # `webServer` w playwright.config.ts sam startuje `astro dev`; w dev sekrety `astro:env`
-      # rozwiązują się przez `process.env`, więc env joba (SUPABASE_URL / SUPABASE_KEY z
-      # $GITHUB_ENV) dociera do aplikacji. Lokalnie wygrywa `.dev.vars` — gitignorowane
-      # i nieobecne w CI, dlatego to jedyne miejsce, gdzie to podłączenie da się sprawdzić.
-      - name: Uruchom suite e2e
+      # Playwright's own `webServer` block starts `astro dev`; in dev, `astro:env` secrets
+      # resolve through `process.env`, so the job env (SUPABASE_URL / SUPABASE_KEY from
+      # $GITHUB_ENV) reaches the app. Locally `.dev.vars` wins instead — gitignored and absent
+      # in CI, which is why this is the only place the wiring can actually be proven.
+      - name: Run the e2e suite
         run: npm run test:e2e
         env:
           E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
           E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
 
-      # `playwright.config.ts:24-26` emituje trace i zrzuty ekranu — bez uploadu są bezużyteczne.
+      # `playwright.config.ts:24-26` emits traces and screenshots — useless without an upload.
+      #
+      # Deliberately ONLY `playwright-report/`, never `test-results/`. That is where the trace
+      # files live, and the `setup` project's trace contains the password typed into the form
+      # (`auth.setup.ts` calls `fill(password)`) along with the Supabase session cookies from
+      # the response. GitHub's secret masking (`::add-mask::` above) applies to logs, NEVER to
+      # artifact contents, and anyone with read access can download an artifact. To debug a red
+      # CI run, reproduce it locally.
       - if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
-          path: |
-            playwright-report/
-            test-results/
+          path: playwright-report/
           retention-days: 7
 
       - if: always()

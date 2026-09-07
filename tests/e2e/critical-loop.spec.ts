@@ -21,16 +21,38 @@ test.describe("główna ścieżka użytkownika: kolekcja → powtórka", () => {
   test.afterEach(async ({ page }) => {
     if (!createdId || !originForCleanup) return;
 
+    // Uchwyty zerowane PRZED kasowaniem: gdy asercja niżej rzuci, nieaktualne `id` nie może
+    // zostać widoczne dla kolejnej próby. Przy `retries` każde podejście tworzy własną fiszkę.
+    const id = createdId;
+    const origin = originForCleanup;
+    createdId = null;
+    originForCleanup = null;
+
     // `page.request` (nie fixture `request`) dzieli ciasteczka z kartą — widzi token odświeżony
     // przez Supabase w trakcie testu. `Origin` przeglądarka dodaje sama; bez niego bramka
     // origin w Astro zwraca 403. Oba szczegóły: context/foundation/lessons.md:65-77.
-    const deleted = await page.request.delete(`/api/flashcards/${createdId}`, {
-      headers: { Origin: originForCleanup },
-    });
-    expect(deleted.ok(), `DELETE zwrócił ${String(deleted.status())}: ${await deleted.text()}`).toBe(true);
+    //
+    // Ponawiamy zamiast asertować za pierwszym razem: sierota po nieudanym DELETE jest wymagalna
+    // natychmiast, więc zatruwa warunek wstępny KAŻDEGO następnego przebiegu na tym koncie.
+    // Jedno pudło sieciowe nie może tyle kosztować.
+    let status = 0;
+    let body = "";
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      const deleted = await page.request.delete(`/api/flashcards/${id}`, {
+        headers: { Origin: origin },
+      });
+      status = deleted.status();
+      body = await deleted.text();
+      if (deleted.ok()) break;
+    }
 
-    createdId = null;
-    originForCleanup = null;
+    // Komunikat niesie `id`, bo bez niego sieroty nie da się namierzyć: `GET /api/flashcards`
+    // nie istnieje, więc kolekcji nie sposób wyliczyć po HTTP.
+    expect(
+      status,
+      `Nie udało się usunąć fiszki ${id} po 3 próbach (ostatnio ${String(status)}: ${body}). ` +
+        `Zostaje na koncie testowym i zablokuje warunek wstępny następnego przebiegu — usuń ją ręcznie.`,
+    ).toBe(200);
   });
 
   test("fiszka dodana w kolekcji trafia do powtórki i zostaje oceniona po stronie serwera", async ({ page }) => {
@@ -124,5 +146,14 @@ test.describe("główna ścieżka użytkownika: kolekcja → powtórka", () => {
     // nie po komunikacie `To na dziś wszystko — powtórzono {n} fiszek.` ani po liczniku —
     // te czytają stan zaległy i przy brudnym koncie znaczyłyby coś innego.
     await expect(session.getByText(front, { exact: true })).toBeHidden();
+
+    // Sama asercja negatywna jest spełnialna z niewłaściwego powodu: po ocenie `handleGrade`
+    // woła `loadQueue` (ReviewSession.tsx:179), a gdy ten `GET /api/reviews` padnie, wyspa
+    // renderuje `Alert` „Coś poszło nie tak" (:282) i tekst karty też znika. `waitForResponse`
+    // wyżej filtruje po POST, więc tego GET-a nie obejmuje. Domykamy parą pozytywną: link
+    // „Wróć do talii" stoi w EmptyState dla `empty` i `finished` (:260-280), a nie ma go ani
+    // na gałęzi błędu (tam jest „Spróbuj ponownie"), ani w trakcie sesji. Nie jest to licznik,
+    // więc nie czyta stanu zaległego.
+    await expect(session.getByRole("link", { name: "Wróć do talii" })).toBeVisible();
   });
 });

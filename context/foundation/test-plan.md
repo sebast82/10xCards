@@ -255,10 +255,10 @@ i `supabase/tests/recount_generation_acceptance.test.sql`.
 - **pgTAP do semantyki**: `review_queue.test.sql` na realnym wierszu + indeksie `(user_id, due)` +
   RLS — selekcja `due <= now()`, porządek rosnący `due` (niezależny oracle: porządek po `id` przy
   odpowiednim seedzie), sufit 50 wierszy + wykluczenie 51., izolacja kolejki między kontami, oraz
-  sekwencja guarda `reps` (świeży guard → 1 wiersz, nieaktualny → 0, legalna druga ocena → 1 wiersz
-  - spójny re-parse). `plan(N)` liczony na końcu, ustawiony zaraz po `begin;`. Kotwica-komentarz do
-    `src/lib/reviews/service.ts:62-96` i `:132-149` — dryf w łańcuchu `.from()/.eq()/.lte()` łapie
-    przegląd, nie automat (§7).
+  sekwencja guarda `reps` (świeży guard → 1 wiersz, nieaktualny → 0, legalna druga ocena → 1 wiersz +
+  spójny re-parse). `plan(N)` liczony na końcu, ustawiony zaraz po `begin;`. Kotwica-komentarz do
+  `src/lib/reviews/service.ts:62-96` i `:132-149` — dryf w łańcuchu `.from()/.eq()/.lte()` łapie
+  przegląd, nie automat (§7).
 - **`.strict()` na ciele POST** (`src/pages/api/reviews.test.ts`): ciało z dodatkowym `now` → 400,
   `Object.keys(body) === ["error"]`, zero `queries` i `rpcCalls` — serwer jest właścicielem zegara.
 - **„Edycja nie rusza licznika" = `rpcCalls` puste** (`src/lib/flashcards/service.test.ts`,

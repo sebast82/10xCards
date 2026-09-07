@@ -244,9 +244,15 @@ export default function ReviewSession() {
 
   const inSession = status === "question" || status === "answer" || status === "grading";
 
+  // `aria-labelledby`, nie `aria-label`: nazwa regionu jest ta sama co treść `<h1>` w środku, więc
+  // dublowany `aria-label` kazałby czytnikowi ogłosić „Sesja powtórkowa, region", a zaraz potem
+  // „Sesja powtórkowa, nagłówek". Wskazanie nagłówka daje ten sam dostępny name — czyli ten sam
+  // uchwyt `getByRole("region", { name: "Sesja powtórkowa" })` dla e2e — bez podwójnego ogłoszenia.
   return (
-    <section className="flex flex-col gap-8" aria-label="Sesja powtórkowa">
-      <h1 className="text-2xl font-bold">Sesja powtórkowa</h1>
+    <section className="flex flex-col gap-8" aria-labelledby="review-session-heading">
+      <h1 id="review-session-heading" className="text-2xl font-bold">
+        Sesja powtórkowa
+      </h1>
       <span className="sr-only" role="status" aria-live="polite">
         {announcement}
       </span>

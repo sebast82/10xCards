@@ -265,6 +265,12 @@ Repository secrets: `SUPABASE_URL` and `SUPABASE_KEY` for the `ci` build step, p
 `E2E_PASSWORD` for the `e2e` job — that job creates the account in its own throwaway stack, so the
 values only need to be a valid email and password.
 
+**Treat `E2E_USERNAME` / `E2E_PASSWORD` as burner credentials.** Do not reuse a password that unlocks
+anything else, and do not reuse the pair for your own Supabase account. The e2e suite types the
+password into a real sign-in form, so it is recoverable from a Playwright trace by anyone who can read
+a failed run — CI does not upload traces (see the artifact step in `ci.yml`), but locally they sit in
+`test-results/`.
+
 None of these jobs is a required status check: branch protection is unavailable on this repository's
 plan, so a red run does not block the merge button. See `context/foundation/test-plan.md` §7.
 
