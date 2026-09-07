@@ -699,18 +699,18 @@ Two manual repo-settings actions are required and cannot be committed: adding th
 
 #### Automated
 
-- [ ] 3.1 The `e2e` job completes green on a real pull request
-- [ ] 3.2 `ci` and `db-tests` still pass unchanged
-- [ ] 3.3 Workflow YAML is valid: `gh workflow view` resolves the new job
-- [ ] 3.4 On an induced failure, the report artifact is present and contains a trace
+- [x] 3.1 The `e2e` job completes green on a real pull request
+- [x] 3.2 `ci` and `db-tests` still pass unchanged
+- [x] 3.3 Workflow YAML is valid: `gh workflow view` resolves the new job
+- [x] 3.4 On an induced failure, the report artifact is present and contains a trace
 
 #### Manual
 
-- [ ] 3.5 Deliberate break confirms the `e2e` job goes red on the PR, not just locally
-- [ ] 3.6 A forced anon-key capture failure turns that step red with its own name (gap #9 check)
+- [x] 3.5 Deliberate break confirms the `e2e` job goes red on the PR, not just locally
+- [x] 3.6 A forced anon-key capture failure turns that step red with its own name (gap #9 check)
 - [ ] 3.7 `e2e` is in `master`'s required status checks and blocks the merge button while red
-- [ ] 3.8 Total job wall time is acceptable next to `db-tests`
-- [ ] 3.9 With `SUPABASE_URL` emptied, `setup` fails naming the environment, not the credentials
+- [x] 3.8 Total job wall time is acceptable next to `db-tests`
+- [x] 3.9 With `SUPABASE_URL` emptied, `setup` fails naming the environment, not the credentials
 
 ### Phase 4: Documentation reconciliation
 
