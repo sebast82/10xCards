@@ -34,9 +34,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Pin podniesiony z 2.23.4: ten job jest PR-only, a repo do tej pory nie miało ani
+      # jednego PR-a, więc pin nigdy się nie wykonał. 2.23.4 nie parsuje `supabase/config.toml`
+      # (odrzuca m.in. `db.migrations.enabled`, `storage.analytics`, `auth.web3`,
+      # `auth.oauth_server`) i pada na `supabase start`. Trzymaj tę wersję zgodną z pinem
+      # w jobie `e2e` — oba czytają ten sam config.
       - uses: supabase/setup-cli@v3
         with:
-          version: 2.23.4
+          version: 2.117.0
       - run: supabase start
       - run: supabase test db
       - if: always()
@@ -64,9 +69,11 @@ jobs:
       - run: npm ci
       - run: npx astro sync
 
+      # Ta sama wersja co w `db-tests` — oba joby czytają ten sam `supabase/config.toml`,
+      # więc rozjazd pinów oznaczałby, że jeden z nich pada na parsowaniu configu.
       - uses: supabase/setup-cli@v3
         with:
-          version: 2.23.4
+          version: 2.117.0
       - run: supabase start
 
       # Krok, który pada głośno i pod własną nazwą, gdy stack nie wstał — inaczej brak kluczy
