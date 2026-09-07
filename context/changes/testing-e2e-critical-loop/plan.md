@@ -716,14 +716,14 @@ Two manual repo-settings actions are required and cannot be committed: adding th
 
 #### Automated
 
-- [x] 4.1 Linting and formatting pass on the changed markdown: `npm run lint`
-- [x] 4.2 No occurrence of `TBD` remains in §6.6
-- [x] 4.3 Phase 4's Status cell uses a literal from the fixed vocabulary
+- [x] 4.1 Linting and formatting pass on the changed markdown: `npm run lint` — 1639193
+- [x] 4.2 No occurrence of `TBD` remains in §6.6 — 1639193
+- [x] 4.3 Phase 4's Status cell uses a literal from the fixed vocabulary — 1639193
 
 #### Manual
 
-- [x] 4.4 A fresh reader can tell from §4 alone that `page.route` will not reach the provider, and why
-- [x] 4.5 Every §7 entry names what would cause it to be reconsidered
-- [x] 4.6 No claim in the document asserts coverage the landed spec does not deliver
-- [x] 4.7 The Freshness Ledger dates are updated
-- [x] 4.8 A contributor can run `npm run test:e2e` from the README section alone
+- [x] 4.4 A fresh reader can tell from §4 alone that `page.route` will not reach the provider, and why — 1639193
+- [x] 4.5 Every §7 entry names what would cause it to be reconsidered — 1639193
+- [x] 4.6 No claim in the document asserts coverage the landed spec does not deliver — 1639193
+- [x] 4.7 The Freshness Ledger dates are updated — 1639193
+- [x] 4.8 A contributor can run `npm run test:e2e` from the README section alone — 1639193
