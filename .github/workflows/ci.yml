@@ -41,3 +41,93 @@ jobs:
       - run: supabase test db
       - if: always()
         run: supabase stop
+
+  e2e:
+    # Bramka dymna na głównej ścieżce użytkownika (`login → deka → powtórka`),
+    # `tests/e2e/critical-loop.spec.ts`. Osobny job, nie doklejone kroki w `db-tests`:
+    # awaria pgTAP zasłoniłaby wynik e2e i czerwony job przestałby nazywać zepsutą warstwę.
+    # PR-only — czerwony przebieg ma blokować przycisk merge (dodaj `e2e` do required status
+    # checks gałęzi master w repo Settings → Branches).
+    #
+    # Uwaga na zakres: `npm run test:e2e` uruchamia CAŁY katalog `tests/e2e/`, nie tylko
+    # spec pętli. `auth.setup.ts`, `seed.spec.ts` i `protected-routes.guest.spec.ts` stają się
+    # więc blokujące merge — świadomie, ale `seed.spec.ts` (przykład dydaktyczny) niesie od
+    # teraz wagę produkcyjną i trzeba go utrzymywać.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx astro sync
+
+      - uses: supabase/setup-cli@v3
+        with:
+          version: 2.23.4
+      - run: supabase start
+
+      # Krok, który pada głośno i pod własną nazwą, gdy stack nie wstał — inaczej brak kluczy
+      # wypłynąłby dopiero jako „nie udało się zalogować" w raporcie Playwrighta.
+      # `-o env --override-name` to udokumentowana forma maszynowa (`supabase status --help`).
+      - name: Przechwyć adres i klucz lokalnego Supabase
+        run: |
+          set -euo pipefail
+          status="$(supabase status -o env \
+            --override-name api.url=SUPABASE_URL \
+            --override-name auth.anon_key=SUPABASE_KEY)"
+          eval "$status"
+          test -n "${SUPABASE_URL:-}" || { echo "::error::SUPABASE_URL puste — stack Supabase nie wystartował poprawnie."; exit 1; }
+          test -n "${SUPABASE_KEY:-}" || { echo "::error::SUPABASE_KEY puste — stack Supabase nie wystartował poprawnie."; exit 1; }
+          echo "::add-mask::$SUPABASE_KEY"
+          echo "SUPABASE_URL=$SUPABASE_URL" >> "$GITHUB_ENV"
+          echo "SUPABASE_KEY=$SUPABASE_KEY" >> "$GITHUB_ENV"
+
+      # Konto testowe zakładane wprost w GoTrue — nie wymaga działającej aplikacji.
+      # `supabase/config.toml:209` ma `enable_confirmations = false`, więc konto jest
+      # zdatne do logowania natychmiast, bez ręcznie dopisywanego hasha bcrypt.
+      # `--fail` zamienia non-2xx w czerwony TEN krok, zamiast błędu logowania trzy kroki dalej.
+      - name: Załóż konto testowe w lokalnym GoTrue
+        env:
+          E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+        run: |
+          set -euo pipefail
+          test -n "${E2E_USERNAME:-}" || { echo "::error::Brak sekretu E2E_USERNAME w ustawieniach repozytorium."; exit 1; }
+          test -n "${E2E_PASSWORD:-}" || { echo "::error::Brak sekretu E2E_PASSWORD w ustawieniach repozytorium."; exit 1; }
+          # jq buduje JSON, więc znaki specjalne w sekretach nie rozjeżdżają ciała żądania.
+          payload="$(jq -n --arg email "$E2E_USERNAME" --arg password "$E2E_PASSWORD" \
+            '{email: $email, password: $password}')"
+          curl --fail --silent --show-error --output /dev/null \
+            -X POST "$SUPABASE_URL/auth/v1/signup" \
+            -H "apikey: $SUPABASE_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$payload"
+
+      # Tylko Chromium — `playwright.config.ts` nie konfiguruje innej przeglądarki.
+      - run: npx playwright install --with-deps chromium
+
+      # `webServer` w playwright.config.ts sam startuje `astro dev`; w dev sekrety `astro:env`
+      # rozwiązują się przez `process.env`, więc env joba (SUPABASE_URL / SUPABASE_KEY z
+      # $GITHUB_ENV) dociera do aplikacji. Lokalnie wygrywa `.dev.vars` — gitignorowane
+      # i nieobecne w CI, dlatego to jedyne miejsce, gdzie to podłączenie da się sprawdzić.
+      - name: Uruchom suite e2e
+        run: npm run test:e2e
+        env:
+          E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+
+      # `playwright.config.ts:24-26` emituje trace i zrzuty ekranu — bez uploadu są bezużyteczne.
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+      - if: always()
+        run: supabase stop

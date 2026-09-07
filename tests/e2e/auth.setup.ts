@@ -23,6 +23,19 @@ setup("zapisuje stan zalogowania testowego użytkownika", async ({ page }) => {
 
   await page.goto("/auth/signin");
 
+  // Bramka środowiska, nie danych logowania — i jedyne miejsce, gdzie da się ją postawić:
+  // dev server startuje `webServer` Playwrighta, nie krok CI, więc żaden krok joba tego nie złapie.
+  // Bez SUPABASE_URL / SUPABASE_KEY aplikacja nie pada: `astro.config.mjs:31-32` deklaruje je jako
+  // opcjonalne, `src/lib/supabase.ts:7-10` zwraca `null`, a `POST /api/auth/signin` przekierowuje
+  // z błędem — Playwright zameldowałby wtedy nieudane logowanie i szukalibyśmy przyczyny w koncie
+  // testowym zamiast w env. Baner z `src/lib/config-status.ts:14` renderuje się po stronie serwera,
+  // więc jest już w pierwszym HTML-u; jego brak znaczy, że aplikacja widzi konfigurację.
+  await expect(
+    page.getByRole("alert").filter({ hasText: "Supabase nie jest skonfigurowany" }),
+    "Aplikacja pod testem nie widzi konfiguracji Supabase — SUPABASE_URL / SUPABASE_KEY nie dotarły " +
+      "do `astro dev`. To awaria środowiska, nie danych logowania konta testowego.",
+  ).toHaveCount(0);
+
   // `exact`, bo przycisk podglądu hasła ma aria-label „Pokaż hasło".
   await page.getByLabel("Email", { exact: true }).fill(email);
   await page.getByLabel("Hasło", { exact: true }).fill(password);

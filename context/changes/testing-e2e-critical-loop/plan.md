@@ -679,21 +679,21 @@ Two manual repo-settings actions are required and cannot be committed: adding th
 
 #### Automated
 
-- [x] 2.1 The spec passes: `npx playwright test tests/e2e/critical-loop.spec.ts`
-- [x] 2.2 The full suite passes: `npm run test:e2e`
-- [x] 2.3 Linting passes on the new file: `npm run lint`
-- [x] 2.4 Type checking passes: `npx astro check`
-- [x] 2.5 The spec contains no `waitForTimeout`, no `.first()`/`.nth()`, no CSS or XPath selectors
-- [x] 2.6 Re-running the spec immediately twice in a row passes both times
+- [x] 2.1 The spec passes: `npx playwright test tests/e2e/critical-loop.spec.ts` — afa0a83
+- [x] 2.2 The full suite passes: `npm run test:e2e` — afa0a83
+- [x] 2.3 Linting passes on the new file: `npm run lint` — afa0a83
+- [x] 2.4 Type checking passes: `npx astro check` — afa0a83
+- [x] 2.5 The spec contains no `waitForTimeout`, no `.first()`/`.nth()`, no CSS or XPath selectors — afa0a83
+- [x] 2.6 Re-running the spec immediately twice in a row passes both times — afa0a83
 
 #### Manual
 
-- [x] 2.7 Reviewed against all five anti-patterns in `e2e-anti-patterns.md`
-- [x] 2.8 Deliberate break: `Powtórki` nav href — spec goes red, revert, green
-- [x] 2.9 Deliberate break: `POST /api/reviews` returns 409 — spec goes red, not green on the swallowed advance
-- [x] 2.10 After a full run, `/deck` contains no leftover `E2E`-tagged cards
-- [x] 2.11 With a leftover due card, the spec fails at the precondition naming the non-empty queue
-- [x] 2.12 A deliberately failed run still leaves `/deck` clean — cleanup runs on the failure path
+- [x] 2.7 Reviewed against all five anti-patterns in `e2e-anti-patterns.md` — afa0a83
+- [x] 2.8 Deliberate break: `Powtórki` nav href — spec goes red, revert, green — afa0a83
+- [x] 2.9 Deliberate break: `POST /api/reviews` returns 409 — spec goes red, not green on the swallowed advance — afa0a83
+- [x] 2.10 After a full run, `/deck` contains no leftover `E2E`-tagged cards — afa0a83
+- [x] 2.11 With a leftover due card, the spec fails at the precondition naming the non-empty queue — afa0a83
+- [x] 2.12 A deliberately failed run still leaves `/deck` clean — cleanup runs on the failure path — afa0a83
 
 ### Phase 3: The CI gate
 
