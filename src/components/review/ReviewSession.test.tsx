@@ -30,6 +30,13 @@ afterEach(() => {
 });
 
 describe("ReviewSession", () => {
+  it("exposes the session as a region named for E2E scoping", async () => {
+    stubFetch(jsonResponse({ cards: [] }));
+    render(<ReviewSession />);
+
+    expect(await screen.findByRole("region", { name: "Sesja powtórkowa" })).toBeTruthy();
+  });
+
   it("shows the empty state when nothing is due", async () => {
     stubFetch(jsonResponse({ cards: [] }));
     render(<ReviewSession />);

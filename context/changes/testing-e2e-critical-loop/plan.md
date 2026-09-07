@@ -664,16 +664,16 @@ Two manual repo-settings actions are required and cannot be committed: adding th
 
 #### Automated
 
-- [ ] 1.1 Type checking passes: `npx astro check`
-- [ ] 1.2 Linting passes, including `eslint-plugin-jsx-a11y`: `npm run lint`
-- [ ] 1.3 Unit and integration tests pass: `npm test`
-- [ ] 1.4 The new region assertion in `ReviewSession.test.tsx` passes
+- [x] 1.1 Type checking passes: `npx astro check`
+- [x] 1.2 Linting passes, including `eslint-plugin-jsx-a11y`: `npm run lint`
+- [x] 1.3 Unit and integration tests pass: `npm test`
+- [x] 1.4 The new region assertion in `ReviewSession.test.tsx` passes
 
 #### Manual
 
-- [ ] 1.5 `/review` renders unchanged visually — no layout shift from `div` → `section`
-- [ ] 1.6 Browser devtools accessibility pane shows a `region` named `Sesja powtórkowa`
-- [ ] 1.7 The existing sr-only announcer still announces `Karta {n} z {m}` on card change
+- [x] 1.5 `/review` renders unchanged visually — no layout shift from `div` → `section`
+- [x] 1.6 Browser devtools accessibility pane shows a `region` named `Sesja powtórkowa`
+- [x] 1.7 The existing sr-only announcer still announces `Karta {n} z {m}` on card change
 
 ### Phase 2: The critical-loop spec
 

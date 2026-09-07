@@ -245,7 +245,7 @@ export default function ReviewSession() {
   const inSession = status === "question" || status === "answer" || status === "grading";
 
   return (
-    <div className="flex flex-col gap-8">
+    <section className="flex flex-col gap-8" aria-label="Sesja powtórkowa">
       <h1 className="text-2xl font-bold">Sesja powtórkowa</h1>
       <span className="sr-only" role="status" aria-live="polite">
         {announcement}
@@ -335,6 +335,6 @@ export default function ReviewSession() {
           </Card>
         </>
       )}
-    </div>
+    </section>
   );
 }

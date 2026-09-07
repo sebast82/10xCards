@@ -1,7 +1,7 @@
 ---
 change_id: testing-e2e-critical-loop
 title: Testing e2e critical loop
-status: planned
+status: implementing
 created: 2026-09-07
 updated: 2026-09-07
 archived_at: null
