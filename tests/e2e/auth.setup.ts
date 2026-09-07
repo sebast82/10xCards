@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { test as setup, expect } from "@playwright/test";
 import { STORAGE_STATE } from "../../playwright.config";
 
@@ -6,9 +7,18 @@ import { STORAGE_STATE } from "../../playwright.config";
 setup("zapisuje stan zalogowania testowego użytkownika", async ({ page }) => {
   const email = process.env.E2E_USERNAME;
   const password = process.env.E2E_PASSWORD;
+  const hasCredentials = Boolean(email && password);
+
+  // Most na czas przejściowy: stan zapisany ręcznie (`playwright-cli state-save`) wystarcza
+  // do przebiegu lokalnego. W CI nigdy — tam pliku nie ma i logowanie musi odtworzyć się
+  // z .env.test, inaczej suite wisi na artefakcie, którego nikt nie umie odtworzyć.
+  setup.skip(
+    !hasCredentials && !process.env.CI && existsSync(STORAGE_STATE),
+    `Brak E2E_USERNAME / E2E_PASSWORD — używam stanu zapisanego w ${STORAGE_STATE}.`,
+  );
 
   if (!email || !password) {
-    throw new Error("Brak E2E_USERNAME / E2E_PASSWORD — ustaw je w .env.test (wzór w .env.example).");
+    throw new Error(`Brak E2E_USERNAME / E2E_PASSWORD w .env.test i brak zapisanego stanu w ${STORAGE_STATE}.`);
   }
 
   await page.goto("/auth/signin");

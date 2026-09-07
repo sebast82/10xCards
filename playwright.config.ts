@@ -30,15 +30,26 @@ export default defineConfig({
     // Jednorazowe logowanie — reszta projektów startuje z gotowym `storageState`.
     { name: "setup", testMatch: /auth\.setup\.ts/ },
     {
+      // Testy roli „niezalogowany": bez `storageState` i bez zależności od `setup`,
+      // więc biegną także wtedy, gdy nie ma konta testowego w .env.test.
+      name: "chromium-guest",
+      testMatch: /.*\.guest\.spec\.ts/,
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
       // Chromium jako jedyna przeglądarka: aplikacja nie ma ryzyk specyficznych dla silnika,
       // a każdy dodatkowy projekt mnoży czas bramki na PR. Dołóż firefox/webkit, gdy pojawi się powód.
       name: "chromium",
+      testIgnore: /.*\.guest\.spec\.ts/,
       use: { ...devices["Desktop Chrome"], storageState: STORAGE_STATE },
       dependencies: ["setup"],
     },
   ],
   webServer: {
     command: `npm run dev -- --port ${String(PORT)}`,
+    // Astro 7 demonizuje dev server, gdy wykryje agenta AI — proces rodzica kończy się
+    // natychmiast, a Playwright melduje "webServer exited early". Wymuszamy pierwszy plan.
+    env: { ASTRO_DEV_BACKGROUND: "0" },
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
