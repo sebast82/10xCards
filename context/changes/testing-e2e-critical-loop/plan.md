@@ -664,36 +664,36 @@ Two manual repo-settings actions are required and cannot be committed: adding th
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `npx astro check`
-- [x] 1.2 Linting passes, including `eslint-plugin-jsx-a11y`: `npm run lint`
-- [x] 1.3 Unit and integration tests pass: `npm test`
-- [x] 1.4 The new region assertion in `ReviewSession.test.tsx` passes
+- [x] 1.1 Type checking passes: `npx astro check` — 15a84c3
+- [x] 1.2 Linting passes, including `eslint-plugin-jsx-a11y`: `npm run lint` — 15a84c3
+- [x] 1.3 Unit and integration tests pass: `npm test` — 15a84c3
+- [x] 1.4 The new region assertion in `ReviewSession.test.tsx` passes — 15a84c3
 
 #### Manual
 
-- [x] 1.5 `/review` renders unchanged visually — no layout shift from `div` → `section`
-- [x] 1.6 Browser devtools accessibility pane shows a `region` named `Sesja powtórkowa`
-- [x] 1.7 The existing sr-only announcer still announces `Karta {n} z {m}` on card change
+- [x] 1.5 `/review` renders unchanged visually — no layout shift from `div` → `section` — 15a84c3
+- [x] 1.6 Browser devtools accessibility pane shows a `region` named `Sesja powtórkowa` — 15a84c3
+- [x] 1.7 The existing sr-only announcer still announces `Karta {n} z {m}` on card change — 15a84c3
 
 ### Phase 2: The critical-loop spec
 
 #### Automated
 
-- [ ] 2.1 The spec passes: `npx playwright test tests/e2e/critical-loop.spec.ts`
-- [ ] 2.2 The full suite passes: `npm run test:e2e`
-- [ ] 2.3 Linting passes on the new file: `npm run lint`
-- [ ] 2.4 Type checking passes: `npx astro check`
-- [ ] 2.5 The spec contains no `waitForTimeout`, no `.first()`/`.nth()`, no CSS or XPath selectors
-- [ ] 2.6 Re-running the spec immediately twice in a row passes both times
+- [x] 2.1 The spec passes: `npx playwright test tests/e2e/critical-loop.spec.ts`
+- [x] 2.2 The full suite passes: `npm run test:e2e`
+- [x] 2.3 Linting passes on the new file: `npm run lint`
+- [x] 2.4 Type checking passes: `npx astro check`
+- [x] 2.5 The spec contains no `waitForTimeout`, no `.first()`/`.nth()`, no CSS or XPath selectors
+- [x] 2.6 Re-running the spec immediately twice in a row passes both times
 
 #### Manual
 
-- [ ] 2.7 Reviewed against all five anti-patterns in `e2e-anti-patterns.md`
-- [ ] 2.8 Deliberate break: `Powtórki` nav href — spec goes red, revert, green
-- [ ] 2.9 Deliberate break: `POST /api/reviews` returns 409 — spec goes red, not green on the swallowed advance
-- [ ] 2.10 After a full run, `/deck` contains no leftover `E2E`-tagged cards
-- [ ] 2.11 With a leftover due card, the spec fails at the precondition naming the non-empty queue
-- [ ] 2.12 A deliberately failed run still leaves `/deck` clean — cleanup runs on the failure path
+- [x] 2.7 Reviewed against all five anti-patterns in `e2e-anti-patterns.md`
+- [x] 2.8 Deliberate break: `Powtórki` nav href — spec goes red, revert, green
+- [x] 2.9 Deliberate break: `POST /api/reviews` returns 409 — spec goes red, not green on the swallowed advance
+- [x] 2.10 After a full run, `/deck` contains no leftover `E2E`-tagged cards
+- [x] 2.11 With a leftover due card, the spec fails at the precondition naming the non-empty queue
+- [x] 2.12 A deliberately failed run still leaves `/deck` clean — cleanup runs on the failure path
 
 ### Phase 3: The CI gate
 

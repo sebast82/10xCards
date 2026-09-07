@@ -15,11 +15,17 @@ const baseURL = process.env.E2E_BASE_URL ?? `http://localhost:${PORT}`;
 
 export default defineConfig({
   testDir: "./tests/e2e",
-  // Testy są niezależne (własny setup → akcja → asercja → sprzątanie), więc mogą biec równolegle.
+  // Testy są niezależne (własny setup → akcja → asercja → sprzątanie), ale nie wszystkie zasoby są.
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  // Jeden worker także lokalnie, nie tylko w CI. Kolejka powtórek jest globalna dla konta:
+  // każda fiszka utworzona przez `/deck` dostaje `due = now`, a `/review` renderuje wyłącznie
+  // `queue[0]` posortowaną po `due` rosnąco. Równoległy `seed.spec.ts` wstawia więc własną kartę
+  // przed kartę `critical-loop.spec.ts` i zasłania ją w trakcie testu — warunek wstępny sprawdza
+  // kolejkę raz, na starcie, i nie ma jak objąć okna, w którym rośnie ona pod nim.
+  // Suite ma kilka testów i biegnie ~10 s, więc szeregowanie nic nie kosztuje.
+  workers: 1,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : [["list"], ["html", { open: "never" }]],
   use: {
     baseURL,
