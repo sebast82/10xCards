@@ -699,31 +699,31 @@ Two manual repo-settings actions are required and cannot be committed: adding th
 
 #### Automated
 
-- [x] 3.1 The `e2e` job completes green on a real pull request
-- [x] 3.2 `ci` and `db-tests` still pass unchanged
-- [x] 3.3 Workflow YAML is valid: `gh workflow view` resolves the new job
-- [x] 3.4 On an induced failure, the report artifact is present and contains a trace
+- [x] 3.1 The `e2e` job completes green on a real pull request — 2142a2a
+- [x] 3.2 `ci` and `db-tests` still pass unchanged — 2142a2a
+- [x] 3.3 Workflow YAML is valid: `gh workflow view` resolves the new job — 2142a2a
+- [x] 3.4 On an induced failure, the report artifact is present and contains a trace — 2142a2a
 
 #### Manual
 
-- [x] 3.5 Deliberate break confirms the `e2e` job goes red on the PR, not just locally
-- [x] 3.6 A forced anon-key capture failure turns that step red with its own name (gap #9 check)
+- [x] 3.5 Deliberate break confirms the `e2e` job goes red on the PR, not just locally — 2142a2a
+- [x] 3.6 A forced anon-key capture failure turns that step red with its own name (gap #9 check) — 2142a2a
 - [ ] 3.7 `e2e` is in `master`'s required status checks and blocks the merge button while red
-- [x] 3.8 Total job wall time is acceptable next to `db-tests`
-- [x] 3.9 With `SUPABASE_URL` emptied, `setup` fails naming the environment, not the credentials
+- [x] 3.8 Total job wall time is acceptable next to `db-tests` — 2142a2a
+- [x] 3.9 With `SUPABASE_URL` emptied, `setup` fails naming the environment, not the credentials — 2142a2a
 
 ### Phase 4: Documentation reconciliation
 
 #### Automated
 
-- [ ] 4.1 Linting and formatting pass on the changed markdown: `npm run lint`
-- [ ] 4.2 No occurrence of `TBD` remains in §6.6
-- [ ] 4.3 Phase 4's Status cell uses a literal from the fixed vocabulary
+- [x] 4.1 Linting and formatting pass on the changed markdown: `npm run lint`
+- [x] 4.2 No occurrence of `TBD` remains in §6.6
+- [x] 4.3 Phase 4's Status cell uses a literal from the fixed vocabulary
 
 #### Manual
 
-- [ ] 4.4 A fresh reader can tell from §4 alone that `page.route` will not reach the provider, and why
-- [ ] 4.5 Every §7 entry names what would cause it to be reconsidered
-- [ ] 4.6 No claim in the document asserts coverage the landed spec does not deliver
-- [ ] 4.7 The Freshness Ledger dates are updated
-- [ ] 4.8 A contributor can run `npm run test:e2e` from the README section alone
+- [x] 4.4 A fresh reader can tell from §4 alone that `page.route` will not reach the provider, and why
+- [x] 4.5 Every §7 entry names what would cause it to be reconsidered
+- [x] 4.6 No claim in the document asserts coverage the landed spec does not deliver
+- [x] 4.7 The Freshness Ledger dates are updated
+- [x] 4.8 A contributor can run `npm run test:e2e` from the README section alone

@@ -55,6 +55,11 @@ npm run dev
 - `npm run lint` - Run ESLint with type-checked rules
 - `npm run lint:fix` - Auto-fix ESLint issues
 - `npm run format` - Run Prettier
+- `npm test` - Run unit and integration tests (Vitest)
+- `npm run db:test` - Run database policy and procedure tests (pgTAP; needs a running local Supabase stack)
+- `npm run test:e2e` - Run the Playwright end-to-end suite ([setup](#end-to-end-tests) required)
+- `npm run test:e2e:ui` - Same suite in Playwright's interactive runner
+- `npm run test:e2e:report` - Open the HTML report (traces, screenshots) from the last run
 
 ## Project Structure
 
@@ -172,6 +177,60 @@ Users can then sign in immediately after sign-up without clicking a confirmation
 
 Route protection is handled in `src/middleware.ts`. Add paths to the `PROTECTED_ROUTES` array there to require authentication.
 
+## Testing
+
+Unit and integration tests run under Vitest and need no services:
+
+```bash
+npm test
+```
+
+Database policy and procedure tests (pgTAP) run against the local stack:
+
+```bash
+npx supabase start
+npm run db:test
+```
+
+### End-to-end tests
+
+Playwright drives Chromium against a real `astro dev` server, which the runner starts for you (it
+reuses one already listening on port 4321 if you have `npm run dev` open). Setup is a one-time step:
+
+1. **Create a test account.** Sign up once through `/auth/signup` in the app. It must exist in
+   whichever Supabase project the dev server actually reads — note that locally `.dev.vars` wins
+   over `.env`, because the Cloudflare adapter loads it into `process.env` at startup.
+
+2. **Create `.env.test`** with that account's credentials. The keys are the last two in
+   `.env.example`; Playwright loads this file itself (`playwright.config.ts`), and it is gitignored:
+
+   ```
+   E2E_USERNAME=you+e2e@example.com
+   E2E_PASSWORD=<password>
+   ```
+
+3. **Run the suite:**
+
+   ```bash
+   npm run test:e2e
+   ```
+
+**Precondition — the test account's review queue must be empty.** `tests/e2e/critical-loop.spec.ts`
+creates a flashcard, which becomes due immediately, and `/review` renders only the first card of the
+queue sorted by due date ascending — so any card left over from an earlier session hides it. The spec
+checks this before doing anything else and fails with the fronts of the overdue cards listed. That
+failure means the test account needs its reviews cleared (grade them in the app), not that the
+application is broken.
+
+After a failure, open the trace and screenshots:
+
+```bash
+npm run test:e2e:report
+```
+
+Optional environment overrides: `E2E_PORT` (default `4321`) and `E2E_BASE_URL` to point the suite at
+an already-running server elsewhere.
+
 ## Deployment
 
 GitHub Actions validates each push with `npm ci`, `astro sync`, `astro check`, lint, tests, and build.
@@ -194,7 +253,20 @@ Set `SUPABASE_URL` and `SUPABASE_KEY` as secrets in your Cloudflare dashboard or
 
 ## CI
 
-GitHub Actions runs lint + build on every push and PR to `master`. Configure `SUPABASE_URL` and `SUPABASE_KEY` as repository secrets in GitHub for the build step.
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs three jobs:
+
+| Job        | Runs on                       | What it does                                                                                                       |
+| ---------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `ci`       | every push and PR to `master` | `astro check`, lint, `npm test`, build                                                                             |
+| `db-tests` | pull requests only            | pgTAP policy suite against a local Supabase stack                                                                  |
+| `e2e`      | pull requests only            | the Playwright suite against `astro dev`, with its own local Supabase stack and a test user provisioned in the job |
+
+Repository secrets: `SUPABASE_URL` and `SUPABASE_KEY` for the `ci` build step, plus `E2E_USERNAME` and
+`E2E_PASSWORD` for the `e2e` job — that job creates the account in its own throwaway stack, so the
+values only need to be a valid email and password.
+
+None of these jobs is a required status check: branch protection is unavailable on this repository's
+plan, so a red run does not block the merge button. See `context/foundation/test-plan.md` §7.
 
 ## License
 
