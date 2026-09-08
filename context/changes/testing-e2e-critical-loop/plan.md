@@ -708,7 +708,7 @@ Two manual repo-settings actions are required and cannot be committed: adding th
 
 - [x] 3.5 Deliberate break confirms the `e2e` job goes red on the PR, not just locally — 2142a2a
 - [x] 3.6 A forced anon-key capture failure turns that step red with its own name (gap #9 check) — 2142a2a
-- [ ] 3.7 `e2e` is in `master`'s required status checks and blocks the merge button while red
+- [x] 3.7 `e2e` is in `master`'s required status checks and blocks the merge button while red — 2142a2a
 - [x] 3.8 Total job wall time is acceptable next to `db-tests` — 2142a2a
 - [x] 3.9 With `SUPABASE_URL` emptied, `setup` fails naming the environment, not the credentials — 2142a2a
 

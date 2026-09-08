@@ -42,10 +42,10 @@ jobs:
   db-tests:
     # pgTAP policy suite against a real local Postgres. Separate job: `supabase start`
     # pulls Docker images (~1-2 min) and the Docker-free `ci` job must not pay that cost.
-    # PR-only. NOT a required status check: branch protection and rulesets return 403 on this
-    # repository (private, on a plan without the feature), so a red run does not block the merge
-    # button. Once the repo goes public or the plan is upgraded, add `db-tests` to master's
-    # required status checks in Settings → Branches. See context/foundation/test-plan.md §7.
+    # PR-only, and a required status check on master (alongside `ci` and `e2e`) with
+    # enforce_admins on, so a red run blocks the merge button for everyone. Note the
+    # consequence: this job never runs on `push`, so a commit pushed straight to master can
+    # never satisfy it. That is intended — every change goes through a pull request.
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
@@ -74,10 +74,9 @@ jobs:
     # `tests/e2e/critical-loop.spec.ts`. A separate job rather than steps bolted onto
     # `db-tests`: a pgTAP failure would mask the e2e result and a red job would stop naming
     # the broken layer.
-    # PR-only. NOT a required status check: branch protection and rulesets return 403 on this
-    # repository, so a red run does not block the merge button — PR review carries the
-    # enforcement until then. Once the repo goes public or the plan is upgraded, add `e2e` to
-    # master's required status checks. See context/foundation/test-plan.md §7.
+    # PR-only, and a required status check on master (alongside `ci` and `db-tests`) with
+    # enforce_admins on, so a red run blocks the merge button for everyone. Same consequence as
+    # db-tests: it never runs on `push`, so every change to master goes through a pull request.
     #
     # Note the scope: `npm run test:e2e` runs the WHOLE `tests/e2e/` directory, not just the
     # loop spec. `auth.setup.ts`, `seed.spec.ts` and `protected-routes.guest.spec.ts` are part
