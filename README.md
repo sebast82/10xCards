@@ -271,8 +271,10 @@ password into a real sign-in form, so it is recoverable from a Playwright trace 
 a failed run — CI does not upload traces (see the artifact step in `ci.yml`), but locally they sit in
 `test-results/`.
 
-None of these jobs is a required status check: branch protection is unavailable on this repository's
-plan, so a red run does not block the merge button. See `context/foundation/test-plan.md` §7.
+All three are required status checks on `master`, with `enforce_admins` on — a red run blocks the
+merge button for everyone, repository owner included. Because `db-tests` and `e2e` only run on
+`pull_request`, a commit pushed straight to `master` never gets those checks and is rejected: every
+change goes through a pull request.
 
 ## License
 
