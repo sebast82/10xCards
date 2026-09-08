@@ -75,3 +75,24 @@
   niosącym status i ciało odpowiedzi — bez tego dostajesz gołe `expected true, received false`.
 - **Applies to:** Każdy setup/teardown w e2e wołający `POST`/`PATCH`/`DELETE` na `/api/**`;
   ta sama para pułapek dotyczy przygotowywania danych przed testem, nie tylko sprzątania po nim.
+
+## Nie formatuj pliku, którego nie formatujesz celowo
+
+- **Context:** Każde uruchomienie `prettier --write` (albo innego formatera) na pliku dotkniętym
+  przez zmianę — w szczególności `context/foundation/*.md` i `context/changes/**/plan.md`, które
+  powstawały ręcznie i nigdy nie przeszły formatera.
+- **Problem:** Dwa przypadki w jednej sesji. W `test-plan.md` §6.5 prettier uznał zawinięty znak `+`
+  na początku kontynuacji zdania za marker listy, przepisał go na `-` i wciął dwie kolejne linie —
+  „legalna druga ocena → 1 wiersz **+** spójny re-parse" zaczęło znaczyć co innego, w sekcji, której
+  zmiana w ogóle nie dotyczyła. W `plan.md` ten sam odruch dał 40 linii zamiany `*kursywa*` →
+  `_kursywa_` w commicie, który miał zmieniać jeden checkbox. Pierwszy przypadek wyszedł dopiero
+  w przeglądzie implementacji (finding F2), drugi — z przypadkowego spojrzenia na `--stat`.
+- **Rule:** Przed formatowaniem sprawdź `prettier --check <plik>`. Jeśli plik nie był wcześniej
+  czysty, **nie** formatuj go przy okazji zmiany merytorycznej — formater przepisze też treść, której
+  nie tykasz, a w markdownie potrafi zmienić znaczenie (znaki `+`, `-`, `_` na początku zawiniętej
+  linii). Formatowanie pliku zastanego to osobny commit. Po każdym `--write` obejrzyj
+  `git diff --stat`: liczba zmienionych linii wyraźnie większa od Twojej edycji znaczy, że formater
+  zrobił coś jeszcze.
+- **Applies to:** implement, impl-review — każda faza dotykająca markdownu w `context/`, `README.md`
+  i `docs/`. Ta sama pułapka dotyczy dowolnego formatera puszczanego hurtem na plik, którego nie
+  jesteś autorem.
