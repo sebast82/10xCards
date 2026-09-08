@@ -42,3 +42,21 @@ reports/mutation/
 .playwright-cli/
 .playwright-mcp/
 .env.test
+
+# 10xDevs AI Toolkit (@przeprogramowani/10x-cli) — materiał kursowy, nie kod tego projektu.
+# Reguły są katalogowe, bo kolejne lekcje dokładają nowe skille i prompty; pliki zostają
+# na dysku i działają lokalnie, po prostu przestają być śledzone przez gita.
+#
+# Zapis `katalog/*` (a nie `katalog/`) jest celowy: gdy wykluczony jest sam katalog, git nie
+# pozwala odwrócić wykluczenia dla niczego w środku. Przy tej formie własny, nie-kursowy skill
+# da się dołożyć do repo jednym wyjątkiem, np.:  !.claude/skills/moj-skill/
+.claude/skills/*
+.claude/prompts/*
+.claude/commands/*
+.agents/*
+.claude/.10x-cli-manifest.json
+skills-lock.json
+
+# Wstrzykiwany przez 10x-cli w całości (blok BEGIN/END @przeprogramowani/10x-cli).
+# Własne, generyczne reguły projektu zostają w repo jako CLAUDE.md.scaffold.
+CLAUDE.md

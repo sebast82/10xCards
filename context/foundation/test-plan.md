@@ -6,7 +6,7 @@
 >
 > Refresh: re-run `/10x-test-plan --refresh` when stale (see §8).
 >
-> Last updated: 2026-09-04
+> Last updated: 2026-09-07
 
 ## 1. Strategy
 
@@ -72,12 +72,12 @@ przez `/10x-new`. Status przesuwa się od lewej do prawej po wartościach
 poniżej; orchestrator aktualizuje Status w miarę pojawiania się artefaktów
 na dysku.
 
-| #   | Phase name                            | Goal (one line)                                                                                                                       | Risks covered                | Test types                               | Status      | Change folder                                         |
-| --- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- | ---------------------------------------- | ----------- | ----------------------------------------------------- |
-| 1   | Kontrakt błędów generowania           | Każda klasa awarii dostawcy kończy się rozróżnialnym błędem i zerem zapisów, a tekst źródłowy nie przeżywa żądania                    | #1, #5                       | unit + integration                       | complete    | `context/changes/testing-generation-error-contract/`  |
-| 2   | Bramka dostępu i izolacja danych w CI | Własność rekordu jest egzekwowana i na trasie API, i w polityce bazy — a testy polityk przestają być testami, których nikt nie odpala | #2, #4                       | integration + testy polityk bazy + gates | complete    | `context/changes/testing-access-gate-data-isolation/` |
-| 3   | Integralność harmonogramu i liczników | Ocena w sesji zmienia stan deterministycznie i trwale, a liczniki generacji dają się odtworzyć ze stanu kolekcji                      | #3, #6                       | unit + integration + testy procedur bazy | complete    | `context/changes/testing-schedule-counter-integrity/`                                                     |
-| 4   | E2E krytycznej pętli                  | Jedna ścieżka logowanie → generowanie → akceptacja → kolekcja → sesja przechodzi automatycznie na każdym PR                           | #1, #2, #3, #4 (przekrojowo) | e2e + gates                              | change opened | `context/changes/testing-e2e-critical-loop/`          |
+| #   | Phase name                            | Goal (one line)                                                                                                                       | Risks covered                                                               | Test types                               | Status   | Change folder                                         |
+| --- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------- | -------- | ----------------------------------------------------- |
+| 1   | Kontrakt błędów generowania           | Każda klasa awarii dostawcy kończy się rozróżnialnym błędem i zerem zapisów, a tekst źródłowy nie przeżywa żądania                    | #1, #5                                                                      | unit + integration                       | complete | `context/changes/testing-generation-error-contract/`  |
+| 2   | Bramka dostępu i izolacja danych w CI | Własność rekordu jest egzekwowana i na trasie API, i w polityce bazy — a testy polityk przestają być testami, których nikt nie odpala | #2, #4                                                                      | integration + testy polityk bazy + gates | complete | `context/changes/testing-access-gate-data-isolation/` |
+| 3   | Integralność harmonogramu i liczników | Ocena w sesji zmienia stan deterministycznie i trwale, a liczniki generacji dają się odtworzyć ze stanu kolekcji                      | #3, #6                                                                      | unit + integration + testy procedur bazy | complete | `context/changes/testing-schedule-counter-integrity/` |
+| 4   | E2E krytycznej pętli                  | Jedna ścieżka logowanie → kolekcja → sesja powtórkowa przechodzi automatycznie na każdym PR (noga generowania rozcięta — patrz §7)    | #3 (tylko obserwowalny skutek), #4 (przez `protected-routes.guest.spec.ts`) | e2e + gates                              | complete | `context/changes/testing-e2e-critical-loop/`          |
 
 **Status vocabulary** (fixed — parser literals): `not started`, `change opened`,
 `researched`, `planned`, `implementing`, `complete`.
@@ -88,22 +88,22 @@ Klasyczna baza testowa tego projektu. Rekomendacje są ugruntowane w lokalnych
 manifestach i konfiguracjach oraz w MCP faktycznie wystawionych w bieżącej
 sesji.
 
-| Layer                               | Tool                                         | Version     | Notes                                                                                                                                                     |
-| ----------------------------------- | -------------------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| unit + integration                  | Vitest                                       | 4.1         | `environment: node`, alias `@` → `src/`; testy komponentów przełączają się na jsdom dyrektywą per-plik                                                    |
-| komponenty React                    | Testing Library + user-event                 | 16.3 / 14.6 | jsdom 30 obecny w devDependencies                                                                                                                         |
-| walidacja wejścia                   | Zod                                          | 4.4         | schematy są częścią kodu produkcyjnego — testy asertują zachowanie przy złym wejściu, nie definicję schematu                                              |
-| polityki i procedury bazy           | pgTAP przez Supabase CLI (`npm run db:test`) | CLI 2.23    | 5 suit w `supabase/tests/` (w tym `review_queue.test.sql` — kolejka powtórek, dodana w Fazie 3); **krok CI** — job `db-tests` (PR-only, w required status checks `master`), patrz §6.4 |
-| API mocking (granica HTTP dostawcy) | none yet — see §3 Phase 1                    | —           | wybór narzędzia należy do `/10x-research` Fazy 1; wymóg: mockowanie wyłącznie na granicy sieci, nigdy modułów wewnętrznych                                |
-| e2e                                 | none yet — see §3 Phase 4                    | —           | kandydat: Playwright (projekt `setup` + `storageState` do jednorazowego logowania, `page.route` do symulowania klas awarii dostawcy); checked: 2026-09-02 |
-| accessibility                       | brak dedykowanego runnera                    | —           | poza zakresem tego rolloutu; `eslint-plugin-jsx-a11y` działa jako bramka statyczna                                                                        |
-| (optional) AI-native                | brak — świadomie odrzucone                   | n/a         | Kiedy NIE używać: gdy warstwa deterministyczna łapie tę samą regresję taniej i powtarzalnie. Tak jest tutaj dla przeglądu wizualnego — patrz §7           |
+| Layer                               | Tool                                         | Version     | Notes                                                                                                                                                                                                                                                                                                                                                                                          |
+| ----------------------------------- | -------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| unit + integration                  | Vitest                                       | 4.1         | `environment: node`, alias `@` → `src/`; testy komponentów przełączają się na jsdom dyrektywą per-plik                                                                                                                                                                                                                                                                                         |
+| komponenty React                    | Testing Library + user-event                 | 16.3 / 14.6 | jsdom 30 obecny w devDependencies                                                                                                                                                                                                                                                                                                                                                              |
+| walidacja wejścia                   | Zod                                          | 4.4         | schematy są częścią kodu produkcyjnego — testy asertują zachowanie przy złym wejściu, nie definicję schematu                                                                                                                                                                                                                                                                                   |
+| polityki i procedury bazy           | pgTAP przez Supabase CLI (`npm run db:test`) | CLI 2.117   | 5 suit w `supabase/tests/` (w tym `review_queue.test.sql` — kolejka powtórek, dodana w Fazie 3); **krok CI** — job `db-tests` (PR-only; biegnie, ale nie blokuje merge — §7), patrz §6.4. Pin `supabase/setup-cli` = `2.117.0` w obu jobach; checked: 2026-09-07                                                                                                                               |
+| API mocking (granica HTTP dostawcy) | none yet — see §3 Phase 1                    | —           | wybór narzędzia należy do `/10x-research` Fazy 1; wymóg: mockowanie wyłącznie na granicy sieci, nigdy modułów wewnętrznych                                                                                                                                                                                                                                                                     |
+| e2e                                 | Playwright (`npm run test:e2e`)              | 1.63.0      | projekt `setup` + `storageState` (jednorazowe logowanie przez prawdziwy formularz), Chromium-only, `workers: 1`; **`page.route` NIE sięga wywołania OpenRoutera** — idzie ono z runtime'u serwera Astro, nie z przeglądarki (`src/lib/openrouter/client.ts:6`), więc klas awarii dostawcy nie da się symulować w e2e; zostają przy Fazie 1 (§6.1, §6.2, §7). Wzorce: §6.6; checked: 2026-09-07 |
+| accessibility                       | brak dedykowanego runnera                    | —           | poza zakresem tego rolloutu; `eslint-plugin-jsx-a11y` działa jako bramka statyczna                                                                                                                                                                                                                                                                                                             |
+| (optional) AI-native                | brak — świadomie odrzucone                   | n/a         | Kiedy NIE używać: gdy warstwa deterministyczna łapie tę samą regresję taniej i powtarzalnie. Tak jest tutaj dla przeglądu wizualnego — patrz §7                                                                                                                                                                                                                                                |
 
 **Stack grounding tools (current session):**
 
 - Docs: Context7 — sprawdzone: wzorzec projektu `setup` + `storageState` oraz przechwytywanie żądań przez `page.route` w Playwright; checked: 2026-09-02
 - Search: WebSearch / WebFetch — dostępne, nieużyte (dokumentacja pierwotna wystarczyła); checked: 2026-09-02
-- Runtime/browser: Playwright MCP — **niedostępny w bieżącej sesji**; Faza 4 zakłada Playwright jako zależność projektu, nie jako MCP; checked: 2026-09-02
+- Runtime/browser: Playwright MCP — **niedostępny**; ale CLI Playwrighta jest zainstalowane i używane (`npx playwright`, `npm run test:e2e:ui`, `npm run test:e2e:report`), więc ścieżka „napędź przeglądarkę i zobacz prawdziwy DOM" jest dostępna — Faza 4 z niej skorzystała przy ustalaniu lokatorów. Nie trzeba ich zgadywać z lektury kodu; checked: 2026-09-07
 - Provider/platform: brak MCP GitHub / Supabase / Cloudflare; dostępne są CLI `gh`, `supabase`, `wrangler` — bramki CI opierają się na nich, nie na MCP; checked: 2026-09-02
 
 ## 5. Quality Gates
@@ -112,16 +112,16 @@ Pełen zestaw bramek, które muszą przejść, zanim zmiana trafi na produkcję.
 „Required after §3 Phase N" znaczy, że bramka jest egzekwowana od momentu,
 gdy ta faza rolloutu wyląduje; wcześniej ma status planowany.
 
-| Gate                                    | Where                    | Required?                      | Catches                                                           |
-| --------------------------------------- | ------------------------ | ------------------------------ | ----------------------------------------------------------------- |
-| lint                                    | local (pre-commit) + CI  | required                       | dryf stylu oraz reguł a11y i react-hooks                          |
-| typecheck (`astro check`)               | CI                       | required                       | dryf typów i kontraktów TS                                        |
-| unit + integration (`vitest run`)       | local + CI               | required                       | regresje logiki; od §3 Fazy 1 obejmuje klasy awarii dostawcy      |
-| build                                   | CI                       | required                       | błędy budowania i konfiguracji adaptera                           |
-| testy polityk bazy (`supabase test db`) | CI on PR                 | required after §3 Phase 2      | regresje izolacji danych między kontami                           |
-| e2e krytycznej pętli                    | CI on PR                 | required after §3 Phase 4      | zerwana główna ścieżka użytkownika                                |
-| post-edit hook                          | local (pętla agenta)     | recommended — nie zastępuje CI | regresje w momencie edycji; konfiguracja poza zakresem tego planu |
-| pre-prod smoke                          | między merge a produkcją | optional                       | awarie zależne od środowiska Workers                              |
+| Gate                                      | Where                    | Required?                                         | Catches                                                                                                                                                                      |
+| ----------------------------------------- | ------------------------ | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| lint                                      | local (pre-commit) + CI  | required                                          | dryf stylu oraz reguł a11y i react-hooks                                                                                                                                     |
+| typecheck (`astro check`)                 | CI                       | required                                          | dryf typów i kontraktów TS                                                                                                                                                   |
+| unit + integration (`vitest run`)         | local + CI               | required                                          | regresje logiki; od §3 Fazy 1 obejmuje klasy awarii dostawcy                                                                                                                 |
+| build                                     | CI                       | required                                          | błędy budowania i konfiguracji adaptera                                                                                                                                      |
+| testy polityk bazy (`supabase test db`)   | CI on PR                 | biegnie od §3 Fazy 2 — **nie blokuje merge** (§7) | regresje izolacji danych między kontami                                                                                                                                      |
+| e2e krytycznej pętli (`npm run test:e2e`) | CI on PR                 | biegnie od §3 Fazy 4 — **nie blokuje merge** (§7) | zerwana główna ścieżka użytkownika. Zakres = **cały** katalog `tests/e2e/`, nie tylko spec pętli: `seed.spec.ts` i `protected-routes.guest.spec.ts` też czerwienią tę bramkę |
+| post-edit hook                            | local (pętla agenta)     | recommended — nie zastępuje CI                    | regresje w momencie edycji; konfiguracja poza zakresem tego planu                                                                                                            |
+| pre-prod smoke                            | między merge a produkcją | optional                                          | awarie zależne od środowiska Workers                                                                                                                                         |
 
 ## 6. Cookbook Patterns
 
@@ -218,7 +218,10 @@ Wzorzec pgTAP — patrz `supabase/tests/rls_flashcards.test.sql` i `rls_generati
 - **Uruchomienie:** `npm run db:test` (→ `supabase test db`) lokalnie przeciw `supabase start`.
 - **Bramka CI:** job `db-tests` w `.github/workflows/ci.yml`, **tylko na `pull_request`** (osobny
   job — `supabase start` ściąga obrazy ~1-2 min; job `ci` bez Dockera tego nie płaci). `db-tests`
-  jest w **required status checks** gałęzi `master` — czerwony przebieg blokuje przycisk merge.
+  **nie jest** required status checkiem — branch protection jest na tym repozytorium niedostępna
+  (§7), więc czerwony przebieg nie blokuje przycisku merge. Wcześniejszy zapis twierdzący inaczej
+  był nieprawdziwy; skorygowany w Fazie 4. Pin `supabase/setup-cli` trzymaj zgodny z jobem `e2e` —
+  oba joby czytają ten sam `supabase/config.toml`.
 - **Reguła O2-13 (de-konflacja SELECT/write):** asercja cross-account UPDATE/DELETE musi biec
   z polityką SELECT **zneutralizowaną** (`alter policy … using (true)`, cofane przez `rollback`),
   inaczej zostaje zielona po usunięciu _lub osłabieniu_ polityki write (polityka SELECT i tak
@@ -252,8 +255,8 @@ i `supabase/tests/recount_generation_acceptance.test.sql`.
 - **pgTAP do semantyki**: `review_queue.test.sql` na realnym wierszu + indeksie `(user_id, due)` +
   RLS — selekcja `due <= now()`, porządek rosnący `due` (niezależny oracle: porządek po `id` przy
   odpowiednim seedzie), sufit 50 wierszy + wykluczenie 51., izolacja kolejki między kontami, oraz
-  sekwencja guarda `reps` (świeży guard → 1 wiersz, nieaktualny → 0, legalna druga ocena → 1 wiersz
-  + spójny re-parse). `plan(N)` liczony na końcu, ustawiony zaraz po `begin;`. Kotwica-komentarz do
+  sekwencja guarda `reps` (świeży guard → 1 wiersz, nieaktualny → 0, legalna druga ocena → 1 wiersz +
+  spójny re-parse). `plan(N)` liczony na końcu, ustawiony zaraz po `begin;`. Kotwica-komentarz do
   `src/lib/reviews/service.ts:62-96` i `:132-149` — dryf w łańcuchu `.from()/.eq()/.lte()` łapie
   przegląd, nie automat (§7).
 - **`.strict()` na ciele POST** (`src/pages/api/reviews.test.ts`): ciało z dodatkowym `now` → 400,
@@ -272,11 +275,112 @@ i `supabase/tests/recount_generation_acceptance.test.sql`.
 
 ### 6.6 Dodanie testu e2e
 
-- TBD — see §3 Phase 4 (wielokrotnie używany stan zalogowania, podstawienie odpowiedzi dostawcy, kryterium „e2e zamiast integration").
+Wzorzec bramki dymnej na głównej ścieżce użytkownika — patrz `tests/e2e/critical-loop.spec.ts`,
+`tests/e2e/auth.setup.ts` oraz `tests/e2e/seed.spec.ts` (ten sam szkielet w prostszym wydaniu).
+Komendy i konfiguracja lokalna są w `README.md` §„End-to-end tests"; tutaj zostają wzorce.
+
+**Kryterium „e2e zamiast integration".** Domyślna odpowiedź brzmi: integration. E2E płaci najwyższą
+cenę za sygnał (czas bramki, flake, gorsza diagnostyka), więc bierze wyłącznie to ryzyko, którego
+tańsza warstwa nie widzi z definicji — **spojenie między ekranami**: trasy, linki nawigacji,
+hydracja wysp, ciasteczka sesji przechodzące przez prawdziwy formularz, i to, czy te rzeczy nadal
+się ze sobą łączą. Co da się orzec na jednym handlerze albo module, zostaje w Vitest (§6.2);
+własność rekordu i semantyka SQL zostają w pgTAP (§6.4). Test, który mógłby być integracyjny,
+a jest e2e, nie jest „bezpieczniejszy" — jest wolniejszy i mówi mniej, gdy zczerwienieje.
+
+**Wielokrotnie używany stan zalogowania.** Projekt `setup` (`tests/e2e/auth.setup.ts`) loguje się
+raz na przebieg i zapisuje `storageState` do `playwright/.auth/user.json`; projekt `chromium`
+deklaruje `dependencies: ["setup"]` i startuje z gotową sesją. Logowanie idzie **prawdziwym
+formularzem**, nie skrótem przez klienta Supabase w przeglądarce: ciasteczka sesji ustawia serwer
+w `POST /api/auth/signin`, więc `signInWithPassword` po stronie klienta zapisałby stan, którego
+middleware nie zobaczy. Testy roli „niezalogowany" idą osobnym projektem `chromium-guest` — bez
+`storageState` i bez `dependencies`, żeby biegły także tam, gdzie nie ma konta testowego.
+`auth.setup.ts` niesie też **bramkę środowiska**: brak banera „Supabase nie jest skonfigurowany"
+jest asertowany przed wpisaniem loginu, bo dev server startuje `webServer` Playwrighta, a nie krok
+CI — żaden krok joba nie złapałby brakującego `SUPABASE_URL`, a objawem byłoby „nie udało się
+zalogować" i szukanie winy w koncie testowym.
+
+**Podstawienie odpowiedzi dostawcy — w e2e tego nie robimy.** Uczciwa odpowiedź na pytanie, które
+ta sekcja miała rozstrzygnąć: `page.route` nie sięga OpenRoutera, bo wywołanie idzie z runtime'u
+serwera Astro (`src/pages/api/generations.ts` → `src/lib/generations/service.ts` →
+`src/lib/openrouter/client.ts:6`), a nie z przeglądarki. Podstawienie **własnego** `/api/generations`
+też nie działa: sfabrykowany `generationId` nie tworzy wiersza w `generations`, więc następny krok
+(`POST /api/flashcards`) dostaje 404 z `src/lib/flashcards/service.ts:66-80`. Klasy awarii dostawcy
+zostają na granicy sieci pod Vitestem (§6.1, §6.2). Nie próbuj tego drugi raz — patrz §7.
+
+Wzorce, które ta faza ustanowiła:
+
+- **Zakres po roli, zawsze.** `page.getByRole("region", { name: "Kolekcja fiszek" })`,
+  `{ name: "Sesja powtórkowa" }`. Astro serializuje propsy wyspy do `<code>` w dokumencie, więc
+  gołe `getByText` na treści fiszki trafia w dwa węzły i wywala strict mode. Odpowiedzią jest
+  zawężenie do kontenera po roli plus `{ exact: true }` — **nigdy** `.first()` / `.nth()`
+  (`context/foundation/lessons.md` §„Tekst renderowany przez wyspę…"). Brakującą kotwicę dokłada
+  się jako zmianę produkcyjną w tej samej zmianie co test (tak powstał `region` „Sesja powtórkowa"),
+  a nie obchodzi selektorem CSS.
+- **Pierwsza interakcja z wyspą jest ponawialna.** Po `goto()` albo po pełnym przeładowaniu SSR
+  wysyła gotowy przycisk, zanim React podepnie handler — Playwright uzna go za actionable i klik
+  przepadnie bez śladu, a test padnie dopiero na następnym kroku. Klik i asercja na widoczny skutek
+  idą **razem** w `await expect(async () => { … }).toPass()`. Nigdy `waitForTimeout`
+  (`context/foundation/lessons.md` §„Pierwsze kliknięcie w wyspę…").
+- **Asercja po własnym tekście rekordu, nie po liczniku.** `Karta {n} z {m}` oraz
+  `To na dziś wszystko — powtórzono {n} fiszek.` czytają stan całego konta, więc na koncie
+  z zaległościami znaczą co innego, niż zakłada test. Asercje idą po `front`/`back` utworzonej
+  fiszki, ze stemplem `Date.now()` w treści — to samo daje niekolidujące dane przy ponowieniach.
+- **Gdy UI połyka błąd, asertuj status odpowiedzi — przed DOM-em.**
+  `src/components/review/ReviewSession.tsx:167` traktuje 409 jak sukces i przesuwa kolejkę, więc
+  asercja „sesja poszła dalej" jest spełnialna przez ocenę, **której serwer nie przyjął**.
+  Kolejność jest częścią wzorca: `page.waitForResponse(...)` → `expect(status).toBe(200)` →
+  dopiero potem asercja o DOM. Ta sama odpowiedź bywa jedynym uchwytem do `id` nowego rekordu.
+- **Zapisy w setupie i sprzątaniu: `page.request` + nagłówek `Origin`.** Fixture `request` ma
+  własny kontekst sieciowy i nie widzi ciasteczka odświeżonego przez Supabase w trakcie testu,
+  a `APIRequestContext` nie dokłada `Origin`, więc bramka origin w Astro zwraca 403. Asercję pisz
+  z opisem niosącym status i ciało odpowiedzi (`context/foundation/lessons.md` §„Zapis przez API…").
+- **Sprzątanie w hooku czy inline — decyduje trwałość śmiecia.** `seed.spec.ts` sprząta na końcu
+  ciała testu i to wystarcza: porzucona fiszka najwyżej zaśmieca `/deck`. `critical-loop.spec.ts`
+  sprząta w `test.afterEach`, bo fiszka utworzona przez `/deck` jest wymagalna **natychmiast**
+  (`src/lib/flashcards/service.ts` woła `createNewCard(new Date())`) — porzucona przez czerwony
+  przebieg wchodzi do kolejki powtórek i wywala warunek wstępny każdego następnego biegu, a
+  sprzątania inline nie wykona żadna wcześniejsza nieudana asercja. Reguła: **jeśli osierocony
+  rekord zatruwa następny przebieg, sprzątanie idzie do hooka**; jeśli tylko zajmuje miejsce, może
+  zostać w ciele testu.
+- **Warunek wstępny „kolejka powtórek jest pusta".** `getReviewQueue` sortuje po `due` rosnąco
+  (`src/lib/reviews/service.ts:62-70`), a wyspa renderuje wyłącznie `queue[0]`
+  (`ReviewSession.tsx:96,295`). Fiszka utworzona przed chwilą ma **najpóźniejszy** `due` w kolejce,
+  więc każda zaległa karta zasłania ją całkowicie i asercja padłaby na nieodnajdywalnym lokatorze,
+  wskazując na zepsutą aplikację zamiast na brudne konto. Spec sprawdza `GET /api/reviews` **przed
+  czymkolwiek innym** i pada z komunikatem wyliczającym zaległe karty. To jedyna kolejka w tym
+  projekcie enumerowalna po HTTP — kolekcja nie ma `GET`, dlatego jej stanu spec nie weryfikuje.
+- **`workers: 1` to poprawność, nie ostrożność.** Kolejka powtórek jest globalna dla konta, więc
+  równoległy `seed.spec.ts` wstawia własną kartę przed kartę `critical-loop.spec.ts` już **po**
+  sprawdzeniu warunku wstępnego — okna, w którym kolejka rośnie pod testem, nie da się objąć
+  asercją. Suite biegnie ~10 s, więc szeregowanie nic nie kosztuje.
+- **Chromium-only.** Aplikacja nie ma ryzyk specyficznych dla silnika, a każdy dodatkowy projekt
+  mnoży czas bramki na każdym PR. Dołóż firefox/webkit, gdy pojawi się powód, nie „na wszelki wypadek".
 
 ### 6.7 Notatki per faza rolloutu
 
 (Uzupełniane po każdej fazie: 2–3 linie o tym, czego faza nauczyła — np. gdzie wylądowały wspólne dane testowe i co powinno je reużywać.)
+
+**Faza 4 — E2E krytycznej pętli (2026-09-07).**
+
+- Wywołanie OpenRoutera jest **server-side** (`src/lib/openrouter/client.ts:6` w runtime Astro),
+  więc `page.route` go nie sięga, a podstawienie własnego `/api/generations` kaskaduje w 404 na
+  `POST /api/flashcards`. Pętla została **rozcięta**: e2e bierze `login → deka → powtórka`, noga
+  generowania zostaje przy testach granicy sieci z Fazy 1. Zapis w §4 mówiący, że `page.route`
+  symuluje klasy awarii dostawcy, był najdroższym błędnym zwrotem tej fazy — skorygowany.
+- 409 z `POST /api/reviews` jest połykany przez `ReviewSession.tsx:167` (kolejka przesuwa się jak
+  po sukcesie), więc asercja „sesja poszła dalej" jest zielona bez zapisu po stronie serwera. Stąd
+  reguła kolejności: status odpowiedzi **przed** DOM-em. To wzorzec dla każdego ekranu, który
+  połyka błąd, nie jednorazówka tej sesji.
+- Provisioning w CI: lokalny stack (`supabase start`), przechwycenie adresu i klucza przez
+  `supabase status -o env --override-name` (udokumentowana forma maszynowa), konto testowe zakładane
+  wprost w GoTrue (`POST /auth/v1/signup` — działa, bo `supabase/config.toml:209` ma
+  `enable_confirmations = false`, więc ręczny hash bcrypt jest zbędny). Celem jest `astro dev`,
+  nie zbudowany worker — luka runtime'u workerd zostaje przy bramce pre-prod smoke (§7). Pin
+  `supabase/setup-cli` trzeba było podnieść do `2.117.0` w **obu** jobach: `2.23.4` nie parsuje
+  bieżącego `supabase/config.toml` i pada na `supabase start` — `db-tests` jest PR-only, a repo
+  nie miało wcześniej żadnego PR-a, więc pin z Fazy 2 wykonał się po raz pierwszy dopiero teraz.
+  I pułapka na koniec: `.dev.vars` (adapter Cloudflare, `astro:config:done`) nadpisuje env powłoki
+  **lokalnie** i jest gitignorowane, więc zielony przebieg lokalny nie dowodzi podłączenia env w CI.
 
 **Faza 3 — Integralność harmonogramu i liczników (2026-09-04).**
 
@@ -298,7 +402,9 @@ i `supabase/tests/recount_generation_acceptance.test.sql`.
 **Faza 2 — Bramka dostępu i izolacja danych w CI (2026-09-04).**
 
 - Job `db-tests` jest osobny od `ci` (Docker + `supabase start`, ~1-2 min na pull obrazów),
-  `pull_request`-only, w required status checks `master`. `ci` nie płaci kosztu Dockera.
+  `pull_request`-only. `ci` nie płaci kosztu Dockera. (Korekta z Fazy 4: wpisanie `db-tests`
+  w required status checks `master` nigdy się nie udało — branch protection jest na tym repozytorium
+  niedostępna, patrz §7. Job biegnie i czerwienieje, ale nie blokuje merge.)
 - `SupabaseStub` nie ma `.auth` — test middleware mockuje cały moduł `@/lib/supabase`
   (`vi.mock` + `vi.hoisted` na sesję jako fixture), a `astro:middleware` jako tożsamość.
 - Konflacja F1: asercja „0 zmienionych wierszy" cross-account jest tautologią, dopóki polityka
@@ -342,10 +448,18 @@ dopóki nie zmieni się założenie leżące u ich podstaw.
 - **Populacja zagregowanego kryterium „75%"** — w kodzie nie istnieje żadne zapytanie agregujące po `generations`; per użytkownik vs per generacja vs lifetime, oraz czy wiersze `pending`/`failed` się liczą, jest niezdefiniowane. Faza 3 pinuje inwariant `recount` per generacja. Przewartościować, gdy zapytanie metryki sukcesu zostanie faktycznie zaimplementowane. (Źródło: research Open Question 8; rollout Faza 3, 2026-09-04.)
 - **Wykonawcza równoważność SQL `applyReviewGrade` ↔ pgTAP** — `review_queue.test.sql` odtwarza ręcznie `select … where due <= now() …` i `update … where id = ? and user_id = ? and reps = ?`, które emituje serwis; wiąże je z `src/lib/reviews/service.ts` tylko komentarz-kotwica, nie wykonanie (pgTAP nie woła TypeScriptu, a nie ma warstwy Vitest przeciw realnemu Postgresowi). Dryf w łańcuchu `.from()/.update()/.eq()`, który nadal buduje poprawny payload (zła tabela, zgubione `.eq("user_id")`, `.lte` → `.eq`), przechodzi obie warstwy — łapie go przegląd, nie automat. Przewartościować, jeśli powstanie harness integracyjny Vitest ↔ Postgres albo `db-tests` zacznie wołać kod serwisu. (Źródło: research Open Question 5; rollout Faza 3, 2026-09-04.)
 
+- **Noga generowania w przeglądarce** — `/generate` nie jest napędzane przez e2e. Wywołanie dostawcy idzie z runtime'u serwera (`src/lib/openrouter/client.ts:6`), więc `page.route` go nie przechwyci; podstawienie własnego `/api/generations` kaskaduje w 404 na `POST /api/flashcards`, bo sfabrykowany `generationId` nie ma wiersza w `generations`. Do tego każdy przebieg zjadałby dobowy limit generacji (`DAILY_GENERATION_LIMIT`, liczony bez filtra po statusie), którego nie da się odzyskać. Przewartościować, jeśli powstanie server-side seam dostawcy — wstrzykiwalny klient, zmienna base-URL albo flaga fake-provider; wtedy noga generowania wraca do bramki. (Źródło: research + rollout Faza 4, 2026-09-07.)
+- **Ryzyko #1 w warstwie e2e** — kontrakt błędów generowania dowodzą testy granicy sieci z §3 Fazy 1 (`src/lib/openrouter/client.test.ts`, `src/pages/api/generations.test.ts`), nie przeglądarka. Powstanie bramki e2e nie jest powodem, żeby awansować tam wiersz #1 z §2 — sygnał byłby ten sam, a koszt wielokrotnie wyższy (§1 zasada #1). Przewartościować razem z pozycją powyżej: te same warunki, ta sama decyzja. (Źródło: rollout Faza 4, 2026-09-07.)
+- **Ryzyko #2 w warstwie e2e** — własność rekordu dowodzi pgTAP (`supabase/tests/rls_*.test.sql`) mocą decyzji z Fazy 2 (`context/archive/2026-09-03-testing-access-gate-data-isolation/plan.md:159-162`). Po stronie e2e blokerem jest infrastruktura **jednokontowa**: `auth.setup.ts` zapisuje jeden `storageState`, a CI zakłada jedno konto — cross-account wymagałby drugiego konta, drugiego projektu Playwrighta i drugiej pary sekretów. Przewartościować, jeśli pojawi się ryzyko izolacji widoczne wyłącznie w prawdziwej przeglądarce (np. wyciek przez cache po stronie klienta) — dopiero to uzasadnia ten koszt. (Źródło: rollout Faza 4, 2026-09-07.)
+- **Arytmetyka harmonogramu w e2e** — spec ocenia fiszkę i asertuje wyłącznie obserwowalny skutek: `POST /api/reviews` zwrócił 200, a karta wyszła z kolejki. Żadnej asercji na `due`, `stability` czy `interval`, ani na treść przycisku oceny (`{etykieta} · {interwał}` niesie dynamiczne wyjście FSRS — dlatego dopasowanie idzie po samej etykiecie). Zabrania jej reguła oracle z §6.5: wartość przeliczona w teście byłaby lustrem implementacji. Dowód kontraktu stanu zostaje w `src/lib/reviews/service.test.ts` i `supabase/tests/review_queue.test.sql`. Przewartościować, jeśli powstanie niezależne źródło prawdy dla oczekiwanego harmonogramu (zamrożone fixtury z decyzji produktowej). (Źródło: rollout Faza 4, 2026-09-07.)
+- **Kotwice dostępności na `/generate`** — `/review` dostało w Fazie 4 nazwany `region` („Sesja powtórkowa"), `/deck` miało swój wcześniej („Kolekcja fiszek"); `/generate` nie ma żadnej i teraz jej nie dostaje. Rozcięta pętla nie napędza tego ekranu, a kotwica, której żaden test nie konsumuje, to spekulacyjny dryf w kodzie produkcyjnym. Przewartościować, gdy powstanie test e2e dotykający `/generate` — kotwica idzie wtedy w tej samej zmianie co test, nie wcześniej. (Źródło: rollout Faza 4, 2026-09-07.)
+- **Runtime workerd w bramce e2e** — suite biegnie przeciw `astro dev` (Node), nie przeciw zbudowanemu workerowi. Różnice runtime'u Cloudflare (dostępne API, limity, zachowanie adaptera) są poza jej zasięgiem; pokrywa je opcjonalna bramka pre-prod smoke z §5. Przewartościować, jeśli produkcja złapie awarię zależną od workerd, której `astro dev` nie odtwarza — wtedy pre-prod smoke przestaje być opcjonalny. (Źródło: rollout Faza 4, 2026-09-07.)
+- **Egzekwowanie bramek jako required status checks** — ani `e2e`, ani `db-tests` nie blokują przycisku merge. Branch protection i rulesets zwracają na tym repozytorium 403 („Upgrade to GitHub Pro or make this repository public"), więc wymaganego checku **nie da się skonfigurować** — to niedostępność funkcji, nie decyzja zespołu. Oba joby biegną na każdym PR i czerwienieją poprawnie; egzekwowanie spoczywa do tego czasu na przeglądzie PR. Zapisy w §5 i §6.4 twierdzące, że `db-tests` jest required, były nieprawdziwe od Fazy 2 — skorygowane. Przewartościować, gdy repozytorium stanie się publiczne albo plan GitHuba zostanie podniesiony; wtedy dodaj `e2e` i `db-tests` w Settings → Branches. (Źródło: rollout Faza 4, 2026-09-07; `gh api repos/:owner/:repo/branches/master/protection` → 403.)
+
 ## 8. Freshness Ledger
 
-- Strategy (§1–§5) last reviewed: 2026-09-02
-- Stack versions last verified: 2026-09-02
+- Strategy (§1–§5) last reviewed: 2026-09-07
+- Stack versions last verified: 2026-09-07 (Playwright 1.63.0, Supabase CLI 2.117.0; Vitest / Testing Library / Zod bez zmian od 2026-09-02)
 - AI-native tool references last verified: 2026-09-02
 
 Refresh (`/10x-test-plan --refresh`) when:

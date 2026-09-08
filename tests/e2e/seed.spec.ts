@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 // Test wzorcowy (seed). Każdy kolejny test e2e jest generowany „na obraz" tego pliku,
 // więc pokazuje cztery rzeczy naraz: lokatory po roli/etykiecie, pełny cykl
 // setup → akcja → asercja → sprzątanie w jednym teście, czekanie na stan (nigdy na czas)
-// i nazwę związaną z konkretnym ryzykiem. Szczegóły: .claude/skills/10x-e2e/references/seed-test-pattern.md
+// i nazwę związaną z konkretnym ryzykiem. Wzorce: context/foundation/test-plan.md §6.6
 test("ręcznie dodana fiszka jest widoczna w kolekcji po przeładowaniu strony", async ({ page }) => {
   // Unikalny znacznik — równoległe przebiegi i powtórki nie kolidują ze sobą.
   const front = `E2E przód ${String(Date.now())}`;

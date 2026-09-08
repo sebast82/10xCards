@@ -664,66 +664,66 @@ Two manual repo-settings actions are required and cannot be committed: adding th
 
 #### Automated
 
-- [ ] 1.1 Type checking passes: `npx astro check`
-- [ ] 1.2 Linting passes, including `eslint-plugin-jsx-a11y`: `npm run lint`
-- [ ] 1.3 Unit and integration tests pass: `npm test`
-- [ ] 1.4 The new region assertion in `ReviewSession.test.tsx` passes
+- [x] 1.1 Type checking passes: `npx astro check` — 15a84c3
+- [x] 1.2 Linting passes, including `eslint-plugin-jsx-a11y`: `npm run lint` — 15a84c3
+- [x] 1.3 Unit and integration tests pass: `npm test` — 15a84c3
+- [x] 1.4 The new region assertion in `ReviewSession.test.tsx` passes — 15a84c3
 
 #### Manual
 
-- [ ] 1.5 `/review` renders unchanged visually — no layout shift from `div` → `section`
-- [ ] 1.6 Browser devtools accessibility pane shows a `region` named `Sesja powtórkowa`
-- [ ] 1.7 The existing sr-only announcer still announces `Karta {n} z {m}` on card change
+- [x] 1.5 `/review` renders unchanged visually — no layout shift from `div` → `section` — 15a84c3
+- [x] 1.6 Browser devtools accessibility pane shows a `region` named `Sesja powtórkowa` — 15a84c3
+- [x] 1.7 The existing sr-only announcer still announces `Karta {n} z {m}` on card change — 15a84c3
 
 ### Phase 2: The critical-loop spec
 
 #### Automated
 
-- [ ] 2.1 The spec passes: `npx playwright test tests/e2e/critical-loop.spec.ts`
-- [ ] 2.2 The full suite passes: `npm run test:e2e`
-- [ ] 2.3 Linting passes on the new file: `npm run lint`
-- [ ] 2.4 Type checking passes: `npx astro check`
-- [ ] 2.5 The spec contains no `waitForTimeout`, no `.first()`/`.nth()`, no CSS or XPath selectors
-- [ ] 2.6 Re-running the spec immediately twice in a row passes both times
+- [x] 2.1 The spec passes: `npx playwright test tests/e2e/critical-loop.spec.ts` — afa0a83
+- [x] 2.2 The full suite passes: `npm run test:e2e` — afa0a83
+- [x] 2.3 Linting passes on the new file: `npm run lint` — afa0a83
+- [x] 2.4 Type checking passes: `npx astro check` — afa0a83
+- [x] 2.5 The spec contains no `waitForTimeout`, no `.first()`/`.nth()`, no CSS or XPath selectors — afa0a83
+- [x] 2.6 Re-running the spec immediately twice in a row passes both times — afa0a83
 
 #### Manual
 
-- [ ] 2.7 Reviewed against all five anti-patterns in `e2e-anti-patterns.md`
-- [ ] 2.8 Deliberate break: `Powtórki` nav href — spec goes red, revert, green
-- [ ] 2.9 Deliberate break: `POST /api/reviews` returns 409 — spec goes red, not green on the swallowed advance
-- [ ] 2.10 After a full run, `/deck` contains no leftover `E2E`-tagged cards
-- [ ] 2.11 With a leftover due card, the spec fails at the precondition naming the non-empty queue
-- [ ] 2.12 A deliberately failed run still leaves `/deck` clean — cleanup runs on the failure path
+- [x] 2.7 Reviewed against all five anti-patterns in `e2e-anti-patterns.md` — afa0a83
+- [x] 2.8 Deliberate break: `Powtórki` nav href — spec goes red, revert, green — afa0a83
+- [x] 2.9 Deliberate break: `POST /api/reviews` returns 409 — spec goes red, not green on the swallowed advance — afa0a83
+- [x] 2.10 After a full run, `/deck` contains no leftover `E2E`-tagged cards — afa0a83
+- [x] 2.11 With a leftover due card, the spec fails at the precondition naming the non-empty queue — afa0a83
+- [x] 2.12 A deliberately failed run still leaves `/deck` clean — cleanup runs on the failure path — afa0a83
 
 ### Phase 3: The CI gate
 
 #### Automated
 
-- [ ] 3.1 The `e2e` job completes green on a real pull request
-- [ ] 3.2 `ci` and `db-tests` still pass unchanged
-- [ ] 3.3 Workflow YAML is valid: `gh workflow view` resolves the new job
-- [ ] 3.4 On an induced failure, the report artifact is present and contains a trace
+- [x] 3.1 The `e2e` job completes green on a real pull request — 2142a2a
+- [x] 3.2 `ci` and `db-tests` still pass unchanged — 2142a2a
+- [x] 3.3 Workflow YAML is valid: `gh workflow view` resolves the new job — 2142a2a
+- [x] 3.4 On an induced failure, the report artifact is present and contains a trace — 2142a2a
 
 #### Manual
 
-- [ ] 3.5 Deliberate break confirms the `e2e` job goes red on the PR, not just locally
-- [ ] 3.6 A forced anon-key capture failure turns that step red with its own name (gap #9 check)
+- [x] 3.5 Deliberate break confirms the `e2e` job goes red on the PR, not just locally — 2142a2a
+- [x] 3.6 A forced anon-key capture failure turns that step red with its own name (gap #9 check) — 2142a2a
 - [ ] 3.7 `e2e` is in `master`'s required status checks and blocks the merge button while red
-- [ ] 3.8 Total job wall time is acceptable next to `db-tests`
-- [ ] 3.9 With `SUPABASE_URL` emptied, `setup` fails naming the environment, not the credentials
+- [x] 3.8 Total job wall time is acceptable next to `db-tests` — 2142a2a
+- [x] 3.9 With `SUPABASE_URL` emptied, `setup` fails naming the environment, not the credentials — 2142a2a
 
 ### Phase 4: Documentation reconciliation
 
 #### Automated
 
-- [ ] 4.1 Linting and formatting pass on the changed markdown: `npm run lint`
-- [ ] 4.2 No occurrence of `TBD` remains in §6.6
-- [ ] 4.3 Phase 4's Status cell uses a literal from the fixed vocabulary
+- [x] 4.1 Linting and formatting pass on the changed markdown: `npm run lint` — 1639193
+- [x] 4.2 No occurrence of `TBD` remains in §6.6 — 1639193
+- [x] 4.3 Phase 4's Status cell uses a literal from the fixed vocabulary — 1639193
 
 #### Manual
 
-- [ ] 4.4 A fresh reader can tell from §4 alone that `page.route` will not reach the provider, and why
-- [ ] 4.5 Every §7 entry names what would cause it to be reconsidered
-- [ ] 4.6 No claim in the document asserts coverage the landed spec does not deliver
-- [ ] 4.7 The Freshness Ledger dates are updated
-- [ ] 4.8 A contributor can run `npm run test:e2e` from the README section alone
+- [x] 4.4 A fresh reader can tell from §4 alone that `page.route` will not reach the provider, and why — 1639193
+- [x] 4.5 Every §7 entry names what would cause it to be reconsidered — 1639193
+- [x] 4.6 No claim in the document asserts coverage the landed spec does not deliver — 1639193
+- [x] 4.7 The Freshness Ledger dates are updated — 1639193
+- [x] 4.8 A contributor can run `npm run test:e2e` from the README section alone — 1639193
