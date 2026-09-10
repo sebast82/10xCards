@@ -55,9 +55,9 @@ npm test`, and one real `npm start` run.
 - The default loop is `stopWhen: isStepCount(20)`. With no tools, the model answers in one step, so it behaves
   like today's single `generateText` call (`node_modules/ai/docs/03-agents/04-loop-control.mdx:19`,
   `02-building-agents.mdx:215-234`).
-- `result.output` is a getter. Parse or validation failures surface as AI SDK errors (`NoObjectGeneratedError`;
-  `NoOutputGeneratedError` when the final step doesn't finish with `stop`) when it is accessed
-  (`node_modules/ai/docs/03-ai-sdk-core/10-generating-structured-data.mdx:435-478`).
+- `result.output` is a getter. Parse or validation failures are thrown by `generate()` itself
+  (`NoObjectGeneratedError`); the getter only throws `NoOutputGeneratedError` when there is no output
+  (`node_modules/ai/dist/index.js:6365`, `:6503-6506`).
 - `ai/test` exports `MockLanguageModelV4`, which records every call in `doGenerateCalls`
   (`node_modules/ai/dist/test/index.d.ts:113`). There is an example of the mock response shape with structured
   output at `node_modules/ai/docs/03-ai-sdk-core/55-testing.mdx:102-133`.

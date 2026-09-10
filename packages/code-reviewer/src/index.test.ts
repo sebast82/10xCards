@@ -1,4 +1,9 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+// Fresh module graph per test, so no test sees another's memoised default agent.
+beforeEach(() => {
+  vi.resetModules();
+});
 
 // No vitest config sets `unstubEnvs`, so every stub is undone here.
 afterEach(() => {
@@ -8,7 +13,6 @@ afterEach(() => {
 describe('library entry point', () => {
   it('imports without reading env or touching the exit code', async () => {
     vi.stubEnv('OPENROUTER_API_KEY', '');
-    vi.resetModules();
 
     await expect(import('./index.js')).resolves.toBeDefined();
     expect(process.exitCode).toBeUndefined();

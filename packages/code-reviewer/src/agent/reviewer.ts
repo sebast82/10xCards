@@ -31,6 +31,7 @@ function getDefaultAgent(): ReviewerAgent {
 export async function reviewCode(code: string, options?: { agent?: ReviewerAgent }): Promise<Review> {
   const agent = options?.agent ?? getDefaultAgent();
   const result = await agent.generate({ prompt: buildReviewPrompt(code) });
-  // `output` is a getter that throws on parse/validation failure — read it here so the promise rejects.
+  // `generate()` rejects with NoObjectGeneratedError on parse/validation failure; the `output` getter
+  // throws NoOutputGeneratedError when the final step produced none — read it here so the promise rejects.
   return result.output;
 }
