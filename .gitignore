@@ -56,6 +56,10 @@ reports/mutation/
 .agents/*
 .claude/.10x-cli-manifest.json
 skills-lock.json
+# To samo w pakietach: skille dociągnięte przez `npx skills` (`.claude/skills/*` to symlinki
+# z absolutną ścieżką do `.agents/`, więc na innym klonie i tak by nie działały).
+packages/*/.agents/*
+packages/*/.claude/skills/*
 
 # Wstrzykiwany przez 10x-cli w całości (blok BEGIN/END @przeprogramowani/10x-cli).
 # Własne, generyczne reguły projektu zostają w repo jako CLAUDE.md.scaffold.

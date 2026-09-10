@@ -11,6 +11,7 @@ export default defineConfig({
     environment: "node",
     // `tests/e2e` należy do Playwrighta — domyślny glob vitesta łapie `*.spec.ts`,
     // a `lint-staged` puszcza `vitest related` na każdym zmienionym `*.ts`.
-    exclude: [...configDefaults.exclude, "tests/e2e/**"],
+    // `packages/**` to samodzielne projekty — ich testy zależą od własnych `node_modules`.
+    exclude: [...configDefaults.exclude, "tests/e2e/**", "packages/**"],
   },
 });
