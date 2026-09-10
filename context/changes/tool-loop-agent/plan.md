@@ -461,28 +461,28 @@ call. The 2048-token output cap stays, to avoid OpenRouter reserving the model's
 
 #### Automated
 
-- [x] 2.1 Package typecheck passes
-- [x] 2.2 Package build passes and emits index, cli and agent modules
-- [x] 2.3 Importing the built library has no side effects without env
-- [x] 2.4 The CLI is the only module touching the process
+- [x] 2.1 Package typecheck passes — 5e697fa
+- [x] 2.2 Package build passes and emits index, cli and agent modules — 5e697fa
+- [x] 2.3 Importing the built library has no side effects without env — 5e697fa
+- [x] 2.4 The CLI is the only module touching the process — 5e697fa
 
 #### Manual
 
-- [x] 2.5 Real CLI run returns the same JSON shape and flags the subtraction bug
-- [x] 2.6 CLI with no args reviews the default sample
-- [x] 2.7 Blank API key prints the env error and exits 1
-- [x] 2.8 OpenRouter accepts the request with the empty tool set
+- [x] 2.5 Real CLI run returns the same JSON shape and flags the subtraction bug — 5e697fa
+- [x] 2.6 CLI with no args reviews the default sample — 5e697fa
+- [x] 2.7 Blank API key prints the env error and exits 1 — 5e697fa
+- [x] 2.8 OpenRouter accepts the request with the empty tool set — 5e697fa
 
 ### Phase 3: Offline test harness
 
 #### Automated
 
-- [ ] 3.1 Package tests pass offline
-- [ ] 3.2 Package typecheck passes, including tests
-- [ ] 3.3 Build excludes tests
-- [ ] 3.4 Root tests pass and don't collect package tests
+- [x] 3.1 Package tests pass offline
+- [x] 3.2 Package typecheck passes, including tests
+- [x] 3.3 Build excludes tests
+- [x] 3.4 Root tests pass and don't collect package tests
 
 #### Manual
 
-- [ ] 3.5 Removing the closing-tag neutralisation turns the prompt test red
-- [ ] 3.6 Tests pass with a bogus key exported in the shell
+- [x] 3.5 Removing the closing-tag neutralisation turns the prompt test red
+- [x] 3.6 Tests pass with a bogus key exported in the shell

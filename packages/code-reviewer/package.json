@@ -11,7 +11,8 @@
     "start": "tsx --env-file-if-exists=.env src/cli.ts",
     "dev": "tsx watch --env-file-if-exists=.env src/cli.ts",
     "typecheck": "tsc --noEmit",
-    "build": "tsc -p tsconfig.build.json"
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run"
   },
   "dependencies": {
     "@openrouter/ai-sdk-provider": "^3.0.0",
@@ -21,6 +22,7 @@
   "devDependencies": {
     "@types/node": "^24.13.4",
     "tsx": "^4.23.13",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
   }
 }
