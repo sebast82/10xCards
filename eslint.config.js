@@ -91,6 +91,10 @@ export default tseslint.config(
     // Skrypty hooków agenta: Node ESM poza projektem TS — `projectService` ich nie widzi.
     ignores: [".claude/**"],
   },
+  {
+    // Pakiety to samodzielne projekty z własnym toolchainem (styl, tsconfig, testy) — root ich nie lintuje.
+    ignores: ["packages/**"],
+  },
   includeIgnoreFile(gitignorePath),
   baseConfig,
   reactConfig,
