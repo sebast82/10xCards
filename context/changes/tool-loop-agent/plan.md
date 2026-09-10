@@ -477,12 +477,12 @@ call. The 2048-token output cap stays, to avoid OpenRouter reserving the model's
 
 #### Automated
 
-- [x] 3.1 Package tests pass offline
-- [x] 3.2 Package typecheck passes, including tests
-- [x] 3.3 Build excludes tests
-- [x] 3.4 Root tests pass and don't collect package tests
+- [x] 3.1 Package tests pass offline — 478cdba
+- [x] 3.2 Package typecheck passes, including tests — 478cdba
+- [x] 3.3 Build excludes tests — 478cdba
+- [x] 3.4 Root tests pass and don't collect package tests — 478cdba
 
 #### Manual
 
-- [x] 3.5 Removing the closing-tag neutralisation turns the prompt test red
-- [x] 3.6 Tests pass with a bogus key exported in the shell
+- [x] 3.5 Removing the closing-tag neutralisation turns the prompt test red — 478cdba
+- [x] 3.6 Tests pass with a bogus key exported in the shell — 478cdba
