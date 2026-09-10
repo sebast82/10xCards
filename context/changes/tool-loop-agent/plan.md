@@ -447,31 +447,31 @@ call. The 2048-token output cap stays, to avoid OpenRouter reserving the model's
 
 #### Automated
 
-- [x] 1.1 Root eslint no longer reports on package code
-- [x] 1.2 Root typecheck passes and no longer counts the package file
-- [x] 1.3 Root unit tests pass
-- [x] 1.4 Root lint passes
-- [x] 1.5 Root prettier skips package code
+- [x] 1.1 Root eslint no longer reports on package code — e3ef5dd
+- [x] 1.2 Root typecheck passes and no longer counts the package file — e3ef5dd
+- [x] 1.3 Root unit tests pass — e3ef5dd
+- [x] 1.4 Root lint passes — e3ef5dd
+- [x] 1.5 Root prettier skips package code — e3ef5dd
 
 #### Manual
 
-- [x] 1.6 `git diff --stat` touches only the four root config files with small line counts
+- [x] 1.6 `git diff --stat` touches only the four root config files with small line counts — e3ef5dd
 
 ### Phase 2: Modular reviewer library on ToolLoopAgent
 
 #### Automated
 
-- [ ] 2.1 Package typecheck passes
-- [ ] 2.2 Package build passes and emits index, cli and agent modules
-- [ ] 2.3 Importing the built library has no side effects without env
-- [ ] 2.4 The CLI is the only module touching the process
+- [x] 2.1 Package typecheck passes
+- [x] 2.2 Package build passes and emits index, cli and agent modules
+- [x] 2.3 Importing the built library has no side effects without env
+- [x] 2.4 The CLI is the only module touching the process
 
 #### Manual
 
-- [ ] 2.5 Real CLI run returns the same JSON shape and flags the subtraction bug
-- [ ] 2.6 CLI with no args reviews the default sample
-- [ ] 2.7 Blank API key prints the env error and exits 1
-- [ ] 2.8 OpenRouter accepts the request with the empty tool set
+- [x] 2.5 Real CLI run returns the same JSON shape and flags the subtraction bug
+- [x] 2.6 CLI with no args reviews the default sample
+- [x] 2.7 Blank API key prints the env error and exits 1
+- [x] 2.8 OpenRouter accepts the request with the empty tool set
 
 ### Phase 3: Offline test harness
 
