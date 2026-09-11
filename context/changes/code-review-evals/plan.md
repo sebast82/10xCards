@@ -583,14 +583,14 @@ in the CI review.
 
 #### Automated
 
-- [x] 3.1 Evals type-check
-- [x] 3.2 Offline smoke run on the real fixture passes
-- [x] 3.3 Fixture diff is stored with LF endings
-- [x] 3.4 Package tests still pass
+- [x] 3.1 Evals type-check — d27c18b
+- [x] 3.2 Offline smoke run on the real fixture passes — d27c18b
+- [x] 3.3 Fixture diff is stored with LF endings — d27c18b
+- [x] 3.4 Package tests still pass — d27c18b
 
 #### Manual
 
-- [x] 3.5 Fixture review: three flaws present as stated, correct parts correct, neutral PR description
-- [x] 3.6 First paid run completes with no harness errors
-- [x] 3.7 Results view shows per-model metrics, tokens and cost
-- [x] 3.8 Judge spot-check matches a human reading
+- [x] 3.5 Fixture review: three flaws present as stated, correct parts correct, neutral PR description — d27c18b
+- [x] 3.6 First paid run completes with no harness errors — d27c18b
+- [x] 3.7 Results view shows per-model metrics, tokens and cost — d27c18b
+- [x] 3.8 Judge spot-check matches a human reading — d27c18b
