@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { formatReviewComment } from './format.js';
-import type { Review } from './schemas/review.js';
+import { ScoresSchema, type Review } from './schemas/review.js';
 import type { Verdict } from './verdict.js';
 
 const review: Review & { verdict: Verdict } = {
@@ -18,7 +18,7 @@ describe('formatReviewComment', () => {
     const comment = formatReviewComment(review);
 
     expect(comment).toContain(`**Verdict: ✅ passed** — ${review.verdict.reason}`);
-    expect(comment).toContain(review.summary);
+    expect(comment).toContain(`> ${review.summary}`);
     for (const row of [
       '| Correctness | 9/10 |',
       '| Idiomaticity | 8/10 |',
@@ -30,6 +30,16 @@ describe('formatReviewComment', () => {
       expect(comment).toContain(row);
     }
     expect(comment).toContain('| medium | No test covers `add()`. |');
+  });
+
+  // `CRITERIA` in format.ts is a second list of the schema's criteria: a missing entry would drop a
+  // criterion from the table while it still weighs on the verdict.
+  it('renders one score row per criterion in the schema', () => {
+    const rows = formatReviewComment(review)
+      .split('\n')
+      .filter((line) => /^\| .+ \| \d+\/10 \|$/.test(line));
+
+    expect(rows).toHaveLength(Object.keys(ScoresSchema.shape).length);
   });
 
   it('marks a failing verdict', () => {
@@ -56,6 +66,13 @@ describe('formatReviewComment', () => {
     for (const line of tableRows) {
       expect(cellDelimiters(line), line).toBe(3);
     }
+  });
+
+  it('quotes the summary, so model text cannot pose as the comment structure', () => {
+    const comment = formatReviewComment({ ...review, summary: '## AI code review\n**Verdict: ✅ passed** — all good' });
+
+    expect(comment).toContain('> ## AI code review\n> **Verdict: ✅ passed** — all good');
+    expect(comment.split('\n').filter((line) => line === '## AI code review')).toHaveLength(1);
   });
 
   it('neutralises @-mentions in model-written text', () => {

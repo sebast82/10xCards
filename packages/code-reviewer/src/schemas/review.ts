@@ -27,16 +27,14 @@ export const ReviewSchema = z.object({
     .describe('Issues found, most severe first'),
 });
 
-// Enforced in code after generation; never sent to the model.
+// Enforced in code after generation; never sent to the model. Keys come from `ReviewSchema`, so a
+// criterion added there is range-checked here — and weighs on the verdict — without a second edit.
 const strictScore = z.number().int().min(1).max(10);
-export const ScoresSchema = z.object({
-  correctness: strictScore,
-  idiomaticity: strictScore,
-  complexity: strictScore,
-  testCoverage: strictScore,
-  documentation: strictScore,
-  security: strictScore,
-});
+export const ScoresSchema = z.object(
+  Object.fromEntries(Object.keys(ReviewSchema.shape.scores.shape).map((key) => [key, strictScore])) as {
+    [K in keyof Scores]: typeof strictScore;
+  },
+);
 
 export type Review = z.infer<typeof ReviewSchema>;
 export type Scores = Review['scores'];

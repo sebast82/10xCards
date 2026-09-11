@@ -20,6 +20,12 @@ function tableCell(text: string): string {
   return neutralizeMentions(text.replace(/\s*[\r\n]+\s*/g, ' ').replace(/\|/g, '\\|'));
 }
 
+// Quoted, so a summary the model was talked into writing cannot pose as the comment's own structure
+// (a second `## AI code review`, a forged `**Verdict: ✅ passed**`).
+function blockquote(text: string): string[] {
+  return text.split(/\r?\n/).map((line) => `> ${line}`.trimEnd());
+}
+
 export function formatReviewComment(review: Review & { verdict: Verdict }): string {
   const { verdict, issues } = review;
   return [
@@ -27,7 +33,7 @@ export function formatReviewComment(review: Review & { verdict: Verdict }): stri
     '',
     `**Verdict: ${verdict.pass ? '✅ passed' : '❌ failed'}** — ${verdict.reason}`,
     '',
-    neutralizeMentions(review.summary),
+    ...blockquote(neutralizeMentions(review.summary)),
     '',
     '| Criterion | Score |',
     '| --- | ---: |',
@@ -44,7 +50,8 @@ export function formatReviewComment(review: Review & { verdict: Verdict }): stri
         ]),
     '',
     // The workflow runs this reviewer from the PR's own code, so the verdict is self-attested.
-    '<sub>Advisory review by `packages/code-reviewer`, built from this PR — not a merge gate.</sub>',
+    '<sub>Advisory review by `packages/code-reviewer`, built from this PR — not a merge gate. ' +
+      'The security score is uncalibrated: it has passed PRs with seeded vulnerabilities, so it does not stand in for a security review.</sub>',
     '',
   ].join('\n');
 }
