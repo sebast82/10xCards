@@ -69,7 +69,7 @@ jobs:
         with:
           base-sha: ${{ github.event.pull_request.base.sha }}
           head-sha: ${{ github.event.pull_request.head.sha }}
-          openrouter-api-key: invalid-key-for-check-2.7
+          openrouter-api-key: ${{ secrets.OPENROUTER_API_KEY }}
 
       # The retry is consumed whatever happened above, so the label never lingers as a stale
       # "review requested" marker.
