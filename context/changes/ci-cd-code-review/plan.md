@@ -332,7 +332,7 @@ None. The `ReviewSchema` change is breaking, but the only prior consumer is this
 
 #### Manual
 
-- [x] 3.1 Clean PR gets `ai-cr:passed` with high scores
+- [x] 3.1 Clean PR gets `ai-cr:passed` with high scores — 28fc9e7
 - [ ] 3.2 PR with a seeded security issue gets `ai-cr:failed`, reason names the security floor
-- [x] 3.3 Default GITHUB_TOKEN permissions confirmed sufficient (no PAT needed)
-- [ ] 3.4 No secrets or raw sensitive content appear in logs or the PR comment
+- [x] 3.3 Default GITHUB_TOKEN permissions confirmed sufficient (no PAT needed) — 28fc9e7
+- [x] 3.4 No secrets or raw sensitive content appear in logs or the PR comment
