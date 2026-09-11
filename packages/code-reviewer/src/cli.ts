@@ -1,11 +1,3 @@
-import { reviewCode } from './index.js';
+import { runCli } from './run-cli.js';
 
-const DEFAULT_SAMPLE = 'function add(a, b) { return a - b; }';
-
-const input = process.argv.slice(2).join(' ') || DEFAULT_SAMPLE;
-try {
-  console.log(JSON.stringify(await reviewCode(input), null, 2));
-} catch (error) {
-  console.error(error instanceof Error ? error.message : error);
-  process.exitCode = 1;
-}
+process.exitCode = await runCli(process.argv.slice(2));

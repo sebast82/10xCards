@@ -1,0 +1,120 @@
+name: Code Review
+
+# AI review of every same-repo PR to master, by `packages/code-reviewer` (via the local
+# `.github/actions/code-review` composite action): a PR comment with six 1–10 scores, the issues and
+# a verdict, plus an `ai-cr:passed` / `ai-cr:failed` label. Adding `ai-cr:review` re-runs it.
+#
+# The labels are ADVISORY and self-attested. Under `pull_request` the workflow, the action and the
+# reviewer are all built from the PR's own merge commit, so a PR that edits the thresholds, the
+# prompt or this file grades itself by its own rules. Do not make this a required status check
+# without a trusted-build redesign (reviewer built from the base branch, workflow edits protected).
+on:
+  pull_request:
+    branches: [master]
+    # `labeled` is what makes the `ai-cr:review` retry possible; the job `if:` below drops every
+    # other label.
+    types: [opened, synchronize, reopened, labeled]
+
+# Nothing at workflow level; the one job asks for exactly what it writes.
+permissions: {}
+
+jobs:
+  review:
+    # Fork PRs get no secrets on `pull_request` (same exclusion as `ci.yml`'s `e2e` job), so the
+    # review could only fail there. A `labeled` event runs only for the retry label.
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      (github.event.action != 'labeled' || github.event.label.name == 'ai-cr:review')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # `gh label create` goes through the Issues API even for labels that end up on PRs.
+      issues: write
+      pull-requests: write
+    # Job-level, never workflow-level: at workflow level a run joins the group before the job's
+    # `if:` is evaluated, so a run for an unrelated label — skipped moments later — would still
+    # cancel an in-flight review (`gh pr create --label bug` dispatches `opened` + `labeled`).
+    concurrency:
+      group: code-review-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    # A backstop for a wedged install/build (that case goes red). A hung model call is cut off
+    # after 300 s inside the action and takes the neutral-comment path instead.
+    timeout-minutes: 10
+    # `GH_TOKEN` is set per step, only where `gh` runs — never job-wide, where it would also reach
+    # `npm ci` and the PR's own lifecycle scripts.
+    env:
+      GH_REPO: ${{ github.repository }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Full history: the action diffs `base.sha...head.sha`, and `head.sha` (the parent of the
+          # merge commit checked out here) is missing from a depth-1 clone.
+          fetch-depth: 0
+          # This job writes to the repo only through `gh`; without this, checkout leaves
+          # GITHUB_TOKEN behind in .git/config.
+          persist-credentials: false
+
+      - name: Ensure review labels exist
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create ai-cr:passed --color 2ea44f --description "AI code review passed" --force
+          gh label create ai-cr:failed --color d73a4a --description "AI code review failed" --force
+          gh label create ai-cr:review --color ededed --description "Re-run the AI code review" --force
+
+      - name: Run AI code review
+        id: review
+        uses: ./.github/actions/code-review
+        with:
+          base-sha: ${{ github.event.pull_request.base.sha }}
+          head-sha: ${{ github.event.pull_request.head.sha }}
+          openrouter-api-key: ${{ secrets.OPENROUTER_API_KEY }}
+
+      # The body is rendered by the package's `formatReviewComment` (unit-tested there, including
+      # escaping of model-written text) — no formatting logic lives in this workflow.
+      - name: Post the review comment
+        if: steps.review.outputs.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMENT_FILE: ${{ steps.review.outputs.comment-file }}
+        run: gh pr comment "$PR_NUMBER" --body-file "$COMMENT_FILE"
+
+      - name: Apply the verdict label
+        if: steps.review.outputs.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REVIEW_FILE: ${{ steps.review.outputs.review-file }}
+        run: |
+          if [ "$(jq -r '.verdict.pass' "$REVIEW_FILE")" = "true" ]; then
+            gh pr edit "$PR_NUMBER" --add-label ai-cr:passed --remove-label ai-cr:failed
+          else
+            gh pr edit "$PR_NUMBER" --add-label ai-cr:failed --remove-label ai-cr:passed
+          fi
+
+      # The reviewer did not produce a review: say so without failing the job and without touching
+      # the labels, so a flaky model call neither turns the PR red nor erases the last verdict.
+      - name: Post a neutral comment on reviewer failure
+        if: steps.review.outputs.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh pr comment "$PR_NUMBER" --body-file - <<EOF
+          **AI code review unavailable.** The reviewer invocation failed on this run (model or schema
+          error, or a timeout), so no verdict was produced and the \`ai-cr:*\` labels were left as they
+          were. See the [workflow run]($RUN_URL) for details, or add the \`ai-cr:review\` label to retry.
+          EOF
+
+      # The retry is consumed whatever happened above, so the label never lingers as a stale
+      # "review requested" marker. Last on purpose: the steps above run only while no earlier step
+      # has failed, so a transient `gh` error here must not be what swallows a finished review.
+      - name: Consume the retry label
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          has_retry="$(gh pr view "$PR_NUMBER" --json labels --jq '.labels[] | select(.name == "ai-cr:review") | .name')"
+          if [ -n "$has_retry" ]; then
+            gh pr edit "$PR_NUMBER" --remove-label ai-cr:review
+          fi

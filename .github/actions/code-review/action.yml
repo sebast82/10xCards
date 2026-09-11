@@ -1,0 +1,124 @@
+name: AI code review
+description: >-
+  Build packages/code-reviewer and review the current pull request's title, description and diff
+  with it. Expects a full-history checkout (`fetch-depth: 0`) of a `pull_request` event.
+
+inputs:
+  base-sha:
+    description: The pull request's base commit (`github.event.pull_request.base.sha`).
+    required: true
+  head-sha:
+    description: The pull request's head commit (`github.event.pull_request.head.sha`).
+    required: true
+  openrouter-api-key:
+    # Composite actions cannot read `secrets`, so the caller passes the key in.
+    description: OpenRouter API key the reviewer calls the model with.
+    required: true
+
+outputs:
+  outcome:
+    # `continue-on-error` makes the step's *conclusion* always `success`; its *outcome* keeps the
+    # real result. `failure` means the reviewer did not produce a review (model/schema error,
+    # invalid input, or the 300 s timeout) — a legitimate failing verdict still exits 0.
+    description: "`success` if the reviewer ran and wrote a review, `failure` otherwise."
+    value: ${{ steps.run_review.outcome }}
+  review-file:
+    description: Absolute path to the review JSON (review + verdict). Valid only when outcome is `success`.
+    value: ${{ steps.paths.outputs.review-file }}
+  comment-file:
+    description: Absolute path to the rendered PR comment markdown. Valid only when outcome is `success`.
+    value: ${{ steps.paths.outputs.comment-file }}
+
+runs:
+  using: composite
+  steps:
+    # The package is not an npm workspace of the root: it has its own lockfile and must be installed
+    # and built on its own. `dist/` is gitignored, so the build is what produces `dist/cli.js`.
+    # The npm download cache only speeds up `npm ci`; it can never serve a stale `dist/`.
+    - uses: actions/setup-node@v7
+      with:
+        node-version: 24
+        cache: npm
+        cache-dependency-path: packages/code-reviewer/package-lock.json
+
+    # A failure here (or in the diff below) deliberately fails the job: nothing else in CI builds
+    # `packages/**`, so this is the only signal that a PR broke the package.
+    - name: Install and build the reviewer
+      shell: bash
+      working-directory: packages/code-reviewer
+      run: |
+        npm ci
+        npm run build
+
+    # Working files live outside the checkout so nothing can be mistaken for part of the PR.
+    - name: Prepare working files
+      id: paths
+      shell: bash
+      run: |
+        dir="$RUNNER_TEMP/code-review"
+        mkdir -p "$dir"
+        {
+          echo "diff-file=$dir/pr.diff"
+          echo "input-file=$dir/input.json"
+          echo "review-file=$dir/review.json"
+          echo "comment-file=$dir/comment.md"
+        } >> "$GITHUB_OUTPUT"
+
+    # Three-dot range: diffed against the merge base, i.e. the PR's "Files changed" tab. A two-dot
+    # diff against base.sha would show master commits made after branching as reverted lines.
+    # `head.sha` is the parent of the `refs/pull/N/merge` commit checkout lands on — present only
+    # thanks to the caller's `fetch-depth: 0`, so no `git fetch` is needed (or possible: the checkout
+    # does not persist credentials).
+    #
+    # Code first, `context/` last: the package cuts the diff at 60,000 characters, and `git diff`
+    # lists files by path — `context/` sorts before `packages/` and `src/`, and every change here
+    # ships its plan/research docs. In one order the docs fill the budget and cut off the code under
+    # review (first real run: 75k of docs ahead of 40k of package code). Lockfiles are dropped:
+    # machine-generated, often huge, nothing to judge line by line.
+    - name: Compute the PR diff
+      shell: bash
+      env:
+        BASE_SHA: ${{ inputs.base-sha }}
+        HEAD_SHA: ${{ inputs.head-sha }}
+        DIFF_FILE: ${{ steps.paths.outputs.diff-file }}
+      run: |
+        {
+          git diff "$BASE_SHA...$HEAD_SHA" -- . ':(exclude)context' ':(exclude,glob)**/package-lock.json'
+          git diff "$BASE_SHA...$HEAD_SHA" -- context
+        } > "$DIFF_FILE"
+
+    # Title and description are attacker-controllable text (any collaborator writes them). They are
+    # read here, from the event payload file, and never pass through `${{ }}` or a shell variable —
+    # that is what keeps them out of the script. `JSON.stringify` means no content can break the
+    # file either. `body` is `null` for a PR opened without a description.
+    - name: Assemble the reviewer input
+      shell: bash
+      env:
+        DIFF_FILE: ${{ steps.paths.outputs.diff-file }}
+        INPUT_FILE: ${{ steps.paths.outputs.input-file }}
+      run: |
+        node -e '
+          const fs = require("node:fs");
+          const { pull_request: pr } = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, "utf8"));
+          const input = {
+            title: pr.title,
+            description: pr.body ?? "",
+            diff: fs.readFileSync(process.env.DIFF_FILE, "utf8"),
+          };
+          fs.writeFileSync(process.env.INPUT_FILE, JSON.stringify(input));
+        '
+
+    # `timeout 300` (exit 124) turns a hung OpenRouter call into a failed outcome: composite steps
+    # cannot take `timeout-minutes`, and the package threads no abort signal into the model call.
+    # stderr carries only the error message — the CLI never prints the request body (the diff).
+    - name: Run the reviewer
+      id: run_review
+      continue-on-error: true
+      shell: bash
+      working-directory: packages/code-reviewer
+      env:
+        OPENROUTER_API_KEY: ${{ inputs.openrouter-api-key }}
+        INPUT_FILE: ${{ steps.paths.outputs.input-file }}
+        REVIEW_FILE: ${{ steps.paths.outputs.review-file }}
+        COMMENT_FILE: ${{ steps.paths.outputs.comment-file }}
+      run: timeout 300 node dist/cli.js --input-file "$INPUT_FILE" --markdown-out "$COMMENT_FILE" > "$REVIEW_FILE"
