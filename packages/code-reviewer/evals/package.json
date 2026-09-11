@@ -1,0 +1,20 @@
+{
+  "name": "code-reviewer-evals",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "eval": "promptfoo eval -c promptfooconfig.ts --env-file ../.env",
+    "eval:smoke": "promptfoo eval -c promptfooconfig.smoke.ts --no-write --no-cache",
+    "view": "promptfoo view",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.4",
+    "promptfoo": "0.123.0",
+    "typescript": "^7.0.2"
+  }
+}

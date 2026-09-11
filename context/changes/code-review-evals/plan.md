@@ -555,29 +555,29 @@ in the CI review.
 
 #### Automated
 
-- [x] 1.1 Unit tests pass
-- [x] 1.2 Type checking passes
-- [x] 1.3 Build passes and ships no test helper
-- [x] 1.4 No local mock-model helper remains in test files
+- [x] 1.1 Unit tests pass — 4babe61
+- [x] 1.2 Type checking passes — 4babe61
+- [x] 1.3 Build passes and ships no test helper — 4babe61
+- [x] 1.4 No local mock-model helper remains in test files — 4babe61
 
 #### Manual
 
-- [x] 1.5 A real CLI run still prints the same JSON shape
+- [x] 1.5 A real CLI run still prints the same JSON shape — 4babe61
 
 ### Phase 2: Evals project, provider and offline smoke run
 
 #### Automated
 
-- [ ] 2.1 Evals install from the lockfile
-- [ ] 2.2 Evals type-check (incl. `../src`)
-- [ ] 2.3 Offline smoke run passes without a key
-- [ ] 2.4 No `ai` imports under evals
-- [ ] 2.5 Reviewer package stays promptfoo-free
-- [ ] 2.6 Package tests still pass
+- [x] 2.1 Evals install from the lockfile
+- [x] 2.2 Evals type-check (incl. `../src`)
+- [x] 2.3 Offline smoke run passes without a key
+- [x] 2.4 No `ai` imports under evals
+- [x] 2.5 Reviewer package stays promptfoo-free
+- [x] 2.6 Package tests still pass
 
 #### Manual
 
-- [ ] 2.7 README instructions work as written
+- [x] 2.7 README instructions work as written
 
 ### Phase 3: React 19 migration fixture and three-model judge config
 
