@@ -23,6 +23,6 @@ describe('library entry point', () => {
     vi.stubEnv('OPENROUTER_API_KEY', '');
     const { reviewCode } = await import('./index.js');
 
-    await expect(reviewCode('x')).rejects.toThrow('Invalid environment');
+    await expect(reviewCode({ title: 'x', description: '', diff: '' })).rejects.toThrow('Invalid environment');
   });
 });
