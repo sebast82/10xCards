@@ -3,10 +3,11 @@ import { parseArgs } from 'node:util';
 import { z } from 'zod';
 import { reviewCode, type ReviewerAgent } from './agent/reviewer.js';
 import { formatReviewComment } from './format.js';
+import { readGitDiff } from './git-diff.js';
 import { ReviewInputSchema, type ReviewInput } from './schemas/input.js';
 import { computeVerdict } from './verdict.js';
 
-const USAGE = 'Usage: code-reviewer --input-file <path> [--markdown-out <path>]';
+const USAGE = 'Usage: code-reviewer --input-file <path> [--markdown-out <path>] [--diff-ref <ref>]';
 
 async function readInput(path: string): Promise<ReviewInput> {
   let json: unknown;
@@ -28,12 +29,20 @@ export async function runCli(argv: string[], deps?: { agent?: ReviewerAgent }): 
   try {
     const { values } = parseArgs({
       args: argv,
-      options: { 'input-file': { type: 'string' }, 'markdown-out': { type: 'string' } },
+      options: {
+        'input-file': { type: 'string' },
+        'markdown-out': { type: 'string' },
+        'diff-ref': { type: 'string' },
+      },
     });
     const inputFile = values['input-file'];
     if (!inputFile) throw new Error(`Missing --input-file.\n${USAGE}`);
 
-    const review = await reviewCode(await readInput(inputFile), deps);
+    const input = await readInput(inputFile);
+    const diffRef = values['diff-ref'];
+    if (diffRef) input.diff = readGitDiff(diffRef);
+
+    const review = await reviewCode(input, deps);
     const result = { ...review, verdict: computeVerdict(review.scores) };
     const markdownOut = values['markdown-out'];
     if (markdownOut) await writeFile(markdownOut, formatReviewComment(result));
