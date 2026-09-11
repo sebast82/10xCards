@@ -316,13 +316,13 @@ None. The `ReviewSchema` change is breaking, but the only prior consumer is this
 
 #### Automated
 
-- [x] 2.1 Package build still passes: `cd packages/code-reviewer && npm run build`
-- [x] 2.2 Workflow lints clean with actionlint
+- [x] 2.1 Package build still passes: `cd packages/code-reviewer && npm run build` — a3b163c
+- [x] 2.2 Workflow lints clean with actionlint — a3b163c
 
 #### Manual
 
-- [ ] 2.3 Real PR triggers the review job and a comment with all six scores appears
-- [ ] 2.4 Label matches the computed verdict
+- [x] 2.3 Real PR triggers the review job and a comment with all six scores appears
+- [x] 2.4 Label matches the computed verdict
 - [ ] 2.5 `ai-cr:review` label re-triggers a run and is removed afterward
 - [ ] 2.6 Unrelated label addition does NOT trigger the job nor cancel an in-flight review
 - [ ] 2.7 Forced invocation failure posts a neutral comment, job stays green, no label change
