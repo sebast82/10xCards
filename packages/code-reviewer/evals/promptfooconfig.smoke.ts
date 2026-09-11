@@ -1,6 +1,6 @@
 import type { UnifiedConfig } from 'promptfoo';
 import type { Review } from '../src/index.js';
-import { verdictFails } from './assertions.js';
+import { reactMigrationCase } from './cases.js';
 
 // Canned failing review: security below its floor and the average below the pass threshold.
 const mockReview: Review = {
@@ -15,7 +15,8 @@ const config: UnifiedConfig = {
   // Placeholder: the provider reads only `vars.fixture` and builds the prompt with the package's own code.
   prompts: ['{{fixture}}'],
   providers: [{ id: 'file://provider.ts', label: 'mock', config: { mockReview } }],
-  tests: [{ description: 'Wiring fixture', vars: { fixture: 'wiring' }, assert: [verdictFails] }],
+  // The real fixture without the judge: covers its loading and size guard at zero cost.
+  tests: [reactMigrationCase({ judge: false })],
 };
 
 export default config;

@@ -568,29 +568,29 @@ in the CI review.
 
 #### Automated
 
-- [x] 2.1 Evals install from the lockfile
-- [x] 2.2 Evals type-check (incl. `../src`)
-- [x] 2.3 Offline smoke run passes without a key
-- [x] 2.4 No `ai` imports under evals
-- [x] 2.5 Reviewer package stays promptfoo-free
-- [x] 2.6 Package tests still pass
+- [x] 2.1 Evals install from the lockfile — eec457f
+- [x] 2.2 Evals type-check (incl. `../src`) — eec457f
+- [x] 2.3 Offline smoke run passes without a key — eec457f
+- [x] 2.4 No `ai` imports under evals — eec457f
+- [x] 2.5 Reviewer package stays promptfoo-free — eec457f
+- [x] 2.6 Package tests still pass — eec457f
 
 #### Manual
 
-- [x] 2.7 README instructions work as written
+- [x] 2.7 README instructions work as written — eec457f
 
 ### Phase 3: React 19 migration fixture and three-model judge config
 
 #### Automated
 
-- [ ] 3.1 Evals type-check
-- [ ] 3.2 Offline smoke run on the real fixture passes
-- [ ] 3.3 Fixture diff is stored with LF endings
-- [ ] 3.4 Package tests still pass
+- [x] 3.1 Evals type-check
+- [x] 3.2 Offline smoke run on the real fixture passes
+- [x] 3.3 Fixture diff is stored with LF endings
+- [x] 3.4 Package tests still pass
 
 #### Manual
 
-- [ ] 3.5 Fixture review: three flaws present as stated, correct parts correct, neutral PR description
-- [ ] 3.6 First paid run completes with no harness errors
-- [ ] 3.7 Results view shows per-model metrics, tokens and cost
-- [ ] 3.8 Judge spot-check matches a human reading
+- [x] 3.5 Fixture review: three flaws present as stated, correct parts correct, neutral PR description
+- [x] 3.6 First paid run completes with no harness errors
+- [x] 3.7 Results view shows per-model metrics, tokens and cost
+- [x] 3.8 Judge spot-check matches a human reading
