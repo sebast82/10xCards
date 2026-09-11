@@ -321,18 +321,18 @@ None. The `ReviewSchema` change is breaking, but the only prior consumer is this
 
 #### Manual
 
-- [x] 2.3 Real PR triggers the review job and a comment with all six scores appears
-- [x] 2.4 Label matches the computed verdict
-- [ ] 2.5 `ai-cr:review` label re-triggers a run and is removed afterward
-- [ ] 2.6 Unrelated label addition does NOT trigger the job nor cancel an in-flight review
-- [ ] 2.7 Forced invocation failure posts a neutral comment, job stays green, no label change
-- [ ] 2.8 Fork PR condition confirmed to skip the job
+- [x] 2.3 Real PR triggers the review job and a comment with all six scores appears — d474e80
+- [x] 2.4 Label matches the computed verdict — d474e80
+- [x] 2.5 `ai-cr:review` label re-triggers a run and is removed afterward — d474e80
+- [x] 2.6 Unrelated label addition does NOT trigger the job nor cancel an in-flight review — d474e80
+- [x] 2.7 Forced invocation failure posts a neutral comment, job stays green, no label change — d474e80
+- [x] 2.8 Fork PR condition confirmed to skip the job — d474e80
 
 ### Phase 3: End-to-end verification
 
 #### Manual
 
-- [ ] 3.1 Clean PR gets `ai-cr:passed` with high scores
+- [x] 3.1 Clean PR gets `ai-cr:passed` with high scores
 - [ ] 3.2 PR with a seeded security issue gets `ai-cr:failed`, reason names the security floor
-- [ ] 3.3 Default GITHUB_TOKEN permissions confirmed sufficient (no PAT needed)
+- [x] 3.3 Default GITHUB_TOKEN permissions confirmed sufficient (no PAT needed)
 - [ ] 3.4 No secrets or raw sensitive content appear in logs or the PR comment

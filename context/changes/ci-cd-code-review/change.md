@@ -21,3 +21,12 @@ First Github Actions workflow for agentic code review based on packages/code-rev
   docs) sorts before `packages/` (40k), so the package code was cut off and scored unseen. Chosen
   fix: the action diffs everything except `context/` and lockfiles first, then appends `context/`.
   Docs are still reviewed when budget remains; code is never cut off in their favour.
+- **Not met in Phase 3 (manual check 3.2):** a seeded-security PR (#20, closed) never tripped the
+  security floor. Seed 1, a `--diff-ref` CLI flag interpolated into `execSync`: rated low
+  ("developer-supplied"), security 7, `ai-cr:passed`. Seed 2 added a workflow step interpolating
+  `${{ github.event.pull_request.title }}` into `run:` (GHA script injection) at char 9,358 of a
+  129k diff, well inside the 60k window: not mentioned at all, `execSync` raised to medium,
+  security 6 (= floor), `ai-cr:passed`. The verdict logic is correct; the model under-scores
+  untrusted input reaching a shell on a large diff (possibly tied to reasoning effort `low`, see
+  Phase 1). Chosen: 3.2 left unchecked; security calibration (rubric anchors such as "untrusted
+  input reaching a shell = security ≤ 3", seeded eval fixtures) is a follow-up change.
