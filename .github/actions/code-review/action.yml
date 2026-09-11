@@ -35,7 +35,7 @@ runs:
     # The package is not an npm workspace of the root: it has its own lockfile and must be installed
     # and built on its own. `dist/` is gitignored, so the build is what produces `dist/cli.js`.
     # The npm download cache only speeds up `npm ci`; it can never serve a stale `dist/`.
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v7
       with:
         node-version: 24
         cache: npm

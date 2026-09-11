@@ -46,7 +46,7 @@ jobs:
       GH_REPO: ${{ github.repository }}
       PR_NUMBER: ${{ github.event.pull_request.number }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # Full history: the action diffs `base.sha...head.sha`, and `head.sha` (the parent of the
           # merge commit checked out here) is missing from a depth-1 clone.

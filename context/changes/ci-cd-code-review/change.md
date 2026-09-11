@@ -30,3 +30,9 @@ First Github Actions workflow for agentic code review based on packages/code-rev
   untrusted input reaching a shell on a large diff (possibly tied to reasoning effort `low`, see
   Phase 1). Chosen: 3.2 left unchecked; security calibration (rubric anchors such as "untrusted
   input reaching a shell = security ≤ 3", seeded eval fixtures) is a follow-up change.
+- **Adapted after Phase 3:** the plan pinned `actions/checkout@v4` and `actions/setup-node@v4`, both
+  Node 20, which GitHub now force-runs on Node 24 with a deprecation annotation on every run. Bumped
+  to `@v7` (Node 24) in `code-review.yml`, the composite action and `ci.yml`, plus
+  `actions/upload-artifact@v4` → `@v7` in `ci.yml` (same problem, only visible on a failed e2e
+  run). No breaking change applies: no `packageManager` field (setup-node v5 auto-cache), `cache:
+  npm` is explicit, and the artifact inputs are unchanged.
