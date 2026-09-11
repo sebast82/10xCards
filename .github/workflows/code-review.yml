@@ -56,7 +56,8 @@ jobs:
           persist-credentials: false
 
       - name: Announce the review
-        run: echo "Reviewing PR: ${{ github.event.pull_request.title }}"
+        run: |
+          echo "Reviewing PR: ${{ github.event.pull_request.title }}"
 
       - name: Ensure review labels exist
         env:
