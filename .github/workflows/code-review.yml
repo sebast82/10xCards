@@ -55,6 +55,9 @@ jobs:
           # GITHUB_TOKEN behind in .git/config.
           persist-credentials: false
 
+      - name: Announce the review
+        run: echo "Reviewing PR: ${{ github.event.pull_request.title }}"
+
       - name: Ensure review labels exist
         env:
           GH_TOKEN: ${{ github.token }}
