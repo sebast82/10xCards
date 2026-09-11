@@ -303,21 +303,21 @@ None. The `ReviewSchema` change is breaking, but the only prior consumer is this
 
 #### Automated
 
-- [x] 1.1 Dependencies install cleanly: `cd packages/code-reviewer && npm ci`
-- [x] 1.2 Typecheck passes: `npm run typecheck`
-- [x] 1.3 Unit tests pass: `npm test`
-- [x] 1.4 Build succeeds: `npm run build`
+- [x] 1.1 Dependencies install cleanly: `cd packages/code-reviewer && npm ci` — 62da68e
+- [x] 1.2 Typecheck passes: `npm run typecheck` — 62da68e
+- [x] 1.3 Unit tests pass: `npm test` — 62da68e
+- [x] 1.4 Build succeeds: `npm run build` — 62da68e
 
 #### Manual
 
-- [x] 1.5 CLI run against a real OPENROUTER_API_KEY returns all six scores and a verdict (small and near-cap fixtures)
+- [x] 1.5 CLI run against a real OPENROUTER_API_KEY returns all six scores and a verdict (small and near-cap fixtures) — 62da68e
 
 ### Phase 2: Composite action + GHA workflow
 
 #### Automated
 
-- [ ] 2.1 Package build still passes: `cd packages/code-reviewer && npm run build`
-- [ ] 2.2 Workflow lints clean with actionlint
+- [x] 2.1 Package build still passes: `cd packages/code-reviewer && npm run build`
+- [x] 2.2 Workflow lints clean with actionlint
 
 #### Manual
 
