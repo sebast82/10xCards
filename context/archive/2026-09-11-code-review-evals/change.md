@@ -1,10 +1,10 @@
 ---
 change_id: code-review-evals
 title: Introduce promptfoo to evaluate the AI code-review agent
-status: impl_reviewed
+status: archived
 created: 2026-09-11
-updated: 2026-09-11
-archived_at: null
+updated: 2026-09-13
+archived_at: 2026-09-13T21:45:19Z
 ---
 
 ## Notes
