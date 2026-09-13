@@ -9,7 +9,13 @@ const MetaSchema = ReviewInputSchema.omit({ diff: true });
 // throw before the provider runs or reach it silently altered.
 export function loadFixture(name: string): ReviewInput {
   const dir = join(import.meta.dirname, 'fixtures', name);
-  const meta = MetaSchema.safeParse(JSON.parse(readFileSync(join(dir, 'pr.json'), 'utf8')));
+  let raw: unknown;
+  try {
+    raw = JSON.parse(readFileSync(join(dir, 'pr.json'), 'utf8'));
+  } catch (error) {
+    throw new Error(`Fixture ${name}: cannot read pr.json: ${error instanceof Error ? error.message : String(error)}`);
+  }
+  const meta = MetaSchema.safeParse(raw);
   if (!meta.success) {
     throw new Error(`Fixture ${name}: invalid pr.json: ${meta.error.message}`);
   }
