@@ -1,0 +1,3 @@
+# Raw promptfoo output for `npm run matrix` / `npm run gate`: regenerated per run, and the reviews inside
+# quote the fixtures at length. The committed artefacts are `baseline.json` and the report in the change folder.
+results/

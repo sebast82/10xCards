@@ -9,6 +9,10 @@
   "scripts": {
     "eval": "promptfoo eval -c promptfooconfig.ts --env-file ../.env",
     "eval:smoke": "promptfoo eval -c promptfooconfig.smoke.ts --no-write --no-cache",
+    "matrix": "node run.ts matrix",
+    "report": "node report.ts results/comparison.json",
+    "gate": "node run.ts gate",
+    "gate:update": "node report.ts results/gate.json --check baseline.json --update",
     "view": "promptfoo view",
     "typecheck": "tsc --noEmit"
   },

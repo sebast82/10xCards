@@ -1,0 +1,89 @@
+diff --git a/src/components/DeckCard.tsx b/src/components/DeckCard.tsx
+index 085ff3e..027d9c5 100644
+--- a/src/components/DeckCard.tsx
++++ b/src/components/DeckCard.tsx
+@@ -1,3 +1,4 @@
++import { formatRelativeTime } from '../lib/relativeTime';
+ import type { Deck } from '../types';
+ 
+ type DeckCardProps = {
+@@ -10,7 +11,10 @@ export function DeckCard({ deck, onOpen }: DeckCardProps) {
+     <article className="deck-card">
+       <h3>{deck.name}</h3>
+       <p className="deck-card__count">{deck.cardCount} cards</p>
+-      <p className="deck-card__reviewed">Last reviewed {deck.lastReviewedAt.toLocaleDateString()}</p>
++      <p className="deck-card__reviewed">
++        Last reviewed{' '}
++        <time dateTime={deck.lastReviewedAt.toISOString()}>{formatRelativeTime(deck.lastReviewedAt)}</time>
++      </p>
+       <button type="button" onClick={() => onOpen(deck.id)}>
+         Open
+       </button>
+diff --git a/src/lib/relativeTime.test.ts b/src/lib/relativeTime.test.ts
+new file mode 100644
+index 0000000..5b2df43
+--- /dev/null
++++ b/src/lib/relativeTime.test.ts
+@@ -0,0 +1,32 @@
++import { describe, expect, it } from 'vitest';
++import { formatRelativeTime } from './relativeTime';
++
++const NOW = new Date('2026-03-10T12:00:00.000Z');
++
++function ago(ms: number): Date {
++  return new Date(NOW.getTime() - ms);
++}
++
++describe('formatRelativeTime', () => {
++  it('reads "just now" under a minute', () => {
++    expect(formatRelativeTime(ago(0), NOW)).toBe('just now');
++    expect(formatRelativeTime(ago(59_000), NOW)).toBe('just now');
++  });
++
++  it('clamps timestamps in the future to "just now"', () => {
++    expect(formatRelativeTime(new Date(NOW.getTime() + 5_000), NOW)).toBe('just now');
++  });
++
++  it('uses the singular at exactly one unit', () => {
++    expect(formatRelativeTime(ago(60_000), NOW)).toBe('1 minute ago');
++    expect(formatRelativeTime(ago(3_600_000), NOW)).toBe('1 hour ago');
++    expect(formatRelativeTime(ago(86_400_000), NOW)).toBe('1 day ago');
++  });
++
++  it('pluralises and rounds down within a unit', () => {
++    expect(formatRelativeTime(ago(119_000), NOW)).toBe('1 minute ago');
++    expect(formatRelativeTime(ago(2 * 60_000), NOW)).toBe('2 minutes ago');
++    expect(formatRelativeTime(ago(23 * 3_600_000), NOW)).toBe('23 hours ago');
++    expect(formatRelativeTime(ago(30 * 86_400_000), NOW)).toBe('30 days ago');
++  });
++});
+diff --git a/src/lib/relativeTime.ts b/src/lib/relativeTime.ts
+new file mode 100644
+index 0000000..c0f6941
+--- /dev/null
++++ b/src/lib/relativeTime.ts
+@@ -0,0 +1,24 @@
++const MINUTE_MS = 60_000;
++const HOUR_MS = 60 * MINUTE_MS;
++const DAY_MS = 24 * HOUR_MS;
++
++function unitsAgo(amount: number, unit: 'minute' | 'hour' | 'day'): string {
++  const whole = Math.floor(amount);
++  return `${whole} ${unit}${whole === 1 ? '' : 's'} ago`;
++}
++
++/**
++ * Formats `target` as a short relative time for deck card timestamps ("3 minutes ago").
++ *
++ * Anything under a minute — and anything in the future — reads "just now": the API server's
++ * clock can run a few seconds ahead of the browser's, and a card labelled "in 2 seconds"
++ * looks like a bug to the user. Coarser than a minute is deliberate; deck timestamps are
++ * never time-critical, so the component does not need to re-render on a timer.
++ */
++export function formatRelativeTime(target: Date, now: Date = new Date()): string {
++  const elapsedMs = Math.max(0, now.getTime() - target.getTime());
++  if (elapsedMs < MINUTE_MS) return 'just now';
++  if (elapsedMs < HOUR_MS) return unitsAgo(elapsedMs / MINUTE_MS, 'minute');
++  if (elapsedMs < DAY_MS) return unitsAgo(elapsedMs / HOUR_MS, 'hour');
++  return unitsAgo(elapsedMs / DAY_MS, 'day');
++}
