@@ -50,7 +50,7 @@ workflow sets no override). `GATE_MODEL=… npm run gate` points it elsewhere; `
 it was recorded for, and the check refuses to compare across models.
 
 `baseline.json` records what the gate model does **today**, known failures included — `flaw_default_props` sits at
-0/3, see the follow-up in `context/changes/code-review-evals/follow-ups/`. That is the point: the gate fails on a
+0/3, see F1 in `context/archive/2026-09-11-code-review-evals/follow-ups/`. That is the point: the gate fails on a
 *drop* from the recorded rate, so it works on a suite the reviewer does not yet fully pass. Recording it at
 `--repeat 3` means a metric at 3/3 tolerates nothing while a 2/3 metric tolerates one flake. To start a baseline
 from scratch (or after deliberately changing what the suite measures):
