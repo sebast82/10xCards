@@ -1,0 +1,619 @@
+diff --git a/public/index.html b/index.html
+similarity index 80%
+rename from public/index.html
+rename to index.html
+index 8fd9fdf..e1ac3ca 100644
+--- a/public/index.html
++++ b/index.html
+@@ -1,4 +1,4 @@
+-<!DOCTYPE html>
++<!doctype html>
+ <html lang="en">
+   <head>
+     <meta charset="utf-8" />
+@@ -8,5 +8,6 @@
+   <body>
+     <noscript>You need to enable JavaScript to run this app.</noscript>
+     <div id="root"></div>
++    <script type="module" src="/src/main.tsx"></script>
+   </body>
+ </html>
+diff --git a/package.json b/package.json
+index d078e3d..535b715 100644
+--- a/package.json
++++ b/package.json
+@@ -1,23 +1,26 @@
+ {
+   "name": "decks-web",
+-  "version": "0.14.2",
++  "version": "0.15.0",
+   "private": true,
++  "type": "module",
+   "scripts": {
+-    "start": "react-scripts start",
+-    "build": "react-scripts build",
+-    "test": "react-scripts test"
++    "dev": "vite",
++    "build": "tsc && vite build",
++    "preview": "vite preview",
++    "test": "vitest run"
+   },
+   "dependencies": {
+-    "prop-types": "^15.8.1",
+-    "react": "^16.14.0",
+-    "react-dom": "^16.14.0",
+-    "react-scripts": "4.0.3"
++    "react": "^19.2.0",
++    "react-dom": "^19.2.0"
+   },
+   "devDependencies": {
+-    "react-test-renderer": "^16.14.0"
+-  },
+-  "browserslist": {
+-    "production": [">0.2%", "not dead", "not op_mini all"],
+-    "development": ["last 1 chrome version", "last 1 firefox version", "last 1 safari version"]
++    "@testing-library/react": "^16.3.0",
++    "@types/react": "^19.2.2",
++    "@types/react-dom": "^19.2.2",
++    "@vitejs/plugin-react": "^5.0.4",
++    "jsdom": "^27.0.0",
++    "typescript": "^5.9.3",
++    "vite": "^7.1.9",
++    "vitest": "^3.2.4"
+   }
+ }
+diff --git a/src/App.js b/src/App.js
+deleted file mode 100644
+index a94eb3a..0000000
+--- a/src/App.js
++++ /dev/null
+@@ -1,39 +0,0 @@
+-import React, { useEffect, useRef, useState } from 'react';
+-import DeckPanel from './components/DeckPanel';
+-import SearchInput from './components/SearchInput';
+-import { ThemeContext } from './theme/ThemeContext';
+-import { useDeckIdFromUrl } from './routing';
+-
+-export default function App() {
+-  const deckId = useDeckIdFromUrl();
+-  const [query, setQuery] = useState('');
+-  const searchRef = useRef(null);
+-
+-  // "/" focuses the search box from anywhere in the app.
+-  useEffect(() => {
+-    function onKeyDown(event) {
+-      if (event.key === '/' && document.activeElement !== searchRef.current) {
+-        event.preventDefault();
+-        searchRef.current.focus();
+-      }
+-    }
+-    window.addEventListener('keydown', onKeyDown);
+-    return () => window.removeEventListener('keydown', onKeyDown);
+-  }, []);
+-
+-  return (
+-    <ThemeContext.Consumer>
+-      {({ theme, toggleTheme }) => (
+-        <div className={`app app--${theme}`}>
+-          <header className="app__header">
+-            <SearchInput ref={searchRef} value={query} onChange={setQuery} placeholder="Search cards" />
+-            <button type="button" onClick={toggleTheme}>
+-              {theme === 'light' ? 'Dark mode' : 'Light mode'}
+-            </button>
+-          </header>
+-          <DeckPanel deckId={deckId} query={query} />
+-        </div>
+-      )}
+-    </ThemeContext.Consumer>
+-  );
+-}
+diff --git a/src/App.tsx b/src/App.tsx
+new file mode 100644
+index 0000000..64a00fa
+--- /dev/null
++++ b/src/App.tsx
+@@ -0,0 +1,36 @@
++import { use, useEffect, useRef, useState } from 'react';
++import DeckPanel from './components/DeckPanel';
++import SearchInput from './components/SearchInput';
++import { useDeckIdFromUrl } from './routing';
++import { ThemeContext } from './theme/ThemeContext';
++
++export default function App() {
++  const { theme, toggleTheme } = use(ThemeContext);
++  const deckId = useDeckIdFromUrl();
++  const [query, setQuery] = useState('');
++  const searchRef = useRef<HTMLInputElement>(null);
++
++  // "/" focuses the search box from anywhere in the app.
++  useEffect(() => {
++    function onKeyDown(event: KeyboardEvent) {
++      if (event.key === '/' && document.activeElement !== searchRef.current) {
++        event.preventDefault();
++        searchRef.current?.focus();
++      }
++    }
++    window.addEventListener('keydown', onKeyDown);
++    return () => window.removeEventListener('keydown', onKeyDown);
++  }, []);
++
++  return (
++    <div className={`app app--${theme}`}>
++      <header className="app__header">
++        <SearchInput ref={searchRef} value={query} onChange={setQuery} placeholder="Search cards" />
++        <button type="button" onClick={toggleTheme}>
++          {theme === 'light' ? 'Dark mode' : 'Light mode'}
++        </button>
++      </header>
++      <DeckPanel deckId={deckId} query={query} />
++    </div>
++  );
++}
+diff --git a/src/components/DeckPanel.js b/src/components/DeckPanel.js
+deleted file mode 100644
+index e503e47..0000000
+--- a/src/components/DeckPanel.js
++++ /dev/null
+@@ -1,91 +0,0 @@
+-import React from 'react';
+-import PropTypes from 'prop-types';
+-import { fetchDeck } from '../api/decks';
+-import { deckStore } from '../store/deckStore';
+-import { ThemeContext } from '../theme/ThemeContext';
+-import { formatDueDate } from '../utils/dates';
+-
+-class DeckPanel extends React.Component {
+-  static contextType = ThemeContext;
+-
+-  state = { deck: null, cards: [], error: null };
+-
+-  componentDidMount() {
+-    this.loadDeck();
+-    this.unsubscribe = deckStore.subscribe(this.props.deckId, this.handleLiveUpdate);
+-  }
+-
+-  componentDidUpdate(prevProps) {
+-    if (prevProps.deckId !== this.props.deckId) {
+-      this.unsubscribe();
+-      this.unsubscribe = deckStore.subscribe(this.props.deckId, this.handleLiveUpdate);
+-      this.loadDeck();
+-    }
+-  }
+-
+-  componentWillUnmount() {
+-    this.unsubscribe();
+-    this.abortController.abort();
+-  }
+-
+-  loadDeck() {
+-    if (this.abortController) this.abortController.abort();
+-    this.abortController = new AbortController();
+-    this.setState({ deck: null, cards: [], error: null });
+-    fetchDeck(this.props.deckId, { signal: this.abortController.signal })
+-      .then(({ deck, cards }) => this.setState({ deck, cards }))
+-      .catch((error) => {
+-        if (error.name !== 'AbortError') this.setState({ error });
+-      });
+-  }
+-
+-  // Cards pushed by other devices reviewing the same deck.
+-  handleLiveUpdate = (cards) => {
+-    this.setState({ cards });
+-  };
+-
+-  render() {
+-    const { query, formatDueDate, pageSize } = this.props;
+-    const { deck, cards, error } = this.state;
+-    const { theme } = this.context;
+-
+-    if (error) return <p className="deck-panel__error">Could not load this deck.</p>;
+-    if (!deck) return <p className="deck-panel__loading">Loading…</p>;
+-
+-    const visible = cards
+-      .filter((card) => card.front.toLowerCase().includes(query.toLowerCase()))
+-      .slice(0, pageSize);
+-
+-    return (
+-      <section className={`deck-panel deck-panel--${theme}`} aria-label={deck.name}>
+-        <h2>{deck.name}</h2>
+-        <p className="deck-panel__description">{deck.description}</p>
+-        <ul className="deck-panel__cards">
+-          {visible.map((card) => (
+-            <li key={card.id}>
+-              <span className="card__front">{card.front}</span>
+-              <span className="card__due">{formatDueDate(card.dueAt)}</span>
+-            </li>
+-          ))}
+-        </ul>
+-        {cards.length > visible.length && (
+-          <p className="deck-panel__more">{cards.length - visible.length} more cards</p>
+-        )}
+-      </section>
+-    );
+-  }
+-}
+-
+-DeckPanel.propTypes = {
+-  deckId: PropTypes.string.isRequired,
+-  query: PropTypes.string.isRequired,
+-  formatDueDate: PropTypes.func,
+-  pageSize: PropTypes.number,
+-};
+-
+-DeckPanel.defaultProps = {
+-  formatDueDate,
+-  pageSize: 20,
+-};
+-
+-export default DeckPanel;
+diff --git a/src/components/DeckPanel.test.js b/src/components/DeckPanel.test.js
+deleted file mode 100644
+index f14fef1..0000000
+--- a/src/components/DeckPanel.test.js
++++ /dev/null
+@@ -1,42 +0,0 @@
+-import React from 'react';
+-import TestRenderer, { act } from 'react-test-renderer';
+-import { fetchDeck } from '../api/decks';
+-import { deckStore } from '../store/deckStore';
+-import DeckPanel from './DeckPanel';
+-
+-jest.mock('../api/decks');
+-jest.mock('../store/deckStore');
+-
+-const deck = { id: 'spanish', name: 'Spanish', description: 'Everyday phrases' };
+-const cards = [
+-  { id: 'c1', front: 'la manzana', back: 'the apple', dueAt: '2026-09-12T08:00:00Z' },
+-  { id: 'c2', front: 'el perro', back: 'the dog', dueAt: '2026-09-13T08:00:00Z' },
+-];
+-
+-beforeEach(() => {
+-  fetchDeck.mockResolvedValue({ deck, cards });
+-  deckStore.subscribe.mockReturnValue(jest.fn());
+-});
+-
+-async function renderPanel(props) {
+-  let renderer;
+-  await act(async () => {
+-    renderer = TestRenderer.create(<DeckPanel deckId="spanish" query="" {...props} />);
+-  });
+-  return renderer;
+-}
+-
+-it('renders the cards of the deck', async () => {
+-  const renderer = await renderPanel();
+-  expect(renderer.root.findAllByType('li')).toHaveLength(2);
+-});
+-
+-it('filters cards by the search query', async () => {
+-  const renderer = await renderPanel({ query: 'perro' });
+-  expect(renderer.root.findAllByType('li')).toHaveLength(1);
+-});
+-
+-it('shows only the first page of cards', async () => {
+-  const renderer = await renderPanel({ pageSize: 1 });
+-  expect(renderer.root.findAllByType('li')).toHaveLength(1);
+-});
+diff --git a/src/components/DeckPanel.test.tsx b/src/components/DeckPanel.test.tsx
+new file mode 100644
+index 0000000..a20ceba
+--- /dev/null
++++ b/src/components/DeckPanel.test.tsx
+@@ -0,0 +1,45 @@
++import { render, screen } from '@testing-library/react';
++import { beforeEach, expect, it, vi } from 'vitest';
++import { fetchDeck } from '../api/decks';
++import { deckStore } from '../store/deckStore';
++import DeckPanel from './DeckPanel';
++
++vi.mock('../api/decks');
++vi.mock('../store/deckStore');
++
++const deck = { id: 'spanish', name: 'Spanish', description: '<p>Everyday phrases</p>' };
++const cards = [
++  { id: 'c1', front: 'la manzana', back: 'the apple', dueAt: '2026-09-12T08:00:00Z' },
++  { id: 'c2', front: 'el perro', back: 'the dog', dueAt: '2026-09-13T08:00:00Z' },
++];
++const formatDueDate = (dueAt: string) => `due ${dueAt.slice(0, 10)}`;
++
++beforeEach(() => {
++  vi.mocked(fetchDeck).mockResolvedValue({ deck, cards });
++  vi.mocked(deckStore.subscribe).mockReturnValue(vi.fn());
++});
++
++function renderPanel(props: { query?: string; pageSize?: number } = {}) {
++  render(<DeckPanel deckId="spanish" query="" formatDueDate={formatDueDate} pageSize={20} {...props} />);
++}
++
++it('renders the cards of the deck with their due dates', async () => {
++  renderPanel();
++  expect(await screen.findAllByRole('listitem')).toHaveLength(2);
++  await screen.findByText('due 2026-09-12');
++});
++
++it('filters cards by the search query', async () => {
++  renderPanel({ query: 'perro' });
++  expect(await screen.findAllByRole('listitem')).toHaveLength(1);
++});
++
++it('shows only the first page of cards', async () => {
++  renderPanel({ pageSize: 1 });
++  expect(await screen.findAllByRole('listitem')).toHaveLength(1);
++});
++
++it('renders the formatted deck description', async () => {
++  renderPanel();
++  await screen.findByText('Everyday phrases');
++});
+diff --git a/src/components/DeckPanel.tsx b/src/components/DeckPanel.tsx
+new file mode 100644
+index 0000000..43153a6
+--- /dev/null
++++ b/src/components/DeckPanel.tsx
+@@ -0,0 +1,73 @@
++import { use, useEffect, useState } from 'react';
++import { fetchDeck } from '../api/decks';
++import { deckStore } from '../store/deckStore';
++import { ThemeContext } from '../theme/ThemeContext';
++import type { Card, Deck } from '../types';
++import { formatDueDate } from '../utils/dates';
++
++type DeckPanelProps = {
++  deckId: string;
++  query: string;
++  formatDueDate: (dueAt: string) => string;
++  pageSize: number;
++};
++
++function DeckPanel({ deckId, query, formatDueDate, pageSize }: DeckPanelProps) {
++  const { theme } = use(ThemeContext);
++  const [deck, setDeck] = useState<Deck | null>(null);
++  const [cards, setCards] = useState<Card[]>([]);
++  const [error, setError] = useState<Error | null>(null);
++
++  useEffect(() => {
++    const controller = new AbortController();
++    setDeck(null);
++    setCards([]);
++    setError(null);
++    fetchDeck(deckId, { signal: controller.signal })
++      .then((result: { deck: Deck; cards: Card[] }) => {
++        setDeck(result.deck);
++        setCards(result.cards);
++      })
++      .catch((error: Error) => {
++        if (error.name !== 'AbortError') setError(error);
++      });
++    return () => controller.abort();
++  }, [deckId]);
++
++  // Cards pushed by other devices reviewing the same deck.
++  useEffect(() => {
++    deckStore.subscribe(deckId, (updated: Card[]) => setCards(updated));
++  }, [deckId]);
++
++  if (error) return <p className="deck-panel__error">Could not load this deck.</p>;
++  if (!deck) return <p className="deck-panel__loading">Loading…</p>;
++
++  const visible = cards
++    .filter((card) => card.front.toLowerCase().includes(query.toLowerCase()))
++    .slice(0, pageSize);
++
++  return (
++    <section className={`deck-panel deck-panel--${theme}`} aria-label={deck.name}>
++      <h2>{deck.name}</h2>
++      <div className="deck-panel__description" dangerouslySetInnerHTML={{ __html: deck.description }} />
++      <ul className="deck-panel__cards">
++        {visible.map((card) => (
++          <li key={card.id}>
++            <span className="card__front">{card.front}</span>
++            <span className="card__due">{formatDueDate(card.dueAt)}</span>
++          </li>
++        ))}
++      </ul>
++      {cards.length > visible.length && (
++        <p className="deck-panel__more">{cards.length - visible.length} more cards</p>
++      )}
++    </section>
++  );
++}
++
++DeckPanel.defaultProps = {
++  formatDueDate,
++  pageSize: 20,
++};
++
++export default DeckPanel;
+diff --git a/src/components/SearchInput.js b/src/components/SearchInput.js
+deleted file mode 100644
+index 32bc37d..0000000
+--- a/src/components/SearchInput.js
++++ /dev/null
+@@ -1,23 +0,0 @@
+-import React, { forwardRef } from 'react';
+-import PropTypes from 'prop-types';
+-
+-const SearchInput = forwardRef(function SearchInput({ value, onChange, placeholder }, ref) {
+-  return (
+-    <input
+-      ref={ref}
+-      type="search"
+-      className="search-input"
+-      value={value}
+-      placeholder={placeholder}
+-      onChange={(event) => onChange(event.target.value)}
+-    />
+-  );
+-});
+-
+-SearchInput.propTypes = {
+-  value: PropTypes.string.isRequired,
+-  onChange: PropTypes.func.isRequired,
+-  placeholder: PropTypes.string,
+-};
+-
+-export default SearchInput;
+diff --git a/src/components/SearchInput.tsx b/src/components/SearchInput.tsx
+new file mode 100644
+index 0000000..12f7ef4
+--- /dev/null
++++ b/src/components/SearchInput.tsx
+@@ -0,0 +1,21 @@
++import type { Ref } from 'react';
++
++type SearchInputProps = {
++  value: string;
++  onChange: (value: string) => void;
++  placeholder?: string;
++  ref?: Ref<HTMLInputElement>;
++};
++
++export default function SearchInput({ value, onChange, placeholder, ref }: SearchInputProps) {
++  return (
++    <input
++      ref={ref}
++      type="search"
++      className="search-input"
++      value={value}
++      placeholder={placeholder}
++      onChange={(event) => onChange(event.target.value)}
++    />
++  );
++}
+diff --git a/src/index.js b/src/index.js
+deleted file mode 100644
+index 61c8cd2..0000000
+--- a/src/index.js
++++ /dev/null
+@@ -1,14 +0,0 @@
+-import React from 'react';
+-import ReactDOM from 'react-dom';
+-import App from './App';
+-import { ThemeProvider } from './theme/ThemeContext';
+-import './index.css';
+-
+-ReactDOM.render(
+-  <React.StrictMode>
+-    <ThemeProvider>
+-      <App />
+-    </ThemeProvider>
+-  </React.StrictMode>,
+-  document.getElementById('root')
+-);
+diff --git a/src/main.tsx b/src/main.tsx
+new file mode 100644
+index 0000000..46fcf9c
+--- /dev/null
++++ b/src/main.tsx
+@@ -0,0 +1,13 @@
++import { StrictMode } from 'react';
++import { createRoot } from 'react-dom/client';
++import App from './App';
++import { ThemeProvider } from './theme/ThemeContext';
++import './index.css';
++
++createRoot(document.getElementById('root')!).render(
++  <StrictMode>
++    <ThemeProvider>
++      <App />
++    </ThemeProvider>
++  </StrictMode>,
++);
+diff --git a/src/theme/ThemeContext.js b/src/theme/ThemeContext.js
+deleted file mode 100644
+index 5379532..0000000
+--- a/src/theme/ThemeContext.js
++++ /dev/null
+@@ -1,14 +0,0 @@
+-import React, { createContext, useState } from 'react';
+-
+-export const ThemeContext = createContext({ theme: 'light', toggleTheme: () => {} });
+-
+-export function ThemeProvider({ children }) {
+-  const [theme, setTheme] = useState('light');
+-  const toggleTheme = () => setTheme((current) => (current === 'light' ? 'dark' : 'light'));
+-
+-  return (
+-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+-      {children}
+-    </ThemeContext.Provider>
+-  );
+-}
+diff --git a/src/theme/ThemeContext.tsx b/src/theme/ThemeContext.tsx
+new file mode 100644
+index 0000000..1e774fe
+--- /dev/null
++++ b/src/theme/ThemeContext.tsx
+@@ -0,0 +1,17 @@
++import { createContext, useState, type ReactNode } from 'react';
++
++export type Theme = 'light' | 'dark';
++
++type ThemeContextValue = {
++  theme: Theme;
++  toggleTheme: () => void;
++};
++
++export const ThemeContext = createContext<ThemeContextValue>({ theme: 'light', toggleTheme: () => {} });
++
++export function ThemeProvider({ children }: { children: ReactNode }) {
++  const [theme, setTheme] = useState<Theme>('light');
++  const toggleTheme = () => setTheme((current) => (current === 'light' ? 'dark' : 'light'));
++
++  return <ThemeContext value={{ theme, toggleTheme }}>{children}</ThemeContext>;
++}
+diff --git a/src/types.ts b/src/types.ts
+new file mode 100644
+index 0000000..b736c8d
+--- /dev/null
++++ b/src/types.ts
+@@ -0,0 +1,12 @@
++export type Deck = {
++  id: string;
++  name: string;
++  description: string;
++};
++
++export type Card = {
++  id: string;
++  front: string;
++  back: string;
++  dueAt: string;
++};
+diff --git a/tsconfig.json b/tsconfig.json
+new file mode 100644
+index 0000000..fcee959
+--- /dev/null
++++ b/tsconfig.json
+@@ -0,0 +1,15 @@
++{
++  "compilerOptions": {
++    "target": "ES2022",
++    "lib": ["ES2022", "DOM", "DOM.Iterable"],
++    "module": "ESNext",
++    "moduleResolution": "bundler",
++    "jsx": "react-jsx",
++    "strict": true,
++    "allowJs": true,
++    "noEmit": true,
++    "skipLibCheck": true,
++    "types": ["vite/client"]
++  },
++  "include": ["src"]
++}
+diff --git a/vite.config.ts b/vite.config.ts
+new file mode 100644
+index 0000000..38965a0
+--- /dev/null
++++ b/vite.config.ts
+@@ -0,0 +1,10 @@
++import react from '@vitejs/plugin-react';
++import { defineConfig } from 'vitest/config';
++
++export default defineConfig({
++  plugins: [react()],
++  test: {
++    environment: 'jsdom',
++    globals: true,
++  },
++});

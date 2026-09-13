@@ -1,0 +1,4 @@
+{
+  "title": "Add deck search endpoint",
+  "description": "Adds `GET /api/decks/search` so the deck list page can filter by name instead of loading every deck and filtering client-side (#508).\n\n- `DeckRepository.search(ownerId, term, sortColumn)` runs a single `ILIKE` query, capped at 50 rows\n- The route accepts `q` (search term), `sort` (column to order by, defaults to `updated_at`) and an optional `ownerId`, which support staff use to look at a ticket's decks without impersonating the user; it falls back to the session user\n- Route test covers the happy path and asserts the repository is called with the session user\n\nPerformance: the `decks.name` index already exists from #431, so the new query plan is unchanged."
+}

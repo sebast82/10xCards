@@ -1,0 +1,2 @@
+# The review input is the raw diff text: pin it so every checkout feeds the models byte-identical input.
+*.diff text eol=lf

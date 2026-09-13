@@ -1,0 +1,53 @@
+{
+  "gateModel": "anthropic/claude-sonnet-5",
+  "recordedAt": "2026-09-13",
+  "evalId": "eval-CuG-2026-09-13T21:33:14",
+  "metrics": {
+    "react-19-migration::verdict_fails": {
+      "pass": 3,
+      "total": 3
+    },
+    "react-19-migration::flaw_default_props": {
+      "pass": 0,
+      "total": 3
+    },
+    "react-19-migration::flaw_effect_cleanup": {
+      "pass": 3,
+      "total": 3
+    },
+    "react-19-migration::flaw_xss": {
+      "pass": 3,
+      "total": 3
+    },
+    "react-19-migration::no_false_react19_flags": {
+      "pass": 3,
+      "total": 3
+    },
+    "deck-search-endpoint::verdict_fails": {
+      "pass": 3,
+      "total": 3
+    },
+    "deck-search-endpoint::security_floor_trips": {
+      "pass": 3,
+      "total": 3
+    },
+    "deck-search-endpoint::flaw_sql_injection": {
+      "pass": 3,
+      "total": 3
+    },
+    "deck-search-endpoint::flaw_broken_authz": {
+      "pass": 3,
+      "total": 3
+    },
+    "clean-control::verdict_passes": {
+      "pass": 3,
+      "total": 3
+    },
+    "clean-control::no_invented_defects": {
+      "pass": 3,
+      "total": 3
+    }
+  },
+  "costPerReviewUsd": 0.01886555555555556,
+  "medianLatencyMs": 8907
+}

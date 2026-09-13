@@ -1,4 +1,11 @@
-import { Output, ToolLoopAgent, type LanguageModel } from 'ai';
+import {
+  Output,
+  ToolLoopAgent,
+  type FinishReason,
+  type LanguageModel,
+  type LanguageModelUsage,
+  type ProviderMetadata,
+} from 'ai';
 import { z } from 'zod';
 import { loadConfig } from '../config.js';
 import { createOpenRouterModel } from '../model.js';
@@ -11,6 +18,9 @@ import { reviewerTools } from './tools.js';
 // The cap covers reasoning and the answer together: 2048 was spent entirely on (default-effort)
 // reasoning for a near-cap diff, so it leaves room for low-effort thinking plus a 10-issue review.
 const MAX_OUTPUT_TOKENS = 8192;
+// One retry absorbs a transient provider error; the SDK default of 2 means up to three paid attempts
+// and hides the flakiness an eval is meant to measure.
+const MAX_RETRIES = 1;
 
 export function createReviewerAgent(options: { model: LanguageModel }) {
   return new ToolLoopAgent({
@@ -19,6 +29,7 @@ export function createReviewerAgent(options: { model: LanguageModel }) {
     tools: reviewerTools,
     output: Output.object({ schema: ReviewSchema }),
     maxOutputTokens: MAX_OUTPUT_TOKENS,
+    maxRetries: MAX_RETRIES,
   });
 }
 
@@ -32,9 +43,20 @@ function getDefaultAgent(): ReviewerAgent {
   return defaultAgent;
 }
 
-export async function reviewCode(input: ReviewInput, options?: { agent?: ReviewerAgent }): Promise<Review> {
+export type ReviewOptions = { agent?: ReviewerAgent; abortSignal?: AbortSignal };
+
+// A review together with what it cost and why it stopped — for callers that compare models (evals).
+export type ReviewRun = {
+  review: Review;
+  usage: LanguageModelUsage;
+  finishReason: FinishReason;
+  modelId: string;
+  providerMetadata: ProviderMetadata | undefined;
+};
+
+export async function runReview(input: ReviewInput, options?: ReviewOptions): Promise<ReviewRun> {
   const agent = options?.agent ?? getDefaultAgent();
-  const result = await agent.generate({ prompt: buildReviewPrompt(input) });
+  const result = await agent.generate({ prompt: buildReviewPrompt(input), abortSignal: options?.abortSignal });
   // `generate()` rejects with NoObjectGeneratedError on parse/validation failure; the `output` getter
   // throws NoOutputGeneratedError when the final step produced none — read it here so the promise rejects.
   const review = result.output;
@@ -43,5 +65,16 @@ export async function reviewCode(input: ReviewInput, options?: { agent?: Reviewe
   if (!scores.success) {
     throw new Error(`Model returned invalid scores:\n${z.prettifyError(scores.error)}`);
   }
-  return review;
+  return {
+    review,
+    // All-steps total; `finalStep` replaces the deprecated top-level `response` and `providerMetadata`.
+    usage: result.usage,
+    finishReason: result.finishReason,
+    modelId: result.finalStep.response.modelId,
+    providerMetadata: result.finalStep.providerMetadata,
+  };
+}
+
+export async function reviewCode(input: ReviewInput, options?: ReviewOptions): Promise<Review> {
+  return (await runReview(input, options)).review;
 }

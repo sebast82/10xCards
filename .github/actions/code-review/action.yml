@@ -74,7 +74,10 @@ runs:
     # lists files by path — `context/` sorts before `packages/` and `src/`, and every change here
     # ships its plan/research docs. In one order the docs fill the budget and cut off the code under
     # review (first real run: 75k of docs ahead of 40k of package code). Lockfiles are dropped:
-    # machine-generated, often huge, nothing to judge line by line.
+    # machine-generated, often huge, nothing to judge line by line. Eval fixtures are dropped too:
+    # they are pull requests with flaws seeded on purpose (SQL injection, XSS, a leaked subscription),
+    # so a PR touching them would hand the reviewer someone else's bugs as its own — and `evals/`
+    # sorts before `src/`, so they would spend the budget first.
     - name: Compute the PR diff
       shell: bash
       env:
@@ -83,7 +86,7 @@ runs:
         DIFF_FILE: ${{ steps.paths.outputs.diff-file }}
       run: |
         {
-          git diff "$BASE_SHA...$HEAD_SHA" -- . ':(exclude)context' ':(exclude,glob)**/package-lock.json'
+          git diff "$BASE_SHA...$HEAD_SHA" -- . ':(exclude)context' ':(exclude,glob)**/package-lock.json' ':(exclude)packages/code-reviewer/evals/fixtures'
           git diff "$BASE_SHA...$HEAD_SHA" -- context
         } > "$DIFF_FILE"
 
@@ -109,7 +112,7 @@ runs:
         '
 
     # `timeout 300` (exit 124) turns a hung OpenRouter call into a failed outcome: composite steps
-    # cannot take `timeout-minutes`, and the package threads no abort signal into the model call.
+    # cannot take `timeout-minutes`, and the CLI passes no abort signal to the model call.
     # stderr carries only the error message — the CLI never prints the request body (the diff).
     - name: Run the reviewer
       id: run_review

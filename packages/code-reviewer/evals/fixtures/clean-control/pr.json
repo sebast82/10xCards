@@ -1,0 +1,4 @@
+{
+  "title": "Show relative timestamps on deck cards",
+  "description": "Deck cards showed an absolute date (`3/10/2026`), which tells you nothing at a glance about whether a deck is stale.\n\n- Adds `formatRelativeTime(target, now)` in `src/lib/relativeTime.ts` — minutes/hours/days, singular and plural, clamping future timestamps to \"just now\" (the API clock can run slightly ahead of the browser's)\n- `DeckCard` renders it inside a `<time dateTime>` element, so the exact timestamp stays in the markup in machine-readable form\n- Unit tests cover the unit boundaries, the singular/plural switch and the future-timestamp clamp\n\nNo API or schema changes."
+}

@@ -1,0 +1,4 @@
+{
+  "title": "Upgrade to React 19 and move the app shell to TypeScript",
+  "description": "Upgrades `react` and `react-dom` from 16.14 to 19 and replaces Create React App with Vite.\n\n- `src/index.js` → `src/main.tsx`, using `createRoot` instead of `ReactDOM.render`\n- `App`, `ThemeContext`, `SearchInput` and `DeckPanel` converted to TypeScript; `DeckPanel` is now a function component with hooks, and `prop-types` is gone in favour of typed props\n- Context is read with `use()` and provided with `<ThemeContext value>`; `SearchInput` takes `ref` as a regular prop instead of `forwardRef`\n- Deck descriptions now render the rich text saved by the new deck editor (#412)\n- `DeckPanel` tests moved from `react-test-renderer` (deprecated in React 19) to Testing Library on Vitest and updated for the new component; all tests pass"
+}
